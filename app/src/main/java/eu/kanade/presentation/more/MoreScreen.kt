@@ -100,6 +100,9 @@ fun MoreScreen(
                     onPreferenceClick = onClickDownloadQueue,
                 )
             }
+            // FORK -->
+            item { haruka.updateerrors.UpdateErrorsMoreItem() }
+            // FORK <--
             item {
                 TextPreferenceWidget(
                     title = stringResource(MR.strings.categories),

@@ -653,6 +653,13 @@ class MainActivity : BaseActivity() {
                 }
                 null
             }
+            // FORK -->
+            haruka.updateerrors.UpdateErrorsScreen.ACTION_SHOW -> {
+                navigator.popUntilRoot()
+                navigator.push(haruka.updateerrors.UpdateErrorsScreen())
+                null
+            }
+            // FORK <--
             Intent.ACTION_VIEW -> {
                 // Handling opening of backup files
                 if (intent.data.toString().endsWith(".tachibk")) {

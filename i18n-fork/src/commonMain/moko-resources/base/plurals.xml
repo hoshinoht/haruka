@@ -4,4 +4,8 @@
         <item quantity="one">%d more chapter</item>
         <item quantity="other">%d more chapters</item>
     </plurals>
+    <plurals name="update_errors_entries">
+        <item quantity="one">%d entry failed in the last update</item>
+        <item quantity="other">%d entries failed in the last update</item>
+    </plurals>
 </resources>

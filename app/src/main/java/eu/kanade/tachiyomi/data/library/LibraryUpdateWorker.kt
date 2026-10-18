@@ -257,6 +257,9 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
         val hasDownloads = AtomicBoolean(false)
         val timeZone = TimeZone.currentSystemDefault()
         val fetchWindow = fetchInterval.getWindow(Clock.System.now().toLocalDateTime(timeZone).date, timeZone)
+        // FORK -->
+        graph.updateErrorStore.replace(emptyList())
+        // FORK <--
 
         coroutineScope {
             mangaToUpdate.groupBy { it.manga.source }.values
@@ -326,6 +329,14 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
                 downloadManager.startDownloads()
             }
         }
+
+        // FORK -->
+        graph.updateErrorStore.replace(
+            failedUpdates.map { (manga, error) ->
+                haruka.updateerrors.UpdateError(manga.id, manga.title, manga.source, error)
+            },
+        )
+        // FORK <--
 
         if (failedUpdates.isNotEmpty()) {
             val errorFile = writeErrorFile(failedUpdates)
