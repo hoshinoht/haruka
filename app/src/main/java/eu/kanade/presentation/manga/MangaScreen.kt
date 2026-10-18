@@ -413,6 +413,12 @@ private fun MangaScreenSmallImpl(
                         )
                     }
 
+                    // FORK -->
+                    item(key = "haruka_related", contentType = "haruka_related") {
+                        haruka.related.RelatedMangaRow(manga = state.manga, source = state.source)
+                    }
+                    // FORK <--
+
                     item(
                         key = MangaScreenItem.CHAPTER_HEADER,
                         contentType = MangaScreenItem.CHAPTER_HEADER,
@@ -623,6 +629,9 @@ fun MangaScreenLargeImpl(
                             onCopyTagToClipboard = onCopyTagToClipboard,
                             onEditNotes = onEditNotesClicked,
                         )
+                        // FORK -->
+                        haruka.related.RelatedMangaRow(manga = state.manga, source = state.source)
+                        // FORK <--
                     }
                 },
                 endContent = {

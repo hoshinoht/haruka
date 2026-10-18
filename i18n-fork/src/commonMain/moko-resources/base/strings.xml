@@ -9,4 +9,7 @@
     <string name="action_migrate_unavailable">Migrate all unavailable</string>
     <string name="label_update_errors">Library update errors</string>
     <string name="update_errors_group_header">%1$s (%2$d)</string>
+    <string name="related_titles">Related titles</string>
+    <string name="pref_related_titles">Show related titles</string>
+    <string name="pref_related_titles_summary">Show titles suggested by the source on the entry screen, when the extension supports it</string>
 </resources>
