@@ -109,6 +109,9 @@ data class MigrateMangaScreen(
                 contentPadding = contentPadding,
                 state = state,
                 onClickItem = viewModel::toggleSelection,
+                // FORK -->
+                onLongClickItem = viewModel::selectRange,
+                // FORK <--
                 onClickCover = { navigator.push(MangaScreen(it.id)) },
             )
         }
@@ -131,6 +134,9 @@ data class MigrateMangaScreen(
         state: MigrateMangaViewModel.State,
         onClickItem: (Manga) -> Unit,
         onClickCover: (Manga) -> Unit,
+        // FORK -->
+        onLongClickItem: (Manga) -> Unit,
+        // FORK <--
     ) {
         FastScrollLazyColumn(
             state = lazyListState,
@@ -142,6 +148,9 @@ data class MigrateMangaScreen(
                     isSelected = manga.id in state.selection,
                     onClickItem = onClickItem,
                     onClickCover = onClickCover,
+                    // FORK -->
+                    onLongClickItem = onLongClickItem,
+                    // FORK <--
                 )
             }
         }
@@ -153,6 +162,9 @@ data class MigrateMangaScreen(
         isSelected: Boolean,
         onClickItem: (Manga) -> Unit,
         onClickCover: (Manga) -> Unit,
+        // FORK -->
+        onLongClickItem: (Manga) -> Unit,
+        // FORK <--
         modifier: Modifier = Modifier,
     ) {
         BaseMangaListItem(
@@ -160,6 +172,9 @@ data class MigrateMangaScreen(
             manga = manga,
             onClickItem = { onClickItem(manga) },
             onClickCover = { onClickCover(manga) },
+            // FORK -->
+            onLongClickItem = { onLongClickItem(manga) },
+            // FORK <--
         )
     }
 }
