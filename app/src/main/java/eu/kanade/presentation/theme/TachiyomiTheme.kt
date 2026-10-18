@@ -56,6 +56,9 @@ private fun BaseTachiyomiTheme(
 ) {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
+    // FORK -->
+    val accents = haruka.theme.themeAccents(appTheme)
+    // FORK <--
     MaterialExpressiveTheme(
         colorScheme = remember(appTheme, isDark, isAmoled) {
             getThemeColorScheme(
@@ -65,6 +68,11 @@ private fun BaseTachiyomiTheme(
                 isAmoled = isAmoled,
             )
         },
+        // FORK -->
+        motionScheme = accents.motionScheme,
+        shapes = accents.shapes,
+        typography = accents.typography,
+        // FORK <--
         content = content,
     )
 }
@@ -102,4 +110,7 @@ private val colorSchemes: Map<AppTheme, BaseColorScheme> = mapOf(
     AppTheme.TIDAL_WAVE to TidalWaveColorScheme,
     AppTheme.YINYANG to YinYangColorScheme,
     AppTheme.YOTSUBA to YotsubaColorScheme,
+    // FORK -->
+    AppTheme.HOSHINO to haruka.theme.HoshinoColorScheme,
+    // FORK <--
 )

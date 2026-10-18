@@ -46,4 +46,5 @@
     <string name="action_move_down">Move down</string>
     <string name="chapter_group_expand">Show other versions and parts</string>
     <string name="chapter_group_collapse">Hide other versions and parts</string>
+    <string name="theme_hoshino">Hoshino</string>
 </resources>

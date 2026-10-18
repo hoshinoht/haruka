@@ -20,6 +20,10 @@ enum class AppTheme(val titleRes: StringResource?) {
     TOKYONIGHT(MR.strings.theme_tokyonight),
     MONOCHROME(MR.strings.theme_monochrome),
 
+    // FORK -->
+    HOSHINO(haruka.i18n.HR.strings.theme_hoshino),
+    // FORK <--
+
     // Deprecated
     DARK_BLUE(null),
     HOT_PINK(null),
