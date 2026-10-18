@@ -68,4 +68,31 @@ class DuplicateCopiesTest {
         readerChapterIds(deduped, currentId = 1) shouldBe setOf(1L, 5L, 6L)
         readerChapterIds(deduped, currentId = 4) shouldBe setOf(2L, 3L, 4L, 6L)
     }
+
+    /** Group A's 7.2 uploaded twice (id 12 older): one copy 10 + 11 with 12 as its repeated upload. */
+    private val repeated = listOf(
+        chapter(10, 7.1, "Group A"),
+        chapter(11, 7.2, "Group A", dateUpload = 5),
+        chapter(12, 7.2, "Group A", dateUpload = 1),
+    )
+
+    @Test
+    fun `finishing a copy marks its repeated part uploads read`() {
+        duplicateCopiesToMarkRead(repeated, true, setOf(11)) { it == 10L } shouldBe setOf(12L)
+        duplicateCopiesToMarkRead(repeated, true, setOf(10)) { false } shouldBe emptySet()
+    }
+
+    @Test
+    fun `a repeated part upload is not downloaded once its copy is`() {
+        chaptersWithDownloadedCopy(repeated, true, candidates = setOf(12), downloaded = setOf(10, 11)) shouldBe
+            setOf(12L)
+        chaptersWithDownloadedCopy(repeated, true, candidates = setOf(12), downloaded = setOf(10)) shouldBe emptySet()
+    }
+
+    @Test
+    fun `reading a repeated part upload swaps it in for that part`() {
+        val deduped = ChapterDeduper(testCatalog).dedupe(repeated)
+        readerChapterIds(deduped, currentId = 11) shouldBe setOf(10L, 11L)
+        readerChapterIds(deduped, currentId = 12) shouldBe setOf(10L, 12L)
+    }
 }

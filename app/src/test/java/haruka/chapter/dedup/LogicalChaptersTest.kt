@@ -75,13 +75,14 @@ class LogicalChaptersTest {
     }
 
     @Test
-    fun `parts from a group that also has the whole chapter stay unmerged`() {
-        val result = group(chapter(1, 1.0, "A"), chapter(2, 1.1, "A"), chapter(3, 1.2, "A"))
-        result.shape() shouldBe listOf(
-            Triple(1.0, 0, listOf(listOf(1L))),
-            Triple(1.0, 1, listOf(listOf(2L))),
-            Triple(1.0, 2, listOf(listOf(3L))),
+    fun `parts from a group that also has the whole chapter fold in as another copy`() {
+        // ORV 264: one group uploaded 264 and 264.1/264.2.
+        val result = group(
+            chapter(1, 264.0, "Articuno"),
+            chapter(2, 264.1, "Articuno"),
+            chapter(3, 264.2, "Articuno"),
         )
+        result.shape() shouldBe listOf(Triple(264.0, 0, listOf(listOf(1L), listOf(2L, 3L))))
     }
 
     @Test
@@ -102,11 +103,86 @@ class LogicalChaptersTest {
     }
 
     @Test
-    fun `a repeated part index blocks the merge`() {
-        group(chapter(1, 1.1, "A"), chapter(2, 1.2, "A"), chapter(3, 1.2, "A")).shape() shouldBe listOf(
-            Triple(1.0, 1, listOf(listOf(1L))),
-            Triple(1.0, 2, listOf(listOf(2L), listOf(3L))),
+    fun `a repeated part collapses into its newest upload and the parts still merge`() {
+        val result = group(
+            chapter(1, 12.1, "Empoleon", dateUpload = 1),
+            chapter(2, 12.1, "Empoleon", dateUpload = 5),
+            chapter(3, 12.2, "Empoleon"),
+            chapter(4, 12.0, "Ursaring"),
         )
+        result.shape() shouldBe listOf(Triple(12.0, 0, listOf(listOf(2L, 3L), listOf(4L))))
+        result.single().copies[0].duplicates.map { it.id } shouldBe listOf(1L)
+    }
+
+    @Test
+    fun `repeats match on the normalized scanlator and ties keep the lowest source order`() {
+        val result = group(
+            chapter(1, 3.1, "Lua Comic", sourceOrder = 4),
+            chapter(2, 3.1, "Lua_Comics", sourceOrder = 2),
+            chapter(3, 3.2, "Lua Comic"),
+        )
+        result.shape() shouldBe listOf(Triple(3.0, 0, listOf(listOf(2L, 3L))))
+        result.single().copies[0].duplicates.map { it.id } shouldBe listOf(1L)
+    }
+
+    @Test
+    fun `a repeated part outside a mergeable run stays a copy of its part`() {
+        group(chapter(1, 1.2, "A"), chapter(2, 1.2, "A")).shape() shouldBe listOf(
+            Triple(1.0, 2, listOf(listOf(1L), listOf(2L))),
+        )
+    }
+
+    @Test
+    fun `a different kind keyword makes a separate logical chapter`() {
+        val result = group(
+            chapter(1, 3.0, "The Hours Between", name = "Spin-Off #3 (Episode 99)"),
+            chapter(2, 3.0, "The Hours Between", name = "Episode 3"),
+            chapter(3, 3.0, "Group B", name = "Ch. 3"),
+            chapter(4, 35.3, "official", name = "Ch. 35.3 - Epilogue 3"),
+            chapter(5, 35.3, "unofficial", name = "Ch. 35.3 - Side Story (3)"),
+        )
+        result.map { Triple(it.number, it.kind, it.copies.map { copy -> copy.ids }) } shouldBe listOf(
+            Triple(3.0, ChapterKind.SPIN_OFF, listOf(listOf(1L))),
+            Triple(3.0, ChapterKind.MAIN, listOf(listOf(2L), listOf(3L))),
+            Triple(35.0, ChapterKind.EPILOGUE, listOf(listOf(4L))),
+            Triple(35.0, ChapterKind.SIDE_STORY, listOf(listOf(5L))),
+        )
+    }
+
+    @Test
+    fun `split parts merge within their kind`() {
+        val result = group(
+            chapter(1, 23.1, "A", name = "Ch. 23.1 - Side Story: The City"),
+            chapter(2, 23.2, "A", name = "Ch. 23.2 - Side Story: The City 2"),
+            chapter(3, 23.0, "B", name = "Chapter 23"),
+        )
+        result.map { Triple(it.number, it.kind, it.copies.map { copy -> copy.ids }) } shouldBe listOf(
+            Triple(23.0, ChapterKind.SIDE_STORY, listOf(listOf(1L, 2L))),
+            Triple(23.0, ChapterKind.MAIN, listOf(listOf(3L))),
+        )
+    }
+
+    @Test
+    fun `kind keywords are whole words`() {
+        mapOf(
+            "Spin-Off #4" to ChapterKind.SPIN_OFF,
+            "Spinoff 2" to ChapterKind.SPIN_OFF,
+            "Ch. 5 Side-Story" to ChapterKind.SIDE_STORY,
+            "Ch. 5 SS 2" to ChapterKind.SIDE_STORY,
+            "Vol. 6 Ch. 32.3 Extra Chapter" to ChapterKind.EXTRA,
+            "Volume Extras" to ChapterKind.EXTRA,
+            "Prologue" to ChapterKind.PROLOGUE,
+            "Omake" to ChapterKind.OMAKE,
+            "Chapter 38 - Special Episode" to ChapterKind.SPECIAL,
+            "Bonus" to ChapterKind.BONUS,
+            "Afterword" to ChapterKind.AFTERWORD,
+            "Illust" to ChapterKind.ILLUSTRATION,
+            "Hiatus Notice" to ChapterKind.ANNOUNCEMENT,
+            "Chapter 12" to ChapterKind.MAIN,
+            "Ch. 6 Boss Fight" to ChapterKind.MAIN,
+            "Extraordinary" to ChapterKind.MAIN,
+            "Specialist" to ChapterKind.MAIN,
+        ).forEach { (name, kind) -> chapterKind(name) shouldBe kind }
     }
 
     @Test

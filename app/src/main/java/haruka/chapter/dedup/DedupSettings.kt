@@ -105,6 +105,7 @@ class DedupSettings(preferenceStore: PreferenceStore, private val catalogLoader:
                 rankedScanlators = override?.rankedScanlators ?: ranking,
                 mergeSplitChapters = override?.mergeSplitChapters ?: merge,
                 sourceIsOfficial = catalogLoader.catalog.isOfficialSource(sourceName),
+                sourceIsAggregator = catalogLoader.catalog.isAggregatorSource(sourceName),
             ),
         )
     }
