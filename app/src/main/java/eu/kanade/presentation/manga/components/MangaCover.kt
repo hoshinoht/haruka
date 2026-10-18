@@ -28,6 +28,21 @@ enum class MangaCover(val ratio: Float) {
         shape: Shape = MaterialTheme.shapes.extraSmall,
         onClick: (() -> Unit)? = null,
     ) {
+        // FORK -->
+        if (haruka.cover.rememberPanoramaCoversEnabled()) {
+            haruka.cover.PanoramaAwareCover(
+                data = data,
+                placeholder = ColorPainter(CoverPlaceholderColor),
+                error = rememberResourceBitmapPainter(id = R.drawable.cover_error),
+                contentDescription = contentDescription,
+                onClick = onClick,
+                modifier = modifier
+                    .aspectRatio(ratio)
+                    .clip(shape),
+            )
+            return
+        }
+        // FORK <--
         AsyncImage(
             model = data,
             placeholder = ColorPainter(CoverPlaceholderColor),
