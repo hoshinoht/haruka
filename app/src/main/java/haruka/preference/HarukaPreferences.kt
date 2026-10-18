@@ -12,4 +12,6 @@ import tachiyomi.core.common.preference.PreferenceStore
 class HarukaPreferences(preferenceStore: PreferenceStore) {
 
     val panoramaCovers: Preference<Boolean> = preferenceStore.getBoolean("haruka_panorama_covers", true)
+
+    val groupUpdates: Preference<Boolean> = preferenceStore.getBoolean("haruka_group_updates", true)
 }

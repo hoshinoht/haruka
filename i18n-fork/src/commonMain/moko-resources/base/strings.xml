@@ -2,4 +2,6 @@
 <resources>
     <string name="pref_panorama_covers">Show wide covers in full</string>
     <string name="pref_panorama_covers_summary">Fit landscape covers inside the frame instead of cropping them</string>
+    <string name="pref_group_updates">Group chapters by entry</string>
+    <string name="updates_group_collapse">Show less</string>
 </resources>

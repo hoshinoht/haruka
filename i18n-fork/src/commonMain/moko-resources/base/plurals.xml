@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="updates_group_more_chapters">
+        <item quantity="one">%d more chapter</item>
+        <item quantity="other">%d more chapters</item>
+    </plurals>
+</resources>
