@@ -36,13 +36,9 @@ class AppUpdateChecker(
     }
 }
 
-val GITHUB_REPO: String by lazy {
-    if (isNightlyBuildType) {
-        "mihonapp/mihon-preview"
-    } else {
-        "mihonapp/mihon"
-    }
-}
+// FORK --> Haruka has a single release repo; never offer Mihon builds as updates
+val GITHUB_REPO: String by lazy { "hoshinoht/haruka" }
+// FORK <--
 
 val RELEASE_TAG: String by lazy {
     if (isNightlyBuildType) {
