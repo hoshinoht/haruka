@@ -207,6 +207,9 @@ dependencies {
     baselineProfile(projects.baselineProfile)
 
     implementation(projects.i18n)
+    // FORK -->
+    implementation(projects.i18nFork)
+    // FORK <--
     implementation(projects.icons.customMaterialSymbols)
     implementation(projects.icons.materialSymbols)
     implementation(projects.icons.simpleIcons)

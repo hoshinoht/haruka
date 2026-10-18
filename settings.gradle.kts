@@ -38,6 +38,9 @@ include(":core:metro")
 include(":data")
 include(":domain")
 include(":i18n")
+// FORK -->
+include(":i18n-fork")
+// FORK <--
 include(":icons:custom-material-symbols")
 include(":icons:material-symbols")
 include(":icons:simple-icons")
