@@ -295,6 +295,9 @@ class MangaScreen(
                 excludedScanlators = successState.excludedScanlators,
                 onDismissRequest = { showScanlatorsDialog = false },
                 onConfirm = viewModel::setExcludedScanlators,
+                // FORK -->
+                mangaId = successState.manga.id,
+                // FORK <--
             )
         }
     }
