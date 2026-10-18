@@ -87,6 +87,10 @@ class MigrateMangaViewModel(
         selection.update { it.selectRange(state.value.titles.map(Manga::id), item.id) }
     }
 
+    fun selectAll() {
+        selection.update { it.selectAll(state.value.titles.map(Manga::id)) }
+    }
+
     fun clearSelection() {
         selection.update { it.clear() }
     }

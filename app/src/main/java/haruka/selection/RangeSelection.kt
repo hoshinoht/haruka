@@ -26,5 +26,8 @@ data class RangeSelection<K>(val selected: Set<K> = emptySet(), val anchor: K? =
         return RangeSelection(selected + range, key)
     }
 
+    /** Selects every item in [ordered]; the anchor is kept so a following long-press still ranges from it. */
+    fun selectAll(ordered: List<K>): RangeSelection<K> = RangeSelection(selected + ordered, anchor)
+
     fun clear(): RangeSelection<K> = RangeSelection()
 }
