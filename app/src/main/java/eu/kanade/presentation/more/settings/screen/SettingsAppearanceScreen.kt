@@ -168,6 +168,7 @@ object SettingsAppearanceScreen : SearchableSettings {
                 ),
                 // FORK -->
                 haruka.cover.panoramaCoversPreference(),
+                haruka.title.compactTitlesPreference(),
                 // FORK <--
             ),
         )

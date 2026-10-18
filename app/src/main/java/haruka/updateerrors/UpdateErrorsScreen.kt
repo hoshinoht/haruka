@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import haruka.i18n.HR
 import haruka.selection.SelectionListActions
+import haruka.title.rememberDisplayTitle
 import mihon.feature.migration.config.MigrationConfigScreen
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
@@ -186,7 +187,7 @@ private fun UpdateErrorItem(
                     .padding(start = MaterialTheme.padding.medium),
             ) {
                 Text(
-                    text = entry.manga.title,
+                    text = rememberDisplayTitle(entry.manga.title),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.bodyMedium,

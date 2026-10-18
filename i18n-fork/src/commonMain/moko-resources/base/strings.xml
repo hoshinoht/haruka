@@ -12,4 +12,6 @@
     <string name="related_titles">Related titles</string>
     <string name="pref_related_titles">Show related titles</string>
     <string name="pref_related_titles_summary">Show titles suggested by the source on the entry screen, when the extension supports it</string>
+    <string name="pref_compact_titles">Hide alternative names in titles</string>
+    <string name="pref_compact_titles_summary">Shorten titles that end with a list of alternative names, like \"Title (Alt 1/ Alt 2)\"</string>
 </resources>

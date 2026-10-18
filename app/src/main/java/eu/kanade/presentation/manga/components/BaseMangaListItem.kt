@@ -59,7 +59,9 @@ private val defaultCover: @Composable RowScope.(Manga, () -> Unit) -> Unit = { m
 private val defaultContent: @Composable RowScope.(Manga) -> Unit = {
     Box(modifier = Modifier.weight(1f)) {
         Text(
-            text = it.title,
+            // FORK -->
+            text = haruka.title.rememberDisplayTitle(it.title),
+            // FORK <--
             modifier = Modifier
                 .padding(start = MaterialTheme.padding.medium),
             overflow = TextOverflow.Ellipsis,

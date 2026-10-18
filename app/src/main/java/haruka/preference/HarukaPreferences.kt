@@ -16,4 +16,6 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
     val groupUpdates: Preference<Boolean> = preferenceStore.getBoolean("haruka_group_updates", true)
 
     val relatedManga: Preference<Boolean> = preferenceStore.getBoolean("haruka_related_manga", true)
+
+    val compactTitles: Preference<Boolean> = preferenceStore.getBoolean("haruka_compact_titles", true)
 }
