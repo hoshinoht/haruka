@@ -7,8 +7,8 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 | Branch | Content |
 |---|---|
 | `main` | Exact mirror of `mihonapp/mihon` `main`. Never commit to it; the sync workflow fast-forwards it. |
-| `develop` | Haruka. Default branch. Upstream arrives through `sync/upstream-*` PRs (merge, never rebase). |
-| `feat/*`, `fix/*` | One change each, PR into `develop`. |
+| `dev` | Haruka. Default branch. Upstream arrives through `sync/upstream-*` PRs (merge, never rebase). |
+| `feat/*`, `fix/*` | One change each, PR into `dev`. |
 
 ## Where code goes
 

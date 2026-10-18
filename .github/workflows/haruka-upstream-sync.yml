@@ -21,10 +21,10 @@ jobs:
       GH_TOKEN: ${{ github.token }}
 
     steps:
-      - name: Checkout develop
+      - name: Checkout dev
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: develop
+          ref: dev
           fetch-depth: 0
 
       - name: Fetch upstream
@@ -72,11 +72,11 @@ jobs:
             echo "Issue already open"; exit 0
           fi
           {
-            echo "Merging \`mihonapp/mihon@${{ steps.prep.outputs.short }}\` into \`develop\` conflicts in:"
+            echo "Merging \`mihonapp/mihon@${{ steps.prep.outputs.short }}\` into \`dev\` conflicts in:"
             echo
             sed 's/^/- `/; s/$/`/' "$RUNNER_TEMP/conflicts.txt"
             echo
-            echo "Resolve locally: \`git fetch upstream && git switch -c ${{ steps.prep.outputs.branch }} origin/develop && git merge upstream/main\`."
+            echo "Resolve locally: \`git fetch upstream && git switch -c ${{ steps.prep.outputs.branch }} origin/dev && git merge upstream/main\`."
           } > "$RUNNER_TEMP/body.md"
           gh issue create --title "${title}" --body-file "$RUNNER_TEMP/body.md"
 
@@ -102,7 +102,7 @@ jobs:
         run: |
           git push origin "${{ steps.prep.outputs.branch }}"
           {
-            echo "Merges \`mihonapp/mihon@${{ steps.prep.outputs.short }}\` into \`develop\`."
+            echo "Merges \`mihonapp/mihon@${{ steps.prep.outputs.short }}\` into \`dev\`."
             echo
             echo "Checks (\`spotlessCheck testDebugUnitTest assembleDebug\`): **${{ steps.verify.outcome }}**"
             echo
@@ -114,5 +114,5 @@ jobs:
           } > "$RUNNER_TEMP/body.md"
           draft=""
           [ "${{ steps.verify.outcome }}" = "success" ] || draft="--draft"
-          gh pr create --base develop --head "${{ steps.prep.outputs.branch }}" \
+          gh pr create --base dev --head "${{ steps.prep.outputs.branch }}" \
             --title "Sync upstream ${{ steps.prep.outputs.short }}" --body-file "$RUNNER_TEMP/body.md" ${draft}
