@@ -141,7 +141,9 @@ internal fun LazyListScope.updatesUiItems(
 }
 
 @Composable
-private fun UpdatesUiItem(
+// FORK --> internal so Haruka's grouped list can reuse the row
+internal fun UpdatesUiItem(
+// FORK <--
     update: UpdatesWithRelations,
     selected: Boolean,
     readProgress: String?,

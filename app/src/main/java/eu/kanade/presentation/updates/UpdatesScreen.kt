@@ -26,6 +26,7 @@ import eu.kanade.presentation.manga.components.MangaBottomActionMenu
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import eu.kanade.tachiyomi.ui.updates.UpdatesViewModel
+import haruka.updates.groupedUpdatesUiItems
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -131,11 +132,28 @@ fun UpdateScreen(
                             )
                         }
                     } else {
+                        // FORK -->
+                        val grouping = haruka.updates.rememberUpdatesGroupingState()
+                        // FORK <--
                         FastScrollLazyColumn(
                             contentPadding = contentPadding,
                         ) {
                             updatesLastUpdatedItem(lastUpdated)
 
+                            // FORK -->
+                            if (grouping.enabled) {
+                                groupedUpdatesUiItems(
+                                    items = state.items,
+                                    grouping = grouping,
+                                    selectionMode = state.selectionMode,
+                                    onUpdateSelected = onUpdateSelected,
+                                    onClickCover = onClickCover,
+                                    onClickUpdate = onOpenChapter,
+                                    onDownloadChapter = onDownloadChapter,
+                                )
+                                return@FastScrollLazyColumn
+                            }
+                            // FORK <--
                             updatesUiItems(
                                 uiModels = state.getUiModel(),
                                 selectionMode = state.selectionMode,
