@@ -38,6 +38,9 @@ fun ScanlatorFilterDialog(
     excludedScanlators: Set<String>,
     onDismissRequest: () -> Unit,
     onConfirm: (Set<String>) -> Unit,
+    // FORK -->
+    mangaId: Long? = null,
+    // FORK <--
 ) {
     val sortedAvailableScanlators = remember(availableScanlators) {
         availableScanlators.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
@@ -101,6 +104,13 @@ fun ScanlatorFilterDialog(
         properties = DialogProperties(
             usePlatformDefaultWidth = true,
         ),
+        // FORK -->
+        dismissButton = if (mangaId != null) {
+            { haruka.chapter.dedup.ui.DedupOverrideButton(mangaId, availableScanlators) }
+        } else {
+            null
+        },
+        // FORK <--
         confirmButton = {
             if (sortedAvailableScanlators.isEmpty()) {
                 TextButton(onClick = onDismissRequest) {
