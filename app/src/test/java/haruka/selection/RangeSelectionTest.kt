@@ -75,4 +75,12 @@ class RangeSelectionTest {
 
         selection.selected shouldBe setOf("a", "d", "e", "f")
     }
+
+    @Test
+    fun `select all covers every item and clear empties it and drops the anchor`() {
+        val all = RangeSelection<String>().toggle("c").selectAll(items)
+
+        all.selected shouldBe items.toSet()
+        all.clear() shouldBe RangeSelection()
+    }
 }

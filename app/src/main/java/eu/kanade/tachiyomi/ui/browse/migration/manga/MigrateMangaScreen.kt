@@ -75,6 +75,17 @@ data class MigrateMangaScreen(
                         }
                     },
                     scrollBehavior = scrollBehavior,
+                    // FORK -->
+                    actions = {
+                        haruka.selection.SelectionListActions(
+                            listState = lazyListState,
+                            itemCount = state.titles.size,
+                            hasSelection = state.selectionMode,
+                            onSelectAll = viewModel::selectAll,
+                            onSelectNone = viewModel::clearSelection,
+                        )
+                    },
+                    // FORK <--
                 )
             },
             floatingActionButton = {
