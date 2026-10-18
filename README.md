@@ -1,3 +1,7 @@
+<!-- FORK -->
+> **Haruka** (遥か, "far away") is a personal fork of Mihon for long-haul readers: hundreds of series, thousands of chapters, one clean chapter list. Planned additions: bulk-migration extras, grouped Updates, panorama covers, long-press add/remove everywhere, progress banners and official-first chapter deduplication, while staying merge-compatible with upstream and with keiyoushi extensions. Not affiliated with Mihon; report Haruka issues [here](https://github.com/hoshinoht/haruka/issues), not upstream. Fork rules: [AGENTS.md](AGENTS.md).
+<!-- /FORK -->
+
 <div align="center">
 
 <a href="https://mihon.app">
