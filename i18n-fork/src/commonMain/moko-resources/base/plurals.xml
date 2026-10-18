@@ -8,4 +8,12 @@
         <item quantity="one">%d entry failed in the last update</item>
         <item quantity="other">%d entries failed in the last update</item>
     </plurals>
+    <plurals name="chapter_group_versions">
+        <item quantity="one">%d version</item>
+        <item quantity="other">%d versions</item>
+    </plurals>
+    <plurals name="chapter_group_parts">
+        <item quantity="one">%d part</item>
+        <item quantity="other">%d parts</item>
+    </plurals>
 </resources>

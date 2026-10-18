@@ -104,6 +104,10 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
 
     @Inject private lateinit var notifier: LibraryUpdateNotifier
 
+    // FORK -->
+    @Inject private lateinit var harukaDedup: haruka.chapter.dedup.DedupSurfaces
+    // FORK <--
+
     private var mangaToUpdate: List<LibraryManga> = mutableListOf()
 
     override suspend fun doWork(): Result {
@@ -286,6 +290,9 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
 
                                         if (newChapters.isNotEmpty()) {
                                             val chaptersToDownload = filterChaptersForDownload.await(manga, newChapters)
+                                                // FORK -->
+                                                .let { harukaDedup.withoutDownloadedCopies(manga, it) }
+                                            // FORK <--
 
                                             if (chaptersToDownload.isNotEmpty()) {
                                                 downloadChapters(manga, chaptersToDownload)

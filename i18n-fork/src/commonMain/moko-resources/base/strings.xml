@@ -14,4 +14,6 @@
     <string name="pref_related_titles_summary">Show titles suggested by the source on the entry screen, when the extension supports it</string>
     <string name="pref_compact_titles">Hide alternative names in titles</string>
     <string name="pref_compact_titles_summary">Shorten titles that end with a list of alternative names, like \"Title (Alt 1/ Alt 2)\"</string>
+    <string name="chapter_group_expand">Show other versions and parts</string>
+    <string name="chapter_group_collapse">Hide other versions and parts</string>
 </resources>
