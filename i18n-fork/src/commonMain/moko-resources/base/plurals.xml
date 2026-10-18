@@ -16,4 +16,8 @@
         <item quantity="one">%d part</item>
         <item quantity="other">%d parts</item>
     </plurals>
+    <plurals name="updates_conversation_unread">
+        <item quantity="one">%d unread chapter</item>
+        <item quantity="other">%d unread chapters</item>
+    </plurals>
 </resources>
