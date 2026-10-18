@@ -26,6 +26,12 @@ object ScanlatorNames {
     }
 
     /**
+     * Whether [scanlator], or any group in it, carries a "low quality" marker ("Official (low quality)", a bare
+     * "(low quality)"). Checked on the raw string because [normalize] drops exactly that parenthesised suffix.
+     */
+    fun isLowQuality(scanlator: String): Boolean = scanlator.contains(LOW_QUALITY, ignoreCase = true)
+
+    /**
      * Splits a scanlator string holding several groups ("A & B", "A, B", "A + B", "A | B", "A and B") into its
      * trimmed, non-blank parts. Separators inside parentheses do not split, so a site suffix like "(x, y)" stays
      * attached to its group.
@@ -59,6 +65,7 @@ object ScanlatorNames {
     }
 
     private const val AND = " and "
+    private const val LOW_QUALITY = "low quality"
 
     private fun addPart(parts: MutableList<String>, text: String, start: Int, end: Int) {
         val part = text.substring(start, end).trim()

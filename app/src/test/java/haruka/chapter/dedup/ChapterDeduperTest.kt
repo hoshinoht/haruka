@@ -38,7 +38,73 @@ class ChapterDeduperTest {
 
     @Test
     fun `official beats doubtfully official`() {
-        winnerOf(chapter(1, 1.0, "Official?"), chapter(2, 1.0, "Official (low quality)")) shouldBe listOf(2L)
+        winnerOf(chapter(1, 1.0, "Official?"), chapter(2, 1.0, "Official")) shouldBe listOf(2L)
+    }
+
+    @Test
+    fun `low quality loses to a plain copy, official or not`() {
+        winnerOf(chapter(1, 1.0, "Official (low quality)"), chapter(2, 1.0, "mmscans")) shouldBe listOf(2L)
+        winnerOf(chapter(1, 1.0, "(low quality)", dateUpload = 9), chapter(2, 1.0, "Group A")) shouldBe listOf(2L)
+        winnerOf(chapter(1, 1.0, "Group A & mangaplus (low quality)"), chapter(2, 1.0, null)) shouldBe listOf(2L)
+    }
+
+    @Test
+    fun `among low quality copies, official status still decides`() {
+        winnerOf(
+            chapter(1, 1.0, "(low quality)", dateUpload = 9),
+            chapter(2, 1.0, "Official (low quality)"),
+            chapter(3, 1.0, "Official?"),
+        ) shouldBe listOf(3L)
+        winnerOf(chapter(1, 1.0, "(low quality)", dateUpload = 9), chapter(2, 1.0, "Official (low quality)")) shouldBe
+            listOf(2L)
+    }
+
+    @Test
+    fun `a downloaded low quality copy wins only while DOWNLOADED is the first rule`() {
+        val chapters = arrayOf(chapter(1, 1.0, "Official (low quality)"), chapter(2, 1.0, "mmscans"))
+        winnerOf(*chapters, downloaded = setOf(1)) shouldBe listOf(1L)
+        val officialFirst = DedupOptions(rules = listOf(DedupRule.OFFICIAL, DedupRule.DOWNLOADED))
+        winnerOf(*chapters, options = officialFirst, downloaded = setOf(1)) shouldBe listOf(2L)
+    }
+
+    @Test
+    fun `an official translation name counts as official on an aggregator source only`() {
+        val chapters = arrayOf(
+            chapter(1, 66.0, "Tyranitar", name = "Chapter 66: Ideals and Reality (10)", dateUpload = 9),
+            chapter(2, 66.0, "Articuno", name = "Ch. 66 OFFICIAL TRANSLATION"),
+        )
+        winnerOf(*chapters, options = DedupOptions(sourceIsAggregator = true)) shouldBe listOf(2L)
+        winnerOf(*chapters) shouldBe listOf(1L)
+        val kagane = DedupOptions(sourceIsAggregator = testCatalog.isAggregatorSource("Kagane"))
+        winnerOf(*chapters, options = kagane) shouldBe listOf(1L)
+        val mangaBall = DedupOptions(sourceIsAggregator = testCatalog.isAggregatorSource("Manga Ball"))
+        winnerOf(*chapters, options = mangaBall) shouldBe listOf(2L)
+    }
+
+    @Test
+    fun `unofficial translation in a name is not official`() {
+        val options = DedupOptions(sourceIsAggregator = true)
+        winnerOf(
+            chapter(1, 5.0, "Entei", name = "Chapter 5", dateUpload = 9),
+            chapter(2, 5.0, "Articuno", name = "Ch. 5 unofficial translation"),
+            options = options,
+        ) shouldBe listOf(1L)
+        isNamedOfficialTranslation("Ch. 5 Official Translations") shouldBe true
+        isNamedOfficialTranslation("Ch. 5 (official translation)") shouldBe true
+        isNamedOfficialTranslation("Ch. 5 un-official translation") shouldBe false
+        isNamedOfficialTranslation("Ch. 5 officialtranslation") shouldBe false
+        isNamedOfficialTranslation("Ch. 5 OFFICIAL") shouldBe false
+    }
+
+    @Test
+    fun `a split copy is named official only when every part is`() {
+        val options = DedupOptions(sourceIsAggregator = true)
+        winnerOf(
+            chapter(1, 72.0, "Entei", dateUpload = 9),
+            chapter(2, 72.1, "Empoleon", name = "Ch. 72.1 OFFICIAL TRANSLATION"),
+            chapter(3, 72.2, "Empoleon", name = "Ch. 72.2 SCANSLATION"),
+            options = options,
+        ) shouldBe listOf(1L)
     }
 
     @Test
@@ -147,6 +213,7 @@ class ChapterDeduperTest {
                 rankedScanlators = listOf("Group B", "Lua Comic"),
                 mergeSplitChapters = random.nextBoolean(),
                 sourceIsOfficial = random.nextInt(10) == 0,
+                sourceIsAggregator = random.nextBoolean(),
             )
             val isDownloaded = { chapter: DedupChapter -> chapter.id % 3 == 0L }
             val result = deduper.dedupe(chapters, options, isDownloaded)
@@ -155,7 +222,10 @@ class ChapterDeduperTest {
                 deduped.logical.copies.size shouldBe deduped.others.size + 1
                 deduped.logical.copies.toSet() shouldBe (deduped.others + deduped.winner).toSet()
             }
-            val returned = result.flatMap { deduped -> (deduped.others + deduped.winner).flatMap { it.ids } }
+            // Collapsed repeat uploads stay with their copy, so every chapter is still returned exactly once.
+            val returned = result.flatMap { deduped ->
+                (deduped.others + deduped.winner).flatMap { copy -> copy.ids + copy.duplicates.map { it.id } }
+            }
             returned.sorted() shouldBe chapters.map { it.id }.sorted()
 
             val shuffled = deduper.dedupe(chapters.shuffled(random), options, isDownloaded)
@@ -180,10 +250,14 @@ class ChapterDeduperTest {
         millis shouldBeLessThan 50.0
     }
 
-    /** Sorted, order-free rendering of a result: number, part, winner ids and other ids per logical chapter. */
+    /** Sorted, order-free rendering of a result: number, part, kind, winner and other ids per logical chapter. */
     private fun List<DedupedChapter>.describe(): List<String> = map { deduped ->
-        "${deduped.logical.number}|${deduped.logical.part}|${deduped.winner.ids}|${deduped.others.map { it.ids }}"
+        val logical = deduped.logical
+        "${logical.number}|${logical.part}|${logical.kind}|${deduped.winner.describe()}|" +
+            deduped.others.map { it.describe() }
     }.sorted()
+
+    private fun ChapterCopy.describe() = "$ids${duplicates.map { it.id }.sorted()}"
 
     private fun generateChapters(random: Random): List<DedupChapter> {
         val scanlators = listOf(
@@ -192,10 +266,13 @@ class ChapterDeduperTest {
             "Group B",
             "Official",
             "Official?",
+            "Official (low quality)",
+            "(low quality)",
             "unofficial",
             "Group C & VIZ",
             "Lua Comics",
         )
+        val names = listOf("Chapter %s", "Ch. %s OFFICIAL TRANSLATION", "Chapter %s - Side Story", "Spin-Off #%s")
         val ids = (1L..1_000L).shuffled(random).iterator()
         val chapters = ArrayList<DedupChapter>()
         repeat(random.nextInt(0, 120)) {
@@ -216,9 +293,14 @@ class ChapterDeduperTest {
                     name = "Chapter $whole.10",
                     dateUpload = date,
                 )
-                else ->
-                    chapters +=
-                        chapter(ids.next(), whole.toDouble(), scanlator, dateUpload = date, sourceOrder = order)
+                else -> chapters += chapter(
+                    ids.next(),
+                    whole.toDouble(),
+                    scanlator,
+                    name = names.random(random).format(whole),
+                    dateUpload = date,
+                    sourceOrder = order,
+                )
             }
         }
         return chapters

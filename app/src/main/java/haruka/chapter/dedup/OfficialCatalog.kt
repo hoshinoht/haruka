@@ -17,11 +17,13 @@ enum class OfficialStatus {
 
 /**
  * Known official publishers, keyed by [ScanlatorNames.normalize]d alias, plus the sources that are publishers
- * themselves (every chapter they serve is official).
+ * themselves (every chapter they serve is official) and the aggregator sources that mirror many groups under
+ * pseudonyms (where only a chapter's name can tell an official translation apart).
  */
 class OfficialCatalog(
     private val publishersByAlias: Map<String, String>,
     private val officialSources: Set<String>,
+    private val aggregatorSources: Set<String> = emptySet(),
 ) {
 
     /** Canonical publisher of the first official group in [scanlator], or null. Ignores "?" doubt marks. */
@@ -50,6 +52,8 @@ class OfficialCatalog(
 
     fun isOfficialSource(sourceName: String): Boolean = ScanlatorNames.normalize(sourceName) in officialSources
 
+    fun isAggregatorSource(sourceName: String): Boolean = ScanlatorNames.normalize(sourceName) in aggregatorSources
+
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
@@ -67,7 +71,8 @@ class OfficialCatalog(
                 }
             }
             val sources = data.sources.mapTo(HashSet()) { ScanlatorNames.normalize(it) }
-            return OfficialCatalog(publishersByAlias, sources)
+            val aggregators = data.aggregatorSources.mapTo(HashSet()) { ScanlatorNames.normalize(it) }
+            return OfficialCatalog(publishersByAlias, sources, aggregators)
         }
     }
 }
@@ -91,6 +96,7 @@ private class CatalogJson(
     val version: Int,
     val publishers: List<PublisherJson>,
     val sources: List<String>,
+    val aggregatorSources: List<String> = emptyList(),
 )
 
 @Serializable

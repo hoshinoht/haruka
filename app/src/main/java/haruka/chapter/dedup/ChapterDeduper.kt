@@ -3,12 +3,18 @@ package haruka.chapter.dedup
 /**
  * One rule of the winner comparison; the first rule that tells two copies apart decides. The lowest chapter id is
  * always the final tie-break so the winner never depends on input order.
+ *
+ * Before the rules, a low-quality copy (see [ScanlatorNames.isLowQuality]) loses to every other copy; only a leading
+ * [DOWNLOADED] rule is applied ahead of that demotion.
  */
 enum class DedupRule {
     /** Every part of the copy is downloaded. */
     DOWNLOADED,
 
-    /** A group is a known official publisher, or the source itself is one. */
+    /**
+     * A group is a known official publisher, or the source itself is one. On an aggregator source, a copy whose
+     * every part is named "official translation" counts too.
+     */
     OFFICIAL,
 
     /** Official or doubtfully official ("Official?"). */
@@ -36,6 +42,11 @@ data class DedupOptions(
     val mergeSplitChapters: Boolean = true,
     /** The manga's source is itself a publisher (see [OfficialCatalog.isOfficialSource]). */
     val sourceIsOfficial: Boolean = false,
+    /**
+     * The manga's source mirrors many groups under pseudonyms (see [OfficialCatalog.isAggregatorSource]), so a chapter
+     * named "official translation" there is trusted as official.
+     */
+    val sourceIsAggregator: Boolean = false,
 )
 
 /** The chosen [winner] of a [logical] chapter and the [others], best first. */
@@ -58,16 +69,25 @@ class ChapterDeduper(private val catalog: OfficialCatalog) {
     ): List<DedupedChapter> {
         val ranks = HashMap<String, Int>()
         val tiers = HashMap<String?, ScanlatorTier>()
-        val comparator = CandidateComparator(options.rules.toTypedArray())
+        val comparator = CandidateComparator(options.rules)
         options.rankedScanlators.forEachIndexed { index, name ->
             val key = ScanlatorNames.normalize(name)
             if (key !in ranks) ranks[key] = index
         }
+        val tierFor = { scanlator: String? ->
+            tiers.getOrPut(scanlator) { tierOf(scanlator, ranks, options.sourceIsOfficial) }
+        }
+        val namesOfficial = options.sourceIsAggregator && !options.sourceIsOfficial
 
         return groupLogicalChapters(chapters, options.mergeSplitChapters).map { logical ->
             val candidates = logical.copies.map { copy ->
-                val tier = tiers.getOrPut(copy.scanlator) { tierOf(copy.scanlator, ranks, options.sourceIsOfficial) }
-                Candidate(copy, tier, isDownloaded)
+                Candidate(
+                    copy = copy,
+                    tier = tierFor(copy.scanlator),
+                    namedOfficial = namesOfficial && copy.parts.all { isNamedOfficialTranslation(it.name) },
+                    lowQuality = copy.parts.any { tierFor(it.scanlator).lowQuality },
+                    isDownloaded = isDownloaded,
+                )
             }
             val ordered = if (candidates.size == 1) candidates else candidates.sortedWith(comparator)
             DedupedChapter(logical, ordered.first().copy, ordered.subList(1, ordered.size).map { it.copy })
@@ -84,16 +104,31 @@ class ChapterDeduper(private val catalog: OfficialCatalog) {
                 ranks[ScanlatorNames.normalize(part)]?.let { if (it < rank) rank = it }
             }
         }
-        return ScanlatorTier(status, rank)
+        return ScanlatorTier(status, rank, scanlator != null && ScanlatorNames.isLowQuality(scanlator))
     }
 }
 
-private class ScanlatorTier(val status: OfficialStatus, val rank: Int)
+// "un-official" is excluded along with "unofficial", hence the '-' in the lookbehind.
+private val OFFICIAL_TRANSLATION = Regex(
+    """(?<![\p{L}\p{N}-])official\s+translations?(?![\p{L}\p{N}])""",
+    RegexOption.IGNORE_CASE,
+)
 
-private class Candidate(val copy: ChapterCopy, tier: ScanlatorTier, isDownloaded: (DedupChapter) -> Boolean) {
+/** Whether a chapter [name] claims an official translation ("Ch. 66 OFFICIAL TRANSLATION"). */
+internal fun isNamedOfficialTranslation(name: String): Boolean = OFFICIAL_TRANSLATION.containsMatchIn(name)
+
+private class ScanlatorTier(val status: OfficialStatus, val rank: Int, val lowQuality: Boolean)
+
+private class Candidate(
+    val copy: ChapterCopy,
+    tier: ScanlatorTier,
+    namedOfficial: Boolean,
+    val lowQuality: Boolean,
+    isDownloaded: (DedupChapter) -> Boolean,
+) {
     val downloaded = copy.parts.all(isDownloaded)
-    val official = tier.status == OfficialStatus.OFFICIAL
-    val maybeOfficial = tier.status != OfficialStatus.NONE
+    val official = namedOfficial || tier.status == OfficialStatus.OFFICIAL
+    val maybeOfficial = official || tier.status != OfficialStatus.NONE
     val rank = tier.rank
     val newestUpload = copy.parts.maxOf { it.dateUpload }
     val sourceOrder = copy.parts.minOf { it.sourceOrder }
@@ -101,10 +136,18 @@ private class Candidate(val copy: ChapterCopy, tier: ScanlatorTier, isDownloaded
 }
 
 /** Orders better candidates first. Reads precomputed fields only. */
-private class CandidateComparator(private val rules: Array<DedupRule>) : Comparator<Candidate> {
+private class CandidateComparator(rules: List<DedupRule>) : Comparator<Candidate> {
+
+    /** The rules with the low-quality demotion (null) inserted first, or second behind a leading DOWNLOADED. */
+    private val steps: Array<DedupRule?> = ArrayList<DedupRule?>(rules.size + 1).apply {
+        addAll(rules)
+        add(if (rules.firstOrNull() == DedupRule.DOWNLOADED) 1 else 0, null)
+    }.toTypedArray()
+
     override fun compare(a: Candidate, b: Candidate): Int {
-        for (rule in rules) {
-            val result = when (rule) {
+        for (step in steps) {
+            val result = when (step) {
+                null -> a.lowQuality.compareTo(b.lowQuality)
                 DedupRule.DOWNLOADED -> b.downloaded.compareTo(a.downloaded)
                 DedupRule.OFFICIAL -> b.official.compareTo(a.official)
                 DedupRule.OFFICIAL_UNCERTAIN -> b.maybeOfficial.compareTo(a.maybeOfficial)

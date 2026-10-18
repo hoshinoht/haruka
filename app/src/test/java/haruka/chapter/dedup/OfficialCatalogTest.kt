@@ -120,6 +120,24 @@ class OfficialCatalogTest {
     }
 
     @Test
+    fun `aggregator sources are recognized by name and exclude publishers and curated sites`() {
+        listOf("Manga Ball", "Comix", "MangaFire", "Toonkotsu", "MangaBat", "WeebCentral", "Mangakakalot").forEach {
+            testCatalog.isAggregatorSource(it) shouldBe true
+        }
+        listOf("Kagane", "MangaDex", "Atsumaru", "Comikey", "MANGA Plus by SHUEISHA").forEach {
+            testCatalog.isAggregatorSource(it) shouldBe false
+        }
+    }
+
+    @Test
+    fun `low quality markers are found anywhere in the scanlator string`() {
+        ScanlatorNames.isLowQuality("Official (low quality)") shouldBe true
+        ScanlatorNames.isLowQuality("(low quality)") shouldBe true
+        ScanlatorNames.isLowQuality("Group A & mangaplus (Low Quality)") shouldBe true
+        ScanlatorNames.isLowQuality("Official") shouldBe false
+    }
+
+    @Test
     fun `an alias claimed by two publishers is rejected`() {
         val json = """
             {"version": 1, "sources": [], "publishers": [

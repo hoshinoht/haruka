@@ -67,6 +67,18 @@ class ChapterGroupsTest {
     }
 
     @Test
+    fun `a repeated part upload is revealed with the winner's parts before other copies`() {
+        val groups = groups(
+            chapter(13, 3.0, "Group B"),
+            chapter(10, 3.1, "Group A"),
+            chapter(11, 3.2, "Group A", dateUpload = 5),
+            chapter(12, 3.2, "Group A", dateUpload = 1),
+            downloaded = setOf(10, 11),
+        )
+        groups.render(expanded = setOf(10)) shouldBe listOf("10[2/2]", ">11", ">12", ">13")
+    }
+
+    @Test
     fun `expansion is keyed by group and toggles`() {
         val groups = groups(chapter(1, 1.0, "Group A"), chapter(2, 1.0, "VIZ"), chapter(3, 2.0, "Group A"))
         expansion.toggle(groups.first().key)

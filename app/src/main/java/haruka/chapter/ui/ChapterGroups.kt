@@ -14,7 +14,7 @@ class ChapterGroup(
     val key: Long,
     /** The winner copy's parts, first part first; the first is the row that stands for the group. */
     val winner: List<Long>,
-    /** Every part of every other copy, best copy first. */
+    /** The winner's repeated part uploads, then every part and repeated upload of every other copy, best copy first. */
     val others: List<Long>,
     /** Number of copies, the winner included. */
     val versions: Int,
@@ -57,11 +57,16 @@ fun buildChapterGroups(
     val winner = deduped.winner.parts.map { it.id }
     var key = winner.min()
     val others = ArrayList<Long>()
-    for (copy in deduped.others) {
-        for (part in copy.parts) {
+    fun hide(parts: List<DedupChapter>) {
+        for (part in parts) {
             others += part.id
             if (part.id < key) key = part.id
         }
+    }
+    hide(deduped.winner.duplicates)
+    for (copy in deduped.others) {
+        hide(copy.parts)
+        hide(copy.duplicates)
     }
     ChapterGroup(key, winner, others, deduped.logical.copies.size)
 }
