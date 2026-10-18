@@ -49,7 +49,6 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.util.chapter.filterDownloaded
-import eu.kanade.tachiyomi.util.chapter.removeDuplicates
 import eu.kanade.tachiyomi.util.editCover
 import eu.kanade.tachiyomi.util.lang.byteSize
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -129,6 +128,9 @@ class ReaderViewModel(
     private val coverCache: CoverCache,
     private val chapterCache: ChapterCache,
     private val downloadCache: DownloadCache,
+    // FORK -->
+    private val harukaDedup: haruka.chapter.dedup.DedupSurfaces,
+    // FORK <--
 ) : ViewModel() {
 
     @AssistedFactory
@@ -281,7 +283,9 @@ class ReaderViewModel(
             .sortedWith(getChapterSort(manga, sortDescending = false))
             .run {
                 if (readerPreferences.skipDupe.get()) {
-                    removeDuplicates(selectedChapter)
+                    // FORK -->
+                    harukaDedup.readerChapters(manga, this, selectedChapter)
+                    // FORK <--
                 } else {
                     this
                 }
@@ -583,11 +587,17 @@ class ReaderViewModel(
 
             val chaptersToDownload = getNextChapters.await(manga.id, nextChapter.id).run {
                 if (readerPreferences.skipDupe.get()) {
-                    removeDuplicates(nextChapter)
+                    // FORK -->
+                    harukaDedup.readerChapters(manga, this, nextChapter)
+                    // FORK <--
                 } else {
                     this
                 }
-            }.take(downloadAheadAmount)
+            }
+                // FORK -->
+                .let { harukaDedup.withoutDownloadedCopies(manga, it) }
+                // FORK <--
+                .take(downloadAheadAmount)
 
             downloadManager.downloadChapters(
                 manga,
@@ -709,6 +719,9 @@ class ReaderViewModel(
     private suspend fun updateChapterProgressOnComplete(readerChapter: ReaderChapter) {
         updateTrackChapterRead(readerChapter)
         deleteChapterIfNeeded(readerChapter)
+        // FORK -->
+        manga?.let { harukaDedup.onChapterRead(it, readerChapter.chapter) }
+        // FORK <--
 
         val markDuplicateAsRead = libraryPreferences.markDuplicateReadChapterAsRead.get()
             .contains(LibraryPreferences.MARK_DUPLICATE_CHAPTER_READ_EXISTING)

@@ -797,6 +797,12 @@ private fun LazyListScope.sharedChapterItems(
                     onChapterSwipe = {
                         onChapterSwipe(item, it)
                     },
+                    // FORK -->
+                    modifier = haruka.chapter.ui.chapterGroupIndent(item.harukaRow),
+                    trailingContent = {
+                        haruka.chapter.ui.ChapterGroupChip(item.harukaRow, Modifier.align(Alignment.CenterVertically))
+                    },
+                    // FORK <--
                 )
             }
         }

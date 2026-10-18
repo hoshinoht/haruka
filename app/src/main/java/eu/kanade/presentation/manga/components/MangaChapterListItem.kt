@@ -64,6 +64,9 @@ fun MangaChapterListItem(
     onDownloadClick: ((ChapterDownloadAction) -> Unit)?,
     onChapterSwipe: (LibraryPreferences.ChapterSwipeAction) -> Unit,
     modifier: Modifier = Modifier,
+    // FORK -->
+    trailingContent: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+    // FORK <--
 ) {
     val start = getSwipeAction(
         action = chapterSwipeStartAction,
@@ -170,6 +173,10 @@ fun MangaChapterListItem(
                     }
                 }
             }
+
+            // FORK -->
+            trailingContent()
+            // FORK <--
 
             ChapterDownloadIndicator(
                 enabled = downloadIndicatorEnabled,
