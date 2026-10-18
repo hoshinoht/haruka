@@ -275,7 +275,9 @@ private fun GridItemTitle(
 ) {
     Text(
         modifier = modifier,
-        text = title,
+        // FORK -->
+        text = haruka.title.rememberDisplayTitle(title),
+        // FORK <--
         fontSize = 12.sp,
         lineHeight = 18.sp,
         minLines = minLines,
@@ -357,7 +359,9 @@ fun MangaListItem(
             data = coverData,
         )
         Text(
-            text = title,
+            // FORK -->
+            text = haruka.title.rememberDisplayTitle(title),
+            // FORK <--
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .weight(1f),

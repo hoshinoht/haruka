@@ -187,7 +187,9 @@ internal fun UpdatesUiItem(
                 .weight(1f),
         ) {
             Text(
-                text = update.mangaTitle,
+                // FORK -->
+                text = haruka.title.rememberDisplayTitle(update.mangaTitle),
+                // FORK <--
                 maxLines = 1,
                 style = MaterialTheme.typography.bodyMedium,
                 color = LocalContentColor.current.copy(alpha = textAlpha),

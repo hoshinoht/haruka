@@ -436,7 +436,9 @@ private fun ColumnScope.MangaContentInfo(
 ) {
     val context = LocalContext.current
     Text(
-        text = title.ifBlank { stringResource(MR.strings.unknown_title) },
+        // FORK --> display only; copy and search below keep the full title
+        text = haruka.title.rememberDisplayTitle(title).ifBlank { stringResource(MR.strings.unknown_title) },
+        // FORK <--
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.clickableNoIndication(
             onLongClick = {
