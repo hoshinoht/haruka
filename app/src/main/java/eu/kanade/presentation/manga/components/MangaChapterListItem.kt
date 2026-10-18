@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
-import me.saket.swipe.SwipeableActionsBox
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.BookmarkAdd
 import mihon.icons.materialsymbols.rounded.BookmarkRemove
@@ -85,13 +84,21 @@ fun MangaChapterListItem(
         onSwipe = { onChapterSwipe(chapterSwipeEndAction) },
     )
 
-    SwipeableActionsBox(
+    // FORK -->
+    haruka.ui.swipe.ChapterSwipeBox(
+        startAction = chapterSwipeStartAction,
+        endAction = chapterSwipeEndAction,
+        read = read,
+        bookmark = bookmark,
+        downloadState = downloadStateProvider(),
+        onChapterSwipe = onChapterSwipe,
         modifier = Modifier.clipToBounds(),
         startActions = listOfNotNull(start),
         endActions = listOfNotNull(end),
         swipeThreshold = swipeActionThreshold,
         backgroundUntilSwipeThreshold = MaterialTheme.colorScheme.surfaceContainerLowest,
     ) {
+        // FORK <--
         Row(
             modifier = modifier
                 .selectedBackground(selected)
