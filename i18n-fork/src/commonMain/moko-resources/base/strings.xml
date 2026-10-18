@@ -6,4 +6,7 @@
     <string name="updates_group_collapse">Show less</string>
     <string name="action_jump_to_top">Jump to top</string>
     <string name="action_jump_to_bottom">Jump to bottom</string>
+    <string name="related_titles">Related titles</string>
+    <string name="pref_related_titles">Show related titles</string>
+    <string name="pref_related_titles_summary">Show titles suggested by the source on the entry screen, when the extension supports it</string>
 </resources>
