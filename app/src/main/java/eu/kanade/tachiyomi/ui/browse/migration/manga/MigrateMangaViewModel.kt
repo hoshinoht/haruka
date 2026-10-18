@@ -53,7 +53,9 @@ class MigrateMangaViewModel(
 
     private val source = viewModelScope.async { sourceManager.getOrStub(sourceId) }
 
-    private val selection = MutableStateFlow(emptySet<Long>())
+    // FORK --> anchor-based range selection
+    private val selection = MutableStateFlow(haruka.selection.RangeSelection<Long>())
+    // FORK <--
 
     private val favorites = getFavorites.subscribe(sourceId)
         .catch {
@@ -69,22 +71,26 @@ class MigrateMangaViewModel(
         favorites,
         selection,
     ) { titleList, selection ->
-        State(source = source.await(), selection = selection, titleList = titleList)
+        // FORK -->
+        State(source = source.await(), selection = selection.selected, titleList = titleList)
+        // FORK <--
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), State())
 
+    // FORK -->
     fun toggleSelection(item: Manga) {
-        selection.update { selection ->
-            selection.mutate { list ->
-                if (!list.remove(item.id)) list.add(item.id)
-            }
-        }
+        selection.update { it.toggle(item.id) }
+    }
+
+    fun selectRange(item: Manga) {
+        selection.update { it.selectRange(state.value.titles.map(Manga::id), item.id) }
     }
 
     fun clearSelection() {
-        selection.update { emptySet() }
+        selection.update { it.clear() }
     }
+    // FORK <--
 
     @Immutable
     data class State(
