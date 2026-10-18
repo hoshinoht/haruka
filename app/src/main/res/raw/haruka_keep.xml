@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The OFL requires the licence to ship with every copy of the bundled font; nothing references it in code. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/haruka_zen_maru_gothic_ofl" />

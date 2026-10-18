@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Haruka: Hoshino light colours. Keep in sync with haruka/theme/HoshinoColorScheme.kt
+-->
+<resources>
+    <color name="hoshino_primary">#A63D5C</color>
+    <color name="hoshino_onPrimary">#FFFFFF</color>
+    <color name="hoshino_primaryContainer">#FD90A3</color>
+    <color name="hoshino_onPrimaryContainer">#3E0718</color>
+    <color name="hoshino_secondary">#4C76A6</color>
+    <color name="hoshino_onSecondary">#FFFFFF</color>
+    <color name="hoshino_secondaryContainer">#DCE5EC</color>
+    <color name="hoshino_onSecondaryContainer">#1E2A44</color>
+    <color name="hoshino_tertiary">#7B5800</color>
+    <color name="hoshino_onTertiary">#FFFFFF</color>
+    <color name="hoshino_tertiaryContainer">#F5BE5A</color>
+    <color name="hoshino_onTertiaryContainer">#2B1C00</color>
+    <color name="hoshino_error">#BF3000</color>
+    <color name="hoshino_onError">#FFFFFF</color>
+    <color name="hoshino_errorContainer">#FFDAD2</color>
+    <color name="hoshino_onErrorContainer">#3D0800</color>
+    <color name="hoshino_background">#F3F7F8</color>
+    <color name="hoshino_onBackground">#1E2A44</color>
+    <color name="hoshino_surface">#F3F7F8</color>
+    <color name="hoshino_onSurface">#1E2A44</color>
+    <color name="hoshino_surfaceVariant">#DCE5EC</color>
+    <color name="hoshino_onSurfaceVariant">#4B5C6E</color>
+    <color name="hoshino_outline">#75808E</color>
+    <color name="hoshino_outlineVariant">#C3CDD6</color>
+    <color name="hoshino_scrim">#000000</color>
+    <color name="hoshino_inverseSurface">#1E2A44</color>
+    <color name="hoshino_inverseOnSurface">#EDF2F4</color>
+    <color name="hoshino_inversePrimary">#FFB1C0</color>
+    <color name="hoshino_surfaceContainerLowest">#FFFFFF</color>
+    <color name="hoshino_surfaceDim">#D3DDE3</color>
+    <color name="hoshino_surfaceContainerLow">#EDF2F4</color>
+    <color name="hoshino_surfaceContainer">#E7EEF1</color>
+    <color name="hoshino_surfaceContainerHigh">#E1E9ED</color>
+    <color name="hoshino_surfaceContainerHighest">#DCE5EC</color>
+    <color name="hoshino_surfaceBright">#F3F7F8</color>
+</resources>
