@@ -16,6 +16,7 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 - Edits to upstream files are thin hooks wrapped in markers:
   - Kotlin/KTS/SQL: `// FORK -->` … `// FORK <--`
   - XML: `<!-- FORK -->` … `<!-- /FORK -->`
+  - Imports are never wrapped: ktlint rejects comments in the import list. Prefer fully qualified calls for one-off hooks.
 - Strings: new strings only in the fork i18n module (`i18n-fork`, created with the first feature that needs strings). Never add or edit strings in `i18n/` except the rebrand `app_name`.
 
 ## Hard rules
