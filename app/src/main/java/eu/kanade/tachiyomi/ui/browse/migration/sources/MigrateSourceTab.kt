@@ -26,7 +26,13 @@ fun Screen.migrateSourceTab(): TabContent {
 
     return TabContent(
         titleRes = MR.strings.label_migration,
-        actions = listOf(
+        // FORK --> listOfNotNull: the migrate-unavailable action is absent when every source works
+        actions = listOfNotNull(
+            haruka.stale.migrateUnavailableAction(
+                hasUnavailable = state.unavailable.isNotEmpty(),
+                favoriteIds = viewModel::unavailableFavoriteIds,
+            ),
+            // FORK <--
             AppBar.Action(
                 title = stringResource(MR.strings.migration_help_guide),
                 icon = MaterialSymbols.AutoMirroredRounded.Help,
