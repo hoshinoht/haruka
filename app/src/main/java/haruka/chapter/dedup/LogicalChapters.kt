@@ -15,11 +15,21 @@ data class DedupChapter(
 fun Chapter.toDedupChapter(): DedupChapter = DedupChapter(
     id = id,
     name = name,
-    chapterNumber = chapterNumber,
+    chapterNumber = chapterNumber.withoutFloatNoise(),
     scanlator = scanlator?.ifBlank { null },
     dateUpload = dateUpload?.toEpochMilliseconds() ?: 0L,
     sourceOrder = sourceOrder,
 )
+
+/**
+ * Backups store chapter numbers as Float and restore widens them, so a restored 6.1 reads 6.099999904632568 until the
+ * next library update rewrites it. Such a value is recovered through the float's shortest decimal so split parts and
+ * copies still meet; any other value is returned unchanged.
+ */
+internal fun Double.withoutFloatNoise(): Double {
+    val float = toFloat()
+    return if (float.toDouble() == this) float.toString().toDouble() else this
+}
 
 /** One upload of a logical chapter: a single chapter, or every part of a split chapter from one scanlator. */
 data class ChapterCopy(val parts: List<DedupChapter>) {

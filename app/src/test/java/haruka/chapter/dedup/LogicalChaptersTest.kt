@@ -2,6 +2,7 @@ package haruka.chapter.dedup
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
+import tachiyomi.domain.chapter.model.Chapter
 
 class LogicalChaptersTest {
 
@@ -31,6 +32,28 @@ class LogicalChaptersTest {
             chapter(4, 1.3, "B"),
         )
         result.shape() shouldBe listOf(Triple(1.0, 0, listOf(listOf(1L), listOf(2L, 3L, 4L))))
+    }
+
+    @Test
+    fun `chapter numbers widened from a backup float still merge and meet fresh copies`() {
+        // Restore writes Float.toDouble(), so 6.1 arrives as 6.099999904632568; a later update writes a true 6.3.
+        fun restored(id: Long, number: Float, scanlator: String) = Chapter.create()
+            .copy(id = id, name = "Ch. $number", chapterNumber = number.toDouble(), scanlator = scanlator)
+            .toDedupChapter()
+        val result = group(
+            restored(1, 6.1f, "A"),
+            restored(2, 6.2f, "A"),
+            chapter(3, 6.0, "B"),
+            restored(4, 6.3f, "B"),
+            chapter(5, 6.3, "C"),
+        )
+        result.shape() shouldBe listOf(
+            Triple(6.0, 0, listOf(listOf(1L, 2L), listOf(3L))),
+            Triple(6.0, 3, listOf(listOf(4L), listOf(5L))),
+        )
+        3.25.withoutFloatNoise() shouldBe 3.25
+        6.1.withoutFloatNoise() shouldBe 6.1
+        (-1.0).withoutFloatNoise() shouldBe -1.0
     }
 
     @Test
