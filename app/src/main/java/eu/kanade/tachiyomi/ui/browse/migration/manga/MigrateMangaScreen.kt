@@ -6,14 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.SmallExtendedFloatingActionButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,8 +22,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.collectLatest
 import mihon.feature.migration.config.MigrationConfigScreen
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
@@ -37,7 +30,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.selectedBackground
-import tachiyomi.presentation.core.util.shouldExpandFAB
 
 data class MigrateMangaScreen(
     private val sourceId: Long,
@@ -77,35 +69,28 @@ data class MigrateMangaScreen(
                     scrollBehavior = scrollBehavior,
                     // FORK -->
                     actions = {
-                        haruka.selection.SelectionListActions(
-                            listState = lazyListState,
-                            itemCount = state.titles.size,
-                            hasSelection = state.selectionMode,
-                            onSelectAll = viewModel::selectAll,
-                            onSelectNone = viewModel::clearSelection,
-                        )
+                        haruka.selection.ListJumpActions(listState = lazyListState, itemCount = state.titles.size)
                     },
                     // FORK <--
                 )
             },
+            // FORK -->
+            // The selection toolbar takes over the Continue FAB's role.
             floatingActionButton = {
-                SmallExtendedFloatingActionButton(
-                    text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
-                    icon = {
-                        Icon(imageVector = MaterialSymbols.AutoMirroredRounded.ArrowForward, contentDescription = null)
-                    },
-                    onClick = {
+                haruka.selection.SelectionToolbar(
+                    selectedCount = state.selection.size,
+                    onSelectAll = viewModel::selectAll,
+                    onSelectNone = viewModel::clearSelection,
+                    primaryLabel = stringResource(MR.strings.migrationConfigScreen_continueButtonText),
+                    onPrimary = {
                         val selection = state.selection
                         viewModel.clearSelection()
                         navigator.push(MigrationConfigScreen(selection))
                     },
-                    expanded = lazyListState.shouldExpandFAB(),
-                    modifier = Modifier.animateFloatingActionButton(
-                        visible = state.selectionMode,
-                        alignment = Alignment.BottomEnd,
-                    ),
                 )
             },
+            floatingActionButtonPosition = androidx.compose.material3.FabPosition.Center,
+            // FORK <--
         ) { contentPadding ->
             if (state.isEmpty) {
                 EmptyScreen(
