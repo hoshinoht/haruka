@@ -100,6 +100,9 @@ class LibraryUpdateNotifier(
      */
     @Synchronized
     fun showProgressNotification(manga: List<Manga>, current: Int, total: Int) {
+        // FORK -->
+        haruka.progress.BackgroundTaskProgress.onLibraryUpdateProgress(current, total)
+        // FORK <--
         val now = SystemClock.elapsedRealtime()
         if (current < total && now - lastProgressNotificationTime < NOTIF_PROGRESS_INTERVAL_MS) return
         lastProgressNotificationTime = now
@@ -299,6 +302,9 @@ class LibraryUpdateNotifier(
      * Cancels the progress notification.
      */
     fun cancelProgressNotification() {
+        // FORK -->
+        haruka.progress.BackgroundTaskProgress.onLibraryUpdateFinished()
+        // FORK <--
         context.cancelNotification(Notifications.ID_LIBRARY_PROGRESS)
     }
 

@@ -71,7 +71,6 @@ import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.interactor.GetIncognitoState
 import eu.kanade.presentation.components.AdaptiveSheet
-import eu.kanade.presentation.components.AppStateBanners
 import eu.kanade.presentation.components.DownloadedOnlyBannerBackgroundColor
 import eu.kanade.presentation.components.IncognitoModeBannerBackgroundColor
 import eu.kanade.presentation.components.IndexingBannerBackgroundColor
@@ -97,7 +96,11 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
 import eu.kanade.tachiyomi.util.system.updaterEnabled
+import eu.kanade.tachiyomi.util.system.workManager
 import eu.kanade.tachiyomi.util.view.setComposeContent
+import haruka.progress.BackgroundTaskProgress
+import haruka.progress.HarukaAppStateBanners
+import haruka.progress.TaskProgressBannerBackgroundColor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -216,12 +219,19 @@ class MainActivity : BaseActivity() {
             var incognito by remember { mutableStateOf(false) }
             val downloadOnly by preferences.downloadedOnly.collectAsState()
             val indexing by downloadCache.isInitializing.collectAsState()
+            // FORK -->
+            val backgroundTasks by remember { BackgroundTaskProgress.visibleTasks(context.workManager) }
+                .collectAsState(emptyList())
+            // FORK <--
 
             val isSystemInDarkTheme = isSystemInDarkTheme()
             val statusBarBackgroundColor = when {
                 indexing -> IndexingBannerBackgroundColor
                 downloadOnly -> DownloadedOnlyBannerBackgroundColor
                 incognito -> IncognitoModeBannerBackgroundColor
+                // FORK -->
+                backgroundTasks.isNotEmpty() -> TaskProgressBannerBackgroundColor
+                // FORK <--
                 else -> MaterialTheme.colorScheme.surface
             }
             LaunchedEffect(isSystemInDarkTheme, statusBarBackgroundColor) {
@@ -258,12 +268,15 @@ class MainActivity : BaseActivity() {
                 val scaffoldInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)
                 Scaffold(
                     topBar = {
-                        AppStateBanners(
+                        // FORK -->
+                        HarukaAppStateBanners(
                             downloadedOnlyMode = downloadOnly,
                             incognitoMode = incognito,
                             indexing = indexing,
+                            tasks = backgroundTasks,
                             modifier = Modifier.windowInsetsPadding(scaffoldInsets),
                         )
+                        // FORK <--
                     },
                     contentWindowInsets = scaffoldInsets,
                 ) { contentPadding ->
