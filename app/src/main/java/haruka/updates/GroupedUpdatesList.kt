@@ -35,20 +35,31 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
-/** Expanded groups survive scrolling and list refreshes, but not leaving the screen. */
-class UpdatesGroupingState(val enabled: Boolean, val expanded: SnapshotStateMap<GroupKey, Boolean>)
+/**
+ * Expanded groups survive scrolling and list refreshes, but not leaving the screen.
+ *
+ * [conversations] draws each group as a chat conversation; it implies [enabled].
+ */
+class UpdatesGroupingState(
+    val enabled: Boolean,
+    val conversations: Boolean,
+    val expanded: SnapshotStateMap<GroupKey, Boolean>,
+)
 
 @Composable
 fun rememberUpdatesGroupingState(): UpdatesGroupingState {
     val context = LocalContext.current
-    val preference = remember { context.appGraph.harukaPreferences.groupUpdates }
-    val enabled by preference.collectAsState()
+    val groupPreference = remember { context.appGraph.harukaPreferences.groupUpdates }
+    val conversationsPreference = remember { context.appGraph.harukaPreferences.momotalkUpdates }
+    val grouped by groupPreference.collectAsState()
+    val conversations by conversationsPreference.collectAsState()
     val expanded = remember { mutableStateMapOf<GroupKey, Boolean>() }
-    return UpdatesGroupingState(enabled, expanded)
+    return UpdatesGroupingState(grouped || conversations, conversations, expanded)
 }
 
 /**
- * Updates list with each manga's chapters for a day collapsed under its newest chapter.
+ * Updates list with each manga's chapters for a day collapsed under its newest chapter, or drawn as
+ * conversations when [UpdatesGroupingState.conversations] is on.
  *
  * While a group is collapsed, actions on its leader row apply to every chapter in the group.
  */
@@ -72,7 +83,7 @@ fun LazyListScope.groupedUpdatesUiItems(
         contentType = {
             when (it) {
                 is GroupedRow.Header -> "header"
-                is GroupedRow.Group -> "group"
+                is GroupedRow.Group -> if (grouping.conversations) "conversation" else "group"
             }
         },
         key = {
@@ -87,17 +98,31 @@ fun LazyListScope.groupedUpdatesUiItems(
                 modifier = Modifier.animateItem(),
                 text = relativeDateText(row.date),
             )
-            is GroupedRow.Group -> UpdatesGroup(
-                group = row,
-                expanded = grouping.expanded[row.key] == true,
-                onToggleExpanded = { grouping.expanded[row.key] = grouping.expanded[row.key] != true },
-                selectionMode = selectionMode,
-                onUpdateSelected = onUpdateSelected,
-                onClickCover = onClickCover,
-                onClickUpdate = onClickUpdate,
-                onDownloadChapter = onDownloadChapter,
-                modifier = Modifier.animateItem(),
-            )
+            is GroupedRow.Group -> if (grouping.conversations) {
+                UpdatesConversation(
+                    group = row,
+                    expanded = grouping.expanded[row.key] == true,
+                    onToggleExpanded = { grouping.expanded[row.key] = grouping.expanded[row.key] != true },
+                    selectionMode = selectionMode,
+                    onUpdateSelected = onUpdateSelected,
+                    onClickCover = onClickCover,
+                    onClickUpdate = onClickUpdate,
+                    onDownloadChapter = onDownloadChapter,
+                    modifier = Modifier.animateItem(),
+                )
+            } else {
+                UpdatesGroup(
+                    group = row,
+                    expanded = grouping.expanded[row.key] == true,
+                    onToggleExpanded = { grouping.expanded[row.key] = grouping.expanded[row.key] != true },
+                    selectionMode = selectionMode,
+                    onUpdateSelected = onUpdateSelected,
+                    onClickCover = onClickCover,
+                    onClickUpdate = onClickUpdate,
+                    onDownloadChapter = onDownloadChapter,
+                    modifier = Modifier.animateItem(),
+                )
+            }
         }
     }
 }
@@ -160,12 +185,7 @@ private fun UpdateRow(
     onClickUpdate: (UpdatesItem) -> Unit,
     onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
 ) {
-    fun select(fromLongPress: Boolean) {
-        val select = !selected
-        // The first target goes through upstream's long-press range logic; the rest follow it.
-        onUpdateSelected(targets.first(), select, fromLongPress)
-        targets.drop(1).forEach { onUpdateSelected(it, select, false) }
-    }
+    fun select(fromLongPress: Boolean) = selectAll(targets, !selected, fromLongPress, onUpdateSelected)
     UpdatesUiItem(
         update = item.update,
         selected = selected,
@@ -176,12 +196,33 @@ private fun UpdateRow(
         onLongClick = { select(fromLongPress = true) },
         onClickCover = { onClickCover(item) }.takeIf { !selectionMode },
         onDownloadChapter = { action: ChapterDownloadAction ->
-            // Download/cancel the whole collapsed group; delete and per-chapter actions stay per chapter.
-            onDownloadChapter(if (action == ChapterDownloadAction.START) targets else listOf(item), action)
+            downloadTargets(item, targets, action, onDownloadChapter)
         }.takeIf { !selectionMode },
         downloadStateProvider = item.downloadStateProvider,
         downloadProgressProvider = item.downloadProgressProvider,
     )
+}
+
+/** Selects or deselects every one of [targets] as one action. */
+internal fun selectAll(
+    targets: List<UpdatesItem>,
+    select: Boolean,
+    fromLongPress: Boolean,
+    onUpdateSelected: (UpdatesItem, Boolean, Boolean) -> Unit,
+) {
+    // The first target goes through upstream's long-press range logic; the rest follow it.
+    onUpdateSelected(targets.first(), select, fromLongPress)
+    targets.drop(1).forEach { onUpdateSelected(it, select, false) }
+}
+
+/** Download/cancel the whole of [targets]; delete and per-chapter actions stay on [item]. */
+internal fun downloadTargets(
+    item: UpdatesItem,
+    targets: List<UpdatesItem>,
+    action: ChapterDownloadAction,
+    onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
+) {
+    onDownloadChapter(if (action == ChapterDownloadAction.START) targets else listOf(item), action)
 }
 
 @Composable
