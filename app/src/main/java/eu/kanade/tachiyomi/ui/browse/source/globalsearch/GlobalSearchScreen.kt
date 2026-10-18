@@ -14,6 +14,7 @@ import eu.kanade.presentation.browse.GlobalSearchScreen
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
+import haruka.library.rememberLibraryToggle
 import tachiyomi.presentation.core.screens.LoadingScreen
 
 class GlobalSearchScreen(
@@ -53,6 +54,10 @@ class GlobalSearchScreen(
                 }
             }
         } else {
+            // FORK -->
+            val libraryToggle = rememberLibraryToggle()
+            libraryToggle.Dialogs()
+            // FORK <--
             GlobalSearchScreen(
                 state = state,
                 navigateUp = navigator::pop,
@@ -65,7 +70,9 @@ class GlobalSearchScreen(
                     navigator.push(BrowseSourceScreen(it.id, state.searchQuery))
                 },
                 onClickItem = { navigator.push(MangaScreen(it.id, true)) },
-                onLongClickItem = { navigator.push(MangaScreen(it.id, true)) },
+                // FORK -->
+                onLongClickItem = libraryToggle.onLongClick,
+                // FORK <--
             )
         }
     }
