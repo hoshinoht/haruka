@@ -87,6 +87,7 @@ interface AppGraph : ViewModelGraph {
     // FORK -->
     val harukaPreferences: haruka.preference.HarukaPreferences
     val libraryToggle: haruka.library.LibraryToggle
+    val updateErrorStore: haruka.updateerrors.UpdateErrorStore
 
     // FORK <--
     val readerPreferences: ReaderPreferences
