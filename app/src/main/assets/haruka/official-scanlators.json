@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "publishers": [
+    { "name": "Official", "aliases": ["Official", "Official Translation", "Official TL"] },
+    { "name": "MANGA Plus", "aliases": ["MANGA Plus", "MangaPlus", "MANGA Plus Creators", "Shueisha"] },
+    { "name": "VIZ", "aliases": ["VIZ", "VIZ Media", "VIZ Manga", "Shonen Jump", "VIZ Shonen Jump"] },
+    { "name": "Kodansha", "aliases": ["Kodansha", "Kodansha US", "Kodansha USA", "Kodansha Comics", "K MANGA"] },
+    { "name": "Yen Press", "aliases": ["Yen Press", "Yen On"] },
+    { "name": "Seven Seas", "aliases": ["Seven Seas", "Seven Seas Entertainment"] },
+    { "name": "Square Enix", "aliases": ["Square Enix", "Square Enix Manga", "Manga UP!"] },
+    { "name": "Webtoon", "aliases": ["Webtoon", "LINE Webtoon", "WEBTOON Originals", "Naver Webtoon"] },
+    { "name": "Tapas", "aliases": ["Tapas", "Tapastic"] },
+    { "name": "Comikey", "aliases": ["Comikey"] },
+    { "name": "Azuki", "aliases": ["Azuki"] },
+    { "name": "INKR", "aliases": ["INKR", "INKR Comics"] },
+    { "name": "Tappytoon", "aliases": ["Tappytoon"] },
+    { "name": "Lezhin", "aliases": ["Lezhin", "Lezhin Comics"] },
+    { "name": "Manta", "aliases": ["Manta", "Manta Comics"] },
+    { "name": "J-Novel Club", "aliases": ["J-Novel Club", "J-Novel"] },
+    { "name": "Pocket Comics", "aliases": ["Pocket Comics", "Comico"] },
+    { "name": "Bilibili Comics", "aliases": ["Bilibili Comics", "Bilibili Manga"] }
+  ],
+  "sources": [
+    "MANGA Plus by SHUEISHA",
+    "MANGA Plus Creators by SHUEISHA",
+    "Webtoons.com",
+    "Comikey",
+    "Tapas",
+    "Azuki",
+    "INKR",
+    "Tappytoon",
+    "Lezhin",
+    "Manta",
+    "K Manga",
+    "VIZ Shonen Jump",
+    "VIZ Manga",
+    "Manga UP!",
+    "J-Novel Club",
+    "Pocket Comics",
+    "Bilibili Comics"
+  ]
+}
