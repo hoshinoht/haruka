@@ -1,0 +1,475 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>
+<title>Abydos Shelves</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=swap">
+<style>
+/* Layout: spec page. Sticky filmstrip of the whole scroll on the left, annotated anatomy on the right; then framing options, rules tables, build notes. Dark-first, Abydos navy. */
+:root {
+  --bg: #0e1726; --panel: #142035; --panel-2: #1b2a41; --line: #2b3d56;
+  --fg: #f2ebf4; --muted: #a9b1c7; --pink: #efa7c2; --aqua: #8fd5e4; --gold: #f2c86b; --coral: #ff9473;
+  --code-bg: #0a1220;
+  --display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #faf4f8; --panel: #ffffff; --panel-2: #f3eaf2; --line: #e1d3e3;
+    --fg: #24334e; --muted: #5d6178; --pink: #a33769; --aqua: #087a92; --gold: #8a6100; --coral: #b23a12;
+    --code-bg: #f6eef5; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #faf4f8; --panel: #ffffff; --panel-2: #f3eaf2; --line: #e1d3e3;
+  --fg: #24334e; --muted: #5d6178; --pink: #a33769; --aqua: #087a92; --gold: #8a6100; --coral: #b23a12;
+  --code-bg: #f6eef5; color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font: 400 15px/1.65 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 40px 72px; display: grid; gap: 64px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 900; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.08; }
+h2 { font-size: clamp(22px, 3vw, 30px); line-height: 1.2; }
+h3 { font-size: 17px; line-height: 1.3; }
+p { margin: 0; max-width: 66ch; }
+.eyebrow { font: 700 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--pink); }
+.lede { color: var(--muted); font-size: 17px; }
+code { font-family: var(--mono); font-size: .86em; }
+.halo { display: inline-block; width: 46px; height: 14px; border: 3px solid var(--gold); border-radius: 50%; }
+section { display: grid; gap: 22px; }
+.sec-head { display: grid; gap: 10px; }
+.note { font-size: 13px; color: var(--muted); }
+
+.hero { display: grid; gap: 18px; }
+.thesis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 6px; }
+.thesis div { background: var(--panel); border-radius: 18px; padding: 16px 18px; display: grid; gap: 4px; }
+.thesis b { font: 700 13px/1.2 var(--display); color: var(--gold); }
+.thesis span { font-size: 14px; color: var(--muted); }
+
+/* Anatomy */
+.anatomy { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 40px; align-items: start; }
+.anatomy .film { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.steps li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 14px; padding: 16px 18px; background: var(--panel); border-radius: 18px; }
+.steps h3 { margin-bottom: 4px; }
+.steps p { font-size: 14px; color: var(--muted); }
+.steps p + p { margin-top: 6px; }
+.num { width: 28px; height: 28px; border-radius: 50%; background: var(--gold); color: #2a1d00; display: grid; place-items: center; font: 900 13px/1 var(--display); }
+
+/* Framing options */
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.opt { background: var(--panel); border-radius: 22px; padding: 18px; display: grid; gap: 12px; align-content: start; border: 2px solid transparent; }
+.opt.win { border-color: var(--gold); }
+.verdict { justify-self: start; font: 700 11px/1 var(--display); letter-spacing: .06em; padding: 6px 10px; border-radius: 999px; }
+.win .verdict { background: var(--gold); color: #2a1d00; }
+.alt .verdict { background: var(--panel-2); color: var(--aqua); }
+.no .verdict { background: var(--panel-2); color: var(--coral); }
+.opt ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+.schem { background: #111b2b; border-radius: 16px; padding: 8px; display: grid; gap: 5px; font: 700 9.5px/1.2 var(--display); color: #f2ebf4; }
+.schem div { border-radius: 8px; padding: 7px 8px; }
+.schem .s-bar { background: #172438; }
+.schem .s-shelf { background: #3a2a44; color: #ffd8e7; }
+.schem .s-sticky { background: #1f5562; color: #c9f1fa; }
+.schem .s-grid { background: #26384f; height: 66px; display: grid; place-items: center; color: #b0b6cd; }
+.schem .s-seg { background: #26384f; display: flex; gap: 4px; padding: 4px; }
+.schem .s-seg span { flex: 1; text-align: center; padding: 4px; border-radius: 999px; }
+.schem .s-seg .on { background: #efa7c2; color: #4a1530; }
+.schem .s-tap { background: transparent; border: 1.5px dashed #96a6bd; color: #b0b6cd; text-align: center; }
+
+/* Tables */
+.tbl { overflow-x: auto; border-radius: 18px; border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 700 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--panel); }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+.pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.dp { font: 700 11px/1 var(--display); background: var(--panel-2); color: var(--fg); padding: 5px 9px; border-radius: 999px; white-space: nowrap; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.card { background: var(--panel); border-radius: 22px; padding: 20px; display: grid; gap: 10px; align-content: start; }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 14px; }
+.card li b { color: var(--fg); }
+
+pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; overflow-x: auto; font: 400 12.5px/1.6 var(--mono); }
+pre .c { color: var(--muted); font-style: italic; }
+pre .k { color: var(--pink); }
+.file { font: 600 12px/1.3 var(--mono); color: var(--aqua); word-break: break-all; }
+.phases { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.phases li { background: var(--panel); border-radius: 20px; padding: 18px; display: grid; gap: 8px; align-content: start; }
+.phases .ph { font: 900 12px/1 var(--display); color: var(--gold); letter-spacing: .1em; text-transform: uppercase; }
+.phases p { font-size: 14px; color: var(--muted); }
+.ask { display: grid; gap: 10px; }
+.ask div { background: var(--panel); border-radius: 16px; padding: 14px 18px; display: grid; gap: 4px; }
+.ask b { font-family: var(--display); }
+.ask span { font-size: 14px; color: var(--muted); }
+.ask em { font-style: normal; color: var(--gold); font-weight: 700; }
+
+/* ---- Phone filmstrip (always Hoshino dark) ---- */
+.phone { --h-bg: #111b2b; --h-on: #f2ebf4; --h-onv: #b0b6cd; --h-bar: #172438; --h-high: #1f2e44;
+  width: 300px; max-width: 100%; border-radius: 34px; padding: 10px; background: #05090f;
+  box-shadow: 0 0 0 1px #2b3d56, 0 24px 60px -24px rgba(0,0,0,.6); font-family: "Zen Maru Gothic", system-ui, sans-serif; }
+.screen { background: var(--h-bg); color: var(--h-on); border-radius: 26px; overflow: hidden; position: relative; padding-bottom: 10px; }
+.ms i, i.ms { font-family: "Material Symbols Rounded"; font-style: normal; font-size: 20px; line-height: 1; }
+.appbar { display: flex; align-items: center; gap: 8px; padding: 16px 14px 6px; }
+.appbar b { font-size: 19px; font-weight: 700; }
+.count { font: 700 11px/1 "Zen Maru Gothic"; background: var(--h-high); padding: 5px 7px; border-radius: 999px; }
+.appbar .ms { margin-left: auto; display: flex; gap: 12px; }
+.mk { width: 18px; height: 18px; border-radius: 50%; background: #f2c86b; color: #2a1d00; display: inline-grid; place-items: center; font: 900 10px/1 "Zen Maru Gothic"; flex: 0 0 auto; }
+.sh { display: flex; align-items: center; gap: 6px; padding: 12px 12px 6px; font-size: 12px; font-weight: 700; }
+.sh small { color: var(--h-onv); font-weight: 500; font-size: 10px; }
+.sh em { margin-left: auto; color: #8fd5e4; font-size: 10px; font-style: normal; }
+.sh.warn { color: #ffb59e; }
+.cover { position: relative; aspect-ratio: 2 / 3; border-radius: 7px; overflow: hidden; }
+.carousel { display: flex; gap: 6px; padding: 0 12px; height: 178px; }
+.carousel .cover { aspect-ratio: auto; height: 100%; border-radius: 22px; flex: 0 0 auto; }
+.k1 { width: 62%; } .k2 { width: 26%; } .k3 { width: 8%; }
+.bub { position: absolute; left: 8px; right: 8px; bottom: 8px; background: rgba(31,46,68,.94); border-radius: 12px 12px 12px 4px; padding: 6px 8px; display: grid; gap: 2px; }
+.bub b { font-size: 10.5px; line-height: 13px; }
+.bub span { font-size: 9px; color: #efa7c2; }
+.resume { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 10px; background: #efa7c2; color: #4a1530; display: grid; place-items: center; }
+.resume i { font-size: 18px; font-variation-settings: "FILL" 1; }
+.srow { display: flex; gap: 8px; padding: 0 12px; overflow: hidden; }
+.si { position: relative; flex: 0 0 27%; min-width: 0; }
+.si .cover { border-radius: 12px; }
+.si .st { font-size: 9.5px; line-height: 12.5px; margin-top: 4px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dot { position: absolute; top: 5px; left: 5px; background: #ff9473; color: #5c1300; font-weight: 700; font-size: 9px; line-height: 1; min-width: 16px; height: 16px; border-radius: 999px; display: grid; place-items: center; padding: 0 4px; box-shadow: 0 0 0 1.5px #111b2b; }
+.seeall { flex: 0 0 18%; border-radius: 12px; border: 1.5px dashed #34465d; display: grid; place-items: center; text-align: center; font-size: 9.5px; color: #8fd5e4; aspect-ratio: 2 / 3; padding: 4px; }
+.warnchip { position: absolute; left: 5px; right: 5px; bottom: 5px; background: rgba(140,32,0,.92); color: #ffdad2; border-radius: 8px; font-size: 8.5px; padding: 3px 5px; text-align: center; }
+.sticky { margin-top: 12px; background: #172438; border-top: 1px solid #26384f; border-bottom: 1px solid #26384f; padding: 8px 0 8px; display: grid; gap: 7px; box-shadow: 0 6px 12px -8px rgba(0,0,0,.6); }
+.sticky .top { display: flex; align-items: center; gap: 6px; padding: 0 12px; font-size: 12px; font-weight: 700; }
+.sortchip { margin-left: auto; display: flex; align-items: center; gap: 3px; font-size: 10px; background: #26384f; border-radius: 999px; padding: 4px 9px; font-weight: 500; }
+.sortchip i { font-size: 14px; }
+.chips { display: flex; gap: 5px; padding: 0 12px; overflow: hidden; }
+.chips span { border: 1px solid #34465d; border-radius: 10px; padding: 4px 9px; font-size: 9.5px; white-space: nowrap; }
+.chips .on { background: #1f5562; color: #c9f1fa; border-color: #1f5562; font-weight: 700; }
+.chips .qf { background: #6b3550; color: #ffd8e7; border-color: #6b3550; }
+.divider { display: flex; justify-content: center; padding: 10px 0 6px; grid-column: 1 / -1; }
+.divider span { font-size: 9.5px; font-weight: 700; background: #26384f; color: #b0b6cd; border-radius: 999px; padding: 3px 10px; }
+.cgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 0 12px; position: relative; }
+.gi { position: relative; }
+.gi .scrim { position: absolute; inset: auto 0 0 0; height: 52%; border-radius: 0 0 7px 7px; background: linear-gradient(rgba(11,22,39,0), rgba(11,22,39,.55) 32%, rgba(11,22,39,.86) 58%, rgba(11,22,39,.94)); }
+.gi .t { position: absolute; left: 0; right: 0; bottom: 0; padding: 5px 6px; font-size: 9px; line-height: 12px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.gi .dot { top: 4px; left: 4px; }
+.fs { position: absolute; right: 2px; top: 1120px; display: flex; align-items: center; gap: 4px; z-index: 3; }
+.fs .bubble { background: #efa7c2; color: #4a1530; font-size: 10px; font-weight: 700; border-radius: 14px 14px 4px 14px; padding: 6px 10px; }
+.fs .thumbbar { width: 5px; height: 38px; border-radius: 4px; background: #efa7c2; }
+.frame { position: absolute; left: 0; right: 0; top: 0; height: 622px; border: 2px dashed #f2c86b; border-radius: 26px; pointer-events: none; z-index: 4; }
+.frame span { position: absolute; right: 10px; bottom: 64px; background: #f2c86b; color: #2a1d00; font: 700 9.5px/1 "Zen Maru Gothic"; padding: 4px 8px; border-radius: 999px; }
+.nav { position: absolute; left: 0; right: 0; top: 566px; height: 56px; display: grid; grid-template-columns: repeat(5, 1fr); background: #172438; padding: 7px 4px 0; z-index: 3; }
+.nav div { display: grid; justify-items: center; gap: 2px; font-size: 9px; color: #b0b6cd; }
+.nav .pill { width: 42px; height: 24px; border-radius: 999px; display: grid; place-items: center; }
+.nav .sel { color: #efa7c2; font-weight: 700; }
+.nav .sel .pill { background: #efa7c2; color: #4a1530; }
+.nav .sel i { font-variation-settings: "FILL" 1; }
+.film-cap { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; max-width: 300px; }
+
+.c1 { background: radial-gradient(60% 45% at 30% 35%, #fff 0 40%, transparent 41%), radial-gradient(50% 40% at 75% 45%, #e9e6ee 0 50%, transparent 51%), linear-gradient(165deg, #f7f6f9, #d8d4de 55%, #f0eef3); }
+.c2 { background: radial-gradient(40% 30% at 40% 30%, #ffeef4 0 60%, transparent 61%), linear-gradient(180deg, #ffd9e6, #f4b2cb 70%, #f8c9da); }
+.c3 { background: radial-gradient(8% 6% at 20% 70%, #ffd76a 0 70%, transparent 71%), radial-gradient(7% 5% at 70% 62%, #ff9fbf 0 70%, transparent 71%), linear-gradient(180deg, #2a1f4a, #6a3d7a 55%, #e0a93b); }
+.c4 { background: radial-gradient(45% 35% at 50% 45%, #fff 0 60%, transparent 61%), linear-gradient(170deg, #fff, #bfe3ff 60%, #e9f5ff); }
+.c5 { background: radial-gradient(40% 30% at 45% 40%, #fffaf0 0 60%, transparent 61%), linear-gradient(180deg, #fff6d2, #f7d24a 75%, #ffe58a); }
+.c6 { background: radial-gradient(40% 32% at 55% 40%, #ead9ff 0 55%, transparent 56%), linear-gradient(180deg, #3d2a63, #8a6bc0 60%, #c9b3ea); }
+.c7 { background: radial-gradient(35% 28% at 50% 38%, #c9f1fa 0 55%, transparent 56%), linear-gradient(180deg, #0f3d4a, #2a7f92 60%, #8fd5e4); }
+.c8 { background: radial-gradient(38% 30% at 45% 42%, #ffe3d6 0 55%, transparent 56%), linear-gradient(180deg, #5a1f2a, #b2475a 60%, #f2a0a8); }
+
+@media (max-width: 820px) {
+  .anatomy { grid-template-columns: minmax(0, 1fr); }
+  .anatomy .film { position: static; justify-self: center; }
+}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="halo" aria-hidden="true"></span>
+    <span class="eyebrow">Haruka · Library concept R2 · deep dive</span>
+    <h1>Abydos Shelves</h1>
+    <p class="lede">Shelves at the top answer “what should I read next”. All 951 series follow in the same scroll as the Collection, with a pinned header, category chips, and dividers that follow your sort. Nothing moves to another screen, and every setting you have today keeps working.</p>
+    <div class="thesis">
+      <div><b>One scroll, not two screens</b><span>Shelves and the full library share one grid, so the library is never more than a flick away.</span></div>
+      <div><b>Your settings still rule the Collection</b><span>Sort, filters, display mode, columns and categories keep their current meaning.</span></div>
+      <div><b>Built from what's already loaded</b><span>No new SQL or migrations, and no change to backups. Everything comes from <code>LibraryManga</code>.</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Anatomy</span>
+      <h2>One scroll, top to bottom</h2>
+      <p class="note">The phone on the left shows the whole scroll unrolled. The dashed frame is the first screen on a 412 × 915 dp phone. Covers are synthetic.</p>
+    </div>
+    <div class="anatomy">
+      <div class="film">
+        <div class="phone"><div class="screen" id="film"></div></div>
+        <p class="film-cap">Scaled about 0.7×. The bottom bar is pinned to the first screen.</p>
+      </div>
+      <ol class="steps">
+        <li><span class="num">1</span><div><h3>Top bar stays as it is</h3><p>The upstream <code>LibraryToolbar</code> keeps the title, the count, search, the filter sheet and the overflow menu. Selection mode swaps it for the selection bar exactly as it does today. The category tabs move down into the Collection header (step 4).</p></div></li>
+        <li><span class="num">2</span><div><h3>Continue reading carousel</h3><p>Up to 10 series you've started that have unread chapters, ordered by last read. It uses M3E's <code>HorizontalMultiBrowseCarousel</code>, with one large item, one medium and a peeking small one. The large item gets a MomoTalk bubble with the chapter and page, and a resume button that opens the reader straight away.</p><p>The resume button reuses <code>onContinueReadingClicked</code>, the same callback as the existing “continue reading” button.</p></div></li>
+        <li><span class="num">3</span><div><h3>Shelves</h3><p><b>New chapters</b>, <b>Not started</b>, and Haruka's own <b>Needs a new source</b>, which only appears when a series sits on a source <code>StaleSources</code> marks unavailable. Each shelf is a horizontal row of up to 15 covers with titles below, ending in a “See all” tile. Empty shelves hide.</p><p>A series appears on at most one shelf, but it always also appears in the Collection.</p></div></li>
+        <li><span class="num">4</span><div><h3>Collection header (pinned)</h3><p>A <code>stickyHeader</code> labelled “All series · 951” with the current sort as a chip. Tapping the chip opens the existing sort sheet. You don't use categories, so there's no chip row. If categories are ever added, chips appear here automatically and work like today's tabs. When “See all” is tapped on a shelf, a temporary filter chip such as <b>New chapters ×</b> appears here.</p></div></li>
+        <li><span class="num">5</span><div><h3>Collection grid with sort dividers</h3><p>The grid uses your current display mode and column count, unchanged. The mock shows the compact grid. Between groups sit centred MomoTalk-style pills, like the date separators in a chat. What the pills say depends on the sort (table below).</p></div></li>
+        <li><span class="num">6</span><div><h3>Fast scroller speaks the dividers</h3><p>The existing <code>FastScrollLazyVerticalGrid</code> thumb gains a bubble showing the current section (“This week”, “K”, “Oct 2026”). That's how you cross 951 series quickly.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Framing all entries</span>
+      <h2>Where the other 951 live</h2>
+      <p>Shelves only show a slice of the library. The key decision is how the full library sits next to them. I looked at three ways.</p>
+    </div>
+    <div class="opts">
+      <article class="opt win">
+        <span class="verdict">Recommended</span>
+        <h3>F1 · Continuous</h3>
+        <div class="schem"><div class="s-bar">Library 951</div><div class="s-shelf">Continue reading</div><div class="s-shelf">New chapters · Not started</div><div class="s-sticky">All series 951 · chips (pinned)</div><div class="s-grid">Collection grid ↓</div></div>
+        <ul>
+          <li>Shelves scroll away and the Collection header pins. One gesture reaches everything.</li>
+          <li>Built as one <code>LazyVerticalGrid</code>: shelves are full-width items, so nothing scrolls vertically inside something else that does.</li>
+          <li>Cost: you can no longer swipe sideways between categories. The chips replace that.</li>
+        </ul>
+      </article>
+      <article class="opt alt">
+        <span class="verdict">Fallback</span>
+        <h3>F2 · Home / Collection switch</h3>
+        <div class="schem"><div class="s-bar">Library 951</div><div class="s-seg"><span class="on">Home</span><span>Collection</span></div><div class="s-shelf">Shelves…</div><div class="s-grid">(Collection = today's pager)</div></div>
+        <ul>
+          <li>Collection is today's category pager, completely unchanged, swipe included.</li>
+          <li>Simplest to build, and the safest for upstream merges.</li>
+          <li>Cost: the 951 sit behind a toggle, and Home turns into a separate feed instead of the top of your library.</li>
+        </ul>
+      </article>
+      <article class="opt no">
+        <span class="verdict">Not recommended</span>
+        <h3>F3 · Shelves only</h3>
+        <div class="schem"><div class="s-bar">Library 951</div><div class="s-shelf">Continue reading</div><div class="s-shelf">New chapters</div><div class="s-shelf">… one shelf per category</div><div class="s-tap">“All series” → new screen</div></div>
+        <ul>
+          <li>Looks like a streaming app, with every category as a shelf.</li>
+          <li>Cost: with 951 series, browsing means tapping into a screen per shelf, and range selection across the library goes away.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Collection dividers</span>
+      <h2>Dividers follow the sort you already use</h2>
+      <p>The dividers are worked out from the active <code>LibrarySort.Type</code>, so no new setting is needed. With a descending sort, the same groups appear in reverse order.</p>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Sort</th><th>Dividers</th><th>Built from</th></tr></thead>
+        <tbody>
+          <tr><td>Last read</td><td><div class="pills"><span class="dp">Today</span><span class="dp">This week</span><span class="dp">This month</span><span class="dp">Earlier this year</span><span class="dp">Older</span><span class="dp">Never read</span></div></td><td><code>lastRead</code></td></tr>
+          <tr><td>Last update · Latest chapter · Chapter fetch date</td><td><div class="pills"><span class="dp">Today</span><span class="dp">This week</span><span class="dp">This month</span><span class="dp">Older</span></div></td><td><code>manga.lastUpdate</code>, <code>latestUpload</code>, <code>chapterFetchedAt</code></td></tr>
+          <tr><td>Date added</td><td><div class="pills"><span class="dp">October 2026</span><span class="dp">September 2026</span><span class="dp">…</span></div></td><td><code>manga.favoriteAt</code></td></tr>
+          <tr><td>Alphabetical</td><td><div class="pills"><span class="dp">#</span><span class="dp">A</span><span class="dp">B</span><span class="dp">…</span><span class="dp">Z</span></div></td><td>First letter of the display title. Digits and non-Latin scripts go under #.</td></tr>
+          <tr><td>Unread count</td><td><div class="pills"><span class="dp">10+ unread</span><span class="dp">1–9 unread</span><span class="dp">Caught up</span></div></td><td><code>unreadCount</code></td></tr>
+          <tr><td>Total chapters</td><td><div class="pills"><span class="dp">100+</span><span class="dp">50–99</span><span class="dp">10–49</span><span class="dp">Under 10</span></div></td><td><code>totalChapters</code></td></tr>
+          <tr><td>Tracker score</td><td><div class="pills"><span class="dp">9–10</span><span class="dp">7–8</span><span class="dp">Below 7</span><span class="dp">Not scored</span></div></td><td>Tracker mean, the value the sort already uses</td></tr>
+          <tr><td>Random</td><td>No dividers</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Shelf rules</span>
+      <h2>What lands on each shelf</h2>
+      <p>The rules run top to bottom, and a series placed on one shelf is skipped by the shelves below it. Shelves cover the whole library regardless of the selected category chip, but they do respect active filters and Downloaded-only mode.</p>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Shelf</th><th>Includes</th><th>Order</th><th>Cap</th></tr></thead>
+        <tbody>
+          <tr><td><b>Continue reading</b></td><td><code>hasStarted</code> and <code>unreadCount &gt; 0</code></td><td><code>lastRead</code>, newest first</td><td>10</td></tr>
+          <tr><td><b>New chapters</b></td><td><code>unreadCount &gt; 0</code> and <code>chapterFetchedAt</code> within 7 days</td><td><code>chapterFetchedAt</code>, newest first</td><td>15 + See all</td></tr>
+          <tr><td><b>Not started</b></td><td>not <code>hasStarted</code></td><td><code>favoriteAt</code>, newest first</td><td>15 + See all</td></tr>
+          <tr><td><b>Needs a new source</b></td><td>source unavailable (<code>StaleSources</code>)</td><td>title</td><td>all</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Behaviour</span>
+      <h2>How it behaves in each situation</h2>
+    </div>
+    <div class="two">
+      <div class="card">
+        <h3>Library features you use today</h3>
+        <ul>
+          <li><b>Search:</b> as soon as you type, the shelves collapse and the Collection shows the matches, with the existing global-search row at the bottom.</li>
+          <li><b>Filters and Downloaded-only:</b> apply to both the shelves and the Collection. The filter icon already shows when filters are on.</li>
+          <li><b>Selection:</b> long-press works everywhere and uses the same selection set and action bar. Range select (<code>onToggleRangeSelection</code>) works in the Collection only, where the order is visible.</li>
+          <li><b>Pull to refresh:</b> from the top of the scroll. It calls the same <code>onRefresh</code>.</li>
+          <li><b>Per-category sort and display:</b> choosing a chip calls <code>onChangeCurrentPage</code>, so Mihon's per-category settings keep working.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Edge cases</h3>
+        <ul>
+          <li><b>Small or new library:</b> below about 20 series, or when every shelf is empty, the shelves hide and the page is just the Collection.</li>
+          <li><b>Single category:</b> the chip row hides, matching today's rule for <code>showPageTabs</code>.</li>
+          <li><b>See all:</b> scrolls to the Collection header and adds a temporary filter chip. It's never saved to your filter preferences, and tapping × clears it.</li>
+          <li><b>Returning to the tab:</b> the scroll position is remembered with <code>rememberLazyGridState</code>. Re-tapping Library scrolls to the top (shelves), matching <code>onReselect</code>.</li>
+          <li><b>Turning it off:</b> a Haruka setting (Shelves on/off). Off is today's library, byte for byte.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Build</span>
+      <h2>How it fits the fork</h2>
+      <p>All the inputs the layout needs already come into <code>LibraryContent</code> as parameters: categories, items per category, selection, search, display mode, columns and every callback. So one hook is enough.</p>
+    </div>
+    <div class="two">
+      <div class="card">
+        <span class="file">LibraryContent.kt (upstream) · one FORK hook</span>
+<pre>Column(modifier = …) {
+    <span class="c">// FORK --></span>
+    <span class="k">if</span> (haruka.library.shelves.rememberShelvesEnabled()) {
+        haruka.library.shelves.ShelvesLibrary(
+            categories = categories,
+            currentPage = currentPage,
+            searchQuery = searchQuery,
+            selection = selection,
+            onChangeCurrentPage = onChangeCurrentPage,
+            getItemsForCategory = getItemsForCategory,
+            getDisplayMode = getDisplayMode,
+            getColumnsForOrientation = getColumnsForOrientation,
+            <span class="c">/* …remaining callbacks passed through unchanged */</span>
+        )
+        <span class="k">return</span>@Column
+    }
+    <span class="c">// FORK &lt;--</span>
+    <span class="k">val</span> pagerState = rememberPagerState(currentPage) { categories.size }
+    …</pre>
+      </div>
+      <div class="card">
+        <span class="file">haruka/library/shelves/ShelvesLibrary.kt (new)</span>
+<pre>FastScrollLazyVerticalGrid(columns = cells, state = gridState, …) {
+    <span class="k">if</span> (searchQuery.isNullOrEmpty()) {
+        item(span = FullSpan, contentType = { <span class="k">"carousel"</span> }) {
+            ContinueReadingCarousel(shelves.continueReading, …)
+        }
+        shelves.rows.forEach { shelf ->
+            item(key = <span class="k">"shelf-${shelf.kind}"</span>, span = FullSpan,
+                contentType = { <span class="k">"shelf"</span> }) { ShelfRow(shelf, …) }
+        }
+    }
+    stickyHeader(key = <span class="k">"collection"</span>) { CollectionHeader(…) }
+    collection.sections.forEach { section ->
+        section.label?.let { label ->
+            item(key = <span class="k">"div-$label"</span>, span = FullSpan,
+                contentType = { <span class="k">"divider"</span> }) { SectionPill(label) }
+        }
+        items(section.items, key = { it.id }, contentType = { <span class="k">"manga"</span> }) {
+            <span class="c">// the upstream item for the chosen display mode</span>
+        }
+    }
+}</pre>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <h3>Where the logic lives</h3>
+        <ul>
+          <li><b><code>:haruka:core</code></b>: <code>ShelfRules</code> and <code>SortSections</code> as pure functions over a small fork-owned input type (id, started, unread, lastRead, fetchedAt, favoriteAt, title). They have no app dependencies and get unit tests, following the <code>Chapter.toDedupChapter()</code> pattern.</li>
+          <li><b><code>app/…/haruka/library/shelves/</code></b>: the composables and an adapter from <code>LibraryItem</code>. The shelves are computed off the main thread (<code>Dispatchers.Default</code>) and recomputed only when the library list changes.</li>
+          <li><b><code>i18n-fork</code></b>: shelf names, divider labels, the setting label.</li>
+          <li><b>Patch surface:</b> +1 hook (<code>LibraryContent.kt</code>). The <code>onReselect</code> scroll-to-top may need a second small hook in <code>LibraryTab.kt</code>.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Risks to check</h3>
+        <ul>
+          <li><b>Scroll performance:</b> 951 items in one grid is what you have today. The new parts are the carousel and about three horizontal rows at the top. Compare with <code>scripts/haruka/perf/run.sh</code> before and after (reference: under 1.5% jank on Library).</li>
+          <li><b>API maturity:</b> <code>LazyGridScope.stickyHeader</code> is in the androidx foundation 1.13.0-beta01 in your Gradle cache. It may still be marked <code>@ExperimentalFoundationApi</code>, and I haven't confirmed which version your BOM resolves to. The carousel is in material3 1.5.0-beta, but I haven't checked its parameters.</li>
+          <li><b>Upstream drift:</b> if Mihon changes <code>LibraryContent</code>'s parameters, the hook needs updating. Expect a compile error, not a silent bug.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Delivery</span>
+      <h2>Three phases, each useful on its own</h2>
+    </div>
+    <ol class="phases">
+      <li><span class="ph">Phase 1</span><h3>Frame the Collection</h3><p>Pinned “All series” header, sort chip, and sort dividers with the fast-scroller bubble, all on the grid you have now. It already makes 951 series easier to navigate, even before any shelves exist.</p></li>
+      <li><span class="ph">Phase 2</span><h3>Shelves and carousel</h3><p>Continue reading, New chapters and Not started above the Collection, behind the Haruka setting. Run the perf check before and after.</p></li>
+      <li><span class="ph">Phase 3</span><h3>Polish</h3><p>“See all” filter chips, the Needs a new source shelf, and per-shelf hide or reorder in Haruka's settings.</p></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Decided · 19 Oct 2026</span>
+      <h2>Decisions</h2>
+    </div>
+    <div class="ask">
+      <div><b>Categories</b><span><em>Not used.</em> No chip row. Chips only appear if categories are added later.</span></div>
+      <div><b>Shelves and categories</b><span><em>Library-wide.</em> Shelves never follow a category.</span></div>
+      <div><b>Collection grid</b><span><em>Current display mode, unchanged.</em> No title-style change in this work.</span></div>
+      <div><b>Framing</b><span><em>F1, one continuous scroll.</em> Losing the sideways swipe between categories is acceptable.</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var A = {
+    reading: [{ c: "c6", t: "I May Be a Guild Receptionist, but I'll Solo Any Boss" }, { c: "c4", t: "Exceed" }, { c: "c3", t: "A Fine and Bright Day" }],
+    fresh: [{ c: "c2", t: "7th Time Loop - The Villainess Enjoys a Carefree Life", n: 3 }, { c: "c5", t: "Shiro Onihime no Zako Sotsugyou", n: 12 }, { c: "c1", t: "Honto wa Issho ni, Itai dake", n: 1 }],
+    notStarted: [{ c: "c7", t: "Kon'yaku Haki o Neratte Kioku Soushitsu" }, { c: "c8", t: "Agents of the Four Seasons: Dance of Spring" }, { c: "c4", t: "Gal Maid & Villainess" }],
+    stale: [{ c: "c8", t: "Multiverse no Koi" }, { c: "c3", t: "I Became a Squirrel" }],
+    today: [{ c: "c6", t: "I May Be a Guild Receptionist", n: 2 }, { c: "c2", t: "7th Time Loop - The Villainess…", n: 3 }, { c: "c4", t: "Exceed", n: 1 }],
+    week: [{ c: "c5", t: "Shiro Onihime no Zako Sotsugyou", n: 12 }, { c: "c1", t: "Honto wa Issho ni, Itai dake", n: 1 }, { c: "c3", t: "A Fine and Bright Day" }, { c: "c7", t: "Kon'yaku Haki o Neratte" }, { c: "c8", t: "Agents of the Four Seasons" }, { c: "c2", t: "Gal Maid & Villainess: Only…" }],
+    month: [{ c: "c4", t: "Honto wa Motto, Shitai dake" }, { c: "c6", t: "I Became a Squirrel Seeking…" }, { c: "c1", t: "Multiverse no Koi" }]
+  };
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function dot(n) { return n ? '<span class="dot">' + n + "</span>" : ""; }
+  function si(it, extra) { return '<div class="si"><div class="cover ' + it.c + '">' + (extra || "") + "</div>" + dot(it.n) + '<div class="st">' + esc(it.t) + "</div></div>"; }
+  function gi(it) { return '<div class="gi"><div class="cover ' + it.c + '"><div class="scrim"></div><div class="t">' + esc(it.t) + "</div></div>" + dot(it.n) + "</div>"; }
+  function div(l) { return '<div class="divider"><span>' + l + "</span></div>"; }
+  var tabs = [["collections_bookmark", "Library"], ["new_releases", "Updates"], ["history", "History"], ["explore", "Browse"], ["more_horiz", "More"]];
+
+  var html =
+    '<div class="appbar"><span class="mk">1</span><b>Library</b><span class="count">951</span><span class="ms"><i>search</i><i>filter_list</i><i>more_vert</i></span></div>' +
+    '<div class="sh"><span class="mk">2</span>Continue reading</div>' +
+    '<div class="carousel"><div class="cover c6 k1"><span class="resume ms"><i>play_arrow</i></span><div class="bub"><b>I May Be a Guild Receptionist…</b><span>Ch. 43 · page 12 of 30</span></div></div><div class="cover c4 k2"></div><div class="cover c3 k3"></div></div>' +
+    '<div class="sh"><span class="mk">3</span>New chapters <small>14</small><em>See all</em></div>' +
+    '<div class="srow">' + A.fresh.map(function (x) { return si(x); }).join("") + '<div class="seeall">See all<br>14</div></div>' +
+    '<div class="sh">Not started <small>211</small><em>See all</em></div>' +
+    '<div class="srow">' + A.notStarted.map(function (x) { return si(x); }).join("") + '<div class="seeall">See all<br>211</div></div>' +
+    '<div class="sh warn"><span class="ms"><i style="font-size:16px">warning</i></span>Needs a new source <small>2</small></div>' +
+    '<div class="srow">' + A.stale.map(function (x) { return si(x, '<div class="warnchip">Source unavailable</div>'); }).join("") + "</div>" +
+    '<div class="sticky"><div class="top"><span class="mk">4</span>All series <span class="count">951</span><span class="sortchip ms"><i>swap_vert</i>Last read</span></div>' +
+    '</div>' +
+    '<div class="cgrid">' +
+      '<div class="divider"><span class="mk" style="margin-right:6px">5</span><span>Today</span></div>' + A.today.map(gi).join("") +
+      div("This week") + A.week.map(gi).join("") +
+      div("This month") + A.month.map(gi).join("") +
+    "</div>" +
+    '<div class="fs"><span class="mk">6</span><span class="bubble">This month</span><span class="thumbbar"></span></div>' +
+    '<div class="nav">' + tabs.map(function (t, i) { return '<div class="' + (i === 0 ? "sel" : "") + '"><span class="pill ms"><i>' + t[0] + "</i></span>" + t[1] + "</div>"; }).join("") + "</div>" +
+    '<div class="frame"><span>First screen</span></div>';
+  document.getElementById("film").innerHTML = html;
+})();
+</script>
+</body></html>

@@ -1,0 +1,601 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>
+<title>Haruka Library Legibility</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=swap">
+<style>
+/* Layout: one long column of proposals; each pairs a live phone mock (left) with rationale + Kotlin (right). Dark-first, Abydos navy. */
+:root {
+  --bg: #0e1726;
+  --panel: #142035;
+  --panel-2: #1b2a41;
+  --line: #2b3d56;
+  --fg: #f2ebf4;
+  --muted: #a9b1c7;
+  --pink: #efa7c2;
+  --aqua: #8fd5e4;
+  --gold: #f2c86b;
+  --coral: #ff9473;
+  --code-bg: #0a1220;
+  --display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #faf4f8; --panel: #ffffff; --panel-2: #f3eaf2; --line: #e1d3e3;
+    --fg: #24334e; --muted: #5d6178; --pink: #a33769; --aqua: #087a92; --gold: #8a6100; --coral: #b23a12;
+    --code-bg: #f6eef5; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #faf4f8; --panel: #ffffff; --panel-2: #f3eaf2; --line: #e1d3e3;
+  --fg: #24334e; --muted: #5d6178; --pink: #a33769; --aqua: #087a92; --gold: #8a6100; --coral: #b23a12;
+  --code-bg: #f6eef5; color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 400 15px/1.65 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 72px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 900; text-wrap: balance; margin: 0; letter-spacing: .01em; }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.15; }
+h2 { font-size: clamp(22px, 3vw, 28px); line-height: 1.25; }
+h3 { font-size: 16px; }
+p { margin: 0; max-width: 64ch; }
+.eyebrow { font: 700 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--pink); }
+.lede { color: var(--muted); font-size: 16px; }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: start; }
+.hero-text { display: grid; gap: 18px; min-width: 0; }
+.halo { display: inline-block; width: 46px; height: 14px; border: 3px solid var(--gold); border-radius: 50%; margin-bottom: 4px; }
+
+.issues { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.issues li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 10px 14px; background: var(--panel); border-radius: 14px; }
+.pin { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--coral); color: #3a0d00; font: 700 12px/1 var(--display); }
+.ratio { font: 600 12px/1 var(--mono); padding: 5px 8px; border-radius: 999px; background: var(--panel-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ratio.bad { color: var(--coral); }
+.ratio.good { color: var(--aqua); }
+
+.proposal { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 36px; align-items: start; padding-top: 40px; border-top: 1px solid var(--line); }
+.p-text { display: grid; gap: 16px; min-width: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font: 700 11px/1 var(--display); letter-spacing: .06em; padding: 6px 10px; border-radius: 999px; border: 1.5px solid currentColor; }
+.tag.momo { color: var(--pink); } .tag.hoshino { color: var(--gold); } .tag.m3e { color: var(--aqua); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.fact { background: var(--panel); border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; }
+.fact b { font: 700 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.fact span { font-variant-numeric: tabular-nums; }
+pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; overflow-x: auto; font: 400 12.5px/1.6 var(--mono); }
+pre .c { color: var(--muted); font-style: italic; }
+pre .k { color: var(--pink); }
+.file { font: 600 12px/1.3 var(--mono); color: var(--aqua); word-break: break-all; }
+
+.mock { display: grid; gap: 10px; justify-items: center; }
+.cmp { font: 700 13px/1 var(--display); color: var(--fg); background: var(--panel-2); border: 1.5px solid var(--line); border-radius: 999px; padding: 9px 16px; cursor: pointer; }
+.cmp:hover { border-color: var(--pink); }
+.cmp:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.cmp[aria-pressed="true"] { background: var(--pink); color: var(--bg); border-color: var(--pink); }
+.cap { font-size: 12px; color: var(--muted); }
+
+.plan { display: grid; gap: 18px; padding: 28px; border-radius: 28px; background: var(--panel); }
+.plan ol { margin: 0; padding-left: 20px; display: grid; gap: 10px; max-width: 72ch; }
+.note { font-size: 13px; color: var(--muted); }
+
+/* ---- Phone mock: always the Hoshino dark scheme, independent of page theme ---- */
+.phone {
+  --h-bg: #111b2b; --h-on: #f2ebf4; --h-onv: #b0b6cd; --h-bar: #172438; --h-low: #142035; --h-lowest: #0b1627; --h-high: #1f2e44;
+  width: 300px; max-width: 100%; border-radius: 34px; padding: 10px; background: #05090f;
+  box-shadow: 0 0 0 1px #2b3d56, 0 24px 60px -24px rgba(0,0,0,.6);
+  font-family: "Zen Maru Gothic", system-ui, sans-serif;
+}
+.screen { background: var(--h-bg); color: var(--h-on); border-radius: 26px; overflow: hidden; }
+.appbar { display: flex; align-items: center; gap: 8px; padding: 16px 14px 8px; }
+.appbar b { font-size: 19px; font-weight: 700; }
+.appbar .count { font: 700 11px/1 "Zen Maru Gothic"; background: var(--h-high); padding: 5px 7px; border-radius: 999px; }
+.appbar .ms { margin-left: auto; display: flex; gap: 12px; color: var(--h-on); }
+.ms i { font-family: "Material Symbols Rounded"; font-style: normal; font-size: 20px; line-height: 1; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px 8px 10px; }
+.item { position: relative; padding: 3px; border-radius: 10px; }
+.cover { position: relative; aspect-ratio: 2 / 3; border-radius: 7px; overflow: hidden; }
+.cover .art { position: absolute; left: 6%; right: 6%; font-weight: 900; line-height: 1; letter-spacing: -.02em; }
+.scrim { position: absolute; left: 3px; right: 3px; bottom: 3px; border-radius: 0 0 7px 7px; pointer-events: none; }
+.title { position: absolute; left: 3px; right: 3px; bottom: 3px; padding: 5px 6px; font-size: 9.5px; line-height: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.badge { position: absolute; top: 6px; left: 6px; font-size: 9px; line-height: 1; font-weight: 500; }
+.nav { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--h-bar); padding: 8px 4px 12px; }
+.nav div { display: grid; justify-items: center; gap: 3px; font-size: 9.5px; color: var(--h-onv); }
+.nav .pill { width: 44px; height: 26px; border-radius: 999px; display: grid; place-items: center; }
+.nav .sel .pill i { font-variation-settings: "FILL" 1; }
+
+/* Title treatments */
+.t-now .scrim { height: 33%; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.667)); }
+.t-now .title { color: #fff; text-shadow: 0 0 2px #000; font-weight: 700; }
+.t-plate .scrim { height: 52%; background: linear-gradient(rgba(11,22,39,0) 0%, rgba(11,22,39,.55) 32%, rgba(11,22,39,.86) 58%, rgba(11,22,39,.94) 100%); }
+.t-plate .title { color: var(--h-on); font-weight: 500; }
+.t-bubble .scrim { display: none; }
+.t-bubble .title { left: 6px; right: 6px; bottom: 6px; background: rgba(31,46,68,.93); color: var(--h-on); border-radius: 9px 9px 9px 3px; padding: 4px 6px; font-weight: 500; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.t-card .item { background: var(--h-low); border-radius: 12px; padding: 4px; }
+.t-card .scrim { display: none; }
+.t-card .title { position: static; color: var(--h-on); font-weight: 500; padding: 5px 3px 2px; min-height: 31px; }
+
+/* Badge treatments */
+.b-now .badge { background: #f4b8cf; color: #4a1530; padding: 2px 4px; border-radius: 5px; }
+.b-momo .badge { background: #ff9473; color: #5c1300; font-weight: 700; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; display: grid; place-items: center; box-shadow: 0 0 0 1.5px #111b2b; top: 7px; left: 7px; font-size: 9.5px; }
+
+/* Nav treatments */
+.n-now .sel .pill { background: #6b3550; color: #ffd8e7; }
+.n-now .sel { color: var(--h-on); }
+.n-bold .sel .pill { background: #efa7c2; color: #4a1530; }
+.n-bold .sel { color: #efa7c2; font-weight: 700; }
+
+/* Covers: synthetic stress cases, each with in-art lettering where the title lands */
+.c1 { background: radial-gradient(60% 45% at 30% 35%, #ffffff 0 40%, transparent 41%), radial-gradient(50% 40% at 75% 45%, #e9e6ee 0 50%, transparent 51%), linear-gradient(165deg, #f7f6f9, #d8d4de 55%, #f0eef3); }
+.c1 .art { bottom: 18%; color: #b3262b; font-size: 17px; transform: rotate(-4deg); font-family: "Zen Maru Gothic", serif; }
+.c2 { background: radial-gradient(40% 30% at 40% 30%, #ffeef4 0 60%, transparent 61%), linear-gradient(180deg, #ffd9e6, #f4b2cb 70%, #f8c9da); }
+.c2 .art { top: 12%; color: #c2185b; font-size: 16px; }
+.c3 { background: radial-gradient(8% 6% at 20% 70%, #ffd76a 0 70%, transparent 71%), radial-gradient(7% 5% at 70% 62%, #ff9fbf 0 70%, transparent 71%), radial-gradient(9% 7% at 50% 80%, #fff1a8 0 70%, transparent 71%), linear-gradient(180deg, #2a1f4a, #6a3d7a 55%, #e0a93b); }
+.c3 .art { top: 7%; color: #fff; font-size: 14px; }
+.c4 { background: radial-gradient(45% 35% at 50% 45%, #ffffff 0 60%, transparent 61%), linear-gradient(170deg, #ffffff, #bfe3ff 60%, #e9f5ff); }
+.c4 .art { bottom: 22%; color: #1d5fbf; font-size: 19px; font-family: system-ui, sans-serif; font-style: italic; }
+.c5 { background: radial-gradient(40% 30% at 45% 40%, #fffaf0 0 60%, transparent 61%), linear-gradient(180deg, #fff6d2, #f7d24a 75%, #ffe58a); }
+.c5 .art { bottom: 26%; color: #e0457b; font-size: 22px; }
+.c6 { background: radial-gradient(40% 32% at 55% 40%, #ead9ff 0 55%, transparent 56%), linear-gradient(180deg, #3d2a63, #8a6bc0 60%, #c9b3ea); }
+.c6 .art { top: 8%; color: #fff; font-size: 20px; }
+
+/* ---- Radical concepts ---- */
+.radical { display: grid; gap: 28px; padding-top: 40px; border-top: 1px solid var(--line); }
+.r-head { display: grid; gap: 12px; }
+.r-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 32px 24px; }
+.concept { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.concept .phone { justify-self: center; }
+.concept ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+.concept ul b { color: var(--fg); }
+.pick { font: 700 11px/1 var(--display); letter-spacing: .06em; color: var(--bg); background: var(--gold); border-radius: 999px; padding: 6px 10px; justify-self: start; }
+
+.phone.tall .screen { height: 600px; display: flex; flex-direction: column; position: relative; }
+.tall .body { flex: 1; min-height: 0; overflow: hidden; }
+.seg { display: flex; gap: 2px; padding: 2px 12px 8px; }
+.seg span { flex: 1; text-align: center; font-size: 10px; font-weight: 700; padding: 7px 4px; background: var(--h-high); color: var(--h-onv); border-radius: 6px; }
+.seg span:first-child { border-radius: 999px 6px 6px 999px; }
+.seg span:last-child { border-radius: 6px 999px 999px 6px; }
+.seg .on { background: #efa7c2; color: #4a1530; }
+.row { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 12px; }
+.thumb { width: 46px; height: 46px; border-radius: 15px; overflow: hidden; position: relative; }
+.thumb .art, .si .art, .carousel .art { display: none; }
+.rt { font-size: 11px; line-height: 14px; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rs { font-size: 9.5px; line-height: 12px; color: var(--h-onv); margin-top: 2px; }
+.row.unread .rs { color: #efa7c2; font-weight: 500; }
+.row.read .rt { font-weight: 500; }
+.rm { display: grid; justify-items: end; gap: 4px; font-size: 9px; color: var(--h-onv); white-space: nowrap; }
+.dot { background: #ff9473; color: #5c1300; font-weight: 700; font-size: 9px; line-height: 1; min-width: 16px; height: 16px; border-radius: 999px; display: grid; place-items: center; padding: 0 4px; }
+.sh { display: flex; align-items: baseline; gap: 6px; padding: 10px 12px 6px; font-size: 12px; font-weight: 700; }
+.sh small { color: var(--h-onv); font-weight: 500; font-size: 10px; }
+.sh em { margin-left: auto; color: #8fd5e4; font-size: 10px; font-style: normal; }
+.carousel { display: flex; gap: 6px; padding: 0 12px; height: 188px; }
+.carousel .cover { aspect-ratio: auto; height: 100%; border-radius: 22px; flex: 0 0 auto; }
+.carousel .k1 { width: 62%; } .carousel .k2 { width: 26%; } .carousel .k3 { width: 8%; }
+.bub { position: absolute; left: 8px; right: 8px; bottom: 8px; background: rgba(31,46,68,.94); border-radius: 12px 12px 12px 4px; padding: 6px 8px; display: grid; gap: 2px; }
+.bub b { font-size: 10.5px; line-height: 13px; }
+.bub span { font-size: 9px; color: #efa7c2; }
+.srow { display: flex; gap: 8px; padding: 0 12px; overflow: hidden; }
+.srow .si { flex: 0 0 29%; }
+.si { position: relative; min-width: 0; }
+.si .cover { border-radius: 12px; }
+.si .st { font-size: 9.5px; line-height: 12.5px; margin-top: 4px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.si .dot { position: absolute; top: 5px; left: 5px; box-shadow: 0 0 0 1.5px #111b2b; }
+.big { padding: 22px 14px 2px; }
+.big b { font-size: 26px; font-weight: 900; display: block; line-height: 1.1; }
+.big span { color: var(--h-onv); font-size: 11px; }
+.chips { display: flex; gap: 6px; padding: 10px 12px; overflow: hidden; }
+.chips span { border: 1px solid #34465d; border-radius: 10px; padding: 5px 10px; font-size: 10px; white-space: nowrap; }
+.chips .on { background: #1f5562; color: #c9f1fa; border-color: #1f5562; font-weight: 700; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 10px; padding: 2px 12px; }
+.ftb { position: absolute; left: 12px; right: 12px; bottom: 62px; display: flex; gap: 6px; align-items: center; }
+.ftb .sf { flex: 1; min-width: 0; background: #26384f; border-radius: 999px; padding: 0 14px; height: 40px; font-size: 10.5px; color: var(--h-onv); display: flex; gap: 8px; align-items: center; box-shadow: 0 6px 18px rgba(0,0,0,.5); white-space: nowrap; overflow: hidden; }
+.ftb .ib, .ftb .fab { width: 40px; height: 40px; display: grid; place-items: center; box-shadow: 0 6px 18px rgba(0,0,0,.5); flex: 0 0 auto; }
+.ftb .ib { border-radius: 999px; background: #26384f; }
+.ftb .fab { border-radius: 14px; background: #efa7c2; color: #4a1530; }
+.nav.short { padding: 5px 4px 7px; }
+
+@media (max-width: 760px) {
+  .hero, .proposal { grid-template-columns: minmax(0, 1fr); }
+  .mock { justify-self: center; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .scrim, .title, .badge, .nav .pill { transition: background .2s ease, color .2s ease; }
+}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-text">
+      <span class="halo" aria-hidden="true"></span>
+      <span class="eyebrow">Haruka · Hoshino theme · Library tab</span>
+      <h1>Library legibility pass</h1>
+      <p class="lede">Five changes to the library grid and bottom bar, drawn from MomoTalk's bubbles and unread dots, Hoshino's navy and pink, and Material 3 Expressive's bolder containers. Each one targets a specific spot in your screenshot. Contrast ratios are WCAG values computed from the actual <code>HoshinoColorScheme</code> colours.</p>
+      <ul class="issues">
+        <li><span class="pin">1</span><span><b>Titles on pale or busy covers.</b> The scrim covers only the bottom 33% at 67% black, so the first title line sits on a ~22% scrim. White text on a white cover there is unreadable, and lettering in the art (“Just Want”, “Kon'yaku”) shows through.</span><span class="ratio bad">1.9 : 1</span></li>
+        <li><span class="pin">2</span><span><b>Unread badge vanishes on pink covers.</b> The <code>secondary</code> pink badge on a pink cover (7th Time Loop, Agents of the Four Seasons) has almost no edge.</span><span class="ratio bad">1.1 : 1</span></li>
+        <li><span class="pin">3</span><span><b>Selected tab pill is faint.</b> <code>secondaryContainer</code> #6B3550 on the #172438 bar. The selected state relies on the icon fill and label colour.</span><span class="ratio bad">1.7 : 1</span></li>
+        <li><span class="pin">4</span><span><b>Thin text at 12 sp.</b> Rounded Zen Maru Gothic at Regular weight, with a 4 px blur shadow, smears on dense art.</span><span class="ratio">type</span></li>
+      </ul>
+    </div>
+    <div class="mock">
+      <div class="phone" data-t="now" data-b="now" data-n="now"></div>
+      <span class="cap">Current. Synthetic stress covers, scaled ~0.75×.</span>
+    </div>
+  </header>
+
+  <section class="proposal" id="plate">
+    <div class="mock">
+      <div class="phone" data-t="plate" data-b="now" data-n="now"></div>
+      <button class="cmp" type="button" id="cmp-plate">Compare with current</button>
+    </div>
+    <div class="p-text">
+      <span class="eyebrow">A · smallest diff</span>
+      <h2>Abydos navy title plate</h2>
+      <div class="tags"><span class="tag hoshino">Hoshino</span><span class="tag m3e">M3E</span></div>
+      <p>Keep the overlay layout, but make the scrim taller (52%) and ease it into the theme's <code>surfaceContainerLowest</code> navy instead of black. The text becomes <code>onSurface</code> at Medium weight with no shadow. The plate reads as part of the app rather than a dark smudge, and the first line now lands on a ~70% scrim.</p>
+      <div class="facts">
+        <div class="fact"><b>Worst-case title</b><span>1.9 → 6.2 : 1</span></div>
+        <div class="fact"><b>Cover visible</b><span>~50% of art behind the scrim</span></div>
+        <div class="fact"><b>Patch surface</b><span>1 FORK hook in CommonMangaItem.kt</span></div>
+      </div>
+      <span class="file">app/src/main/java/haruka/library/HoshinoCoverTitle.kt (new)</span>
+<pre><span class="c">// Called from a FORK block in CoverTextOverlay when the Hoshino theme is active.</span>
+@Composable
+internal fun BoxScope.HoshinoTitleScrim() {
+    <span class="k">val</span> navy = MaterialTheme.colorScheme.surfaceContainerLowest
+    Box(
+        Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .fillMaxHeight(0.52f)
+            .background(
+                Brush.verticalGradient(
+                    0f to Color.Transparent,
+                    0.32f to navy.copy(alpha = 0.55f),
+                    0.58f to navy.copy(alpha = 0.86f),
+                    1f to navy.copy(alpha = 0.94f),
+                ),
+            ),
+    )
+}
+<span class="c">// Title style: titleSmall.copy(color = onSurface, fontWeight = FontWeight.Medium), no Shadow.</span></pre>
+    </div>
+  </section>
+
+  <section class="proposal" id="bubble">
+    <div class="mock">
+      <div class="phone" data-t="bubble" data-b="now" data-n="now"></div>
+      <button class="cmp" type="button" id="cmp-bubble">Compare with current</button>
+    </div>
+    <div class="p-text">
+      <span class="eyebrow">B · most on-brand</span>
+      <h2>MomoTalk title bubble</h2>
+      <div class="tags"><span class="tag momo">MomoTalk</span><span class="tag m3e">M3E</span></div>
+      <p>The title sits in a solid message bubble at the foot of the cover, with MomoTalk's tucked lower-left corner. Contrast no longer depends on the cover, and the look matches your Updates conversation screen, which already uses chat bubbles. The cost is that the bubble covers part of the cover art outright.</p>
+      <div class="facts">
+        <div class="fact"><b>Title contrast</b><span>11.7 : 1 on any cover</span></div>
+        <div class="fact"><b>Shape</b><span>12 dp, 4 dp tail corner</span></div>
+        <div class="fact"><b>Patch surface</b><span>Same hook as A</span></div>
+      </div>
+      <span class="file">app/src/main/java/haruka/library/HoshinoCoverTitle.kt</span>
+<pre><span class="c">// Bubble corner: the lower-left is tucked like a MomoTalk message tail.</span>
+<span class="k">private val</span> TitleBubbleShape = RoundedCornerShape(12.dp, 12.dp, 12.dp, 4.dp)
+
+@Composable
+internal fun BoxScope.HoshinoTitleBubble(title: String) {
+    Surface(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .padding(6.dp),
+        shape = TitleBubbleShape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.93f),
+        shadowElevation = 2.dp,
+    ) {
+        Text(
+            text = haruka.title.rememberDisplayTitle(title),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}</pre>
+    </div>
+  </section>
+
+  <section class="proposal" id="card">
+    <div class="mock">
+      <div class="phone" data-t="card" data-b="now" data-n="now"></div>
+      <button class="cmp" type="button" id="cmp-card">Compare with current</button>
+    </div>
+    <div class="p-text">
+      <span class="eyebrow">C · try today, no code</span>
+      <h2>Expressive card grid</h2>
+      <div class="tags"><span class="tag m3e">M3E</span><span class="tag hoshino">Hoshino</span></div>
+      <p>The title moves below the cover, so the art is never covered. Mihon already ships this as <b>Comfortable grid</b> under Library › Display. Switch to it first to see whether the cards are too tall for you. If you like it, the Hoshino version adds a <code>surfaceContainerLow</code> card behind each item with the 12 dp <code>shapes.small</code> radius, so the cover and title read as one object.</p>
+      <div class="facts">
+        <div class="fact"><b>Title contrast</b><span>~13 : 1</span></div>
+        <div class="fact"><b>Trade-off</b><span>~20% fewer covers per screen</span></div>
+        <div class="fact"><b>Patch surface</b><span>0 for the trial · 1 hook for the card</span></div>
+      </div>
+      <span class="file">CommonMangaItem.kt · GridItemSelectable (FORK hook)</span>
+<pre><span class="c">// FORK --></span>
+.then(haruka.library.hoshinoCardBackground(isSelected))
+<span class="c">// FORK &lt;--</span>
+
+<span class="c">// haruka/library: no-op unless the Hoshino theme is active, so other themes stay as upstream draws them.</span>
+@Composable
+internal fun hoshinoCardBackground(isSelected: Boolean): Modifier =
+    <span class="k">if</span> (!isSelected &amp;&amp; isHoshino()) Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)
+    <span class="k">else</span> Modifier</pre>
+      <p class="note"><code>isHoshino()</code> doesn't exist yet. The cleanest source is a CompositionLocal that <code>HarukaExpressiveTheme</code> provides next to <code>LocalAnimationProfile</code>, and A, B and D would all read it.</p>
+    </div>
+  </section>
+
+  <section class="proposal" id="badge">
+    <div class="mock">
+      <div class="phone" data-t="now" data-b="momo" data-n="now"></div>
+      <button class="cmp" type="button" id="cmp-badge">Compare with current</button>
+    </div>
+    <div class="p-text">
+      <span class="eyebrow">D · pairs with any title option</span>
+      <h2>MomoTalk unread dot</h2>
+      <div class="tags"><span class="tag momo">MomoTalk</span></div>
+      <p>Use the same coral, bold, round badge that <code>UpdatesConversation.UnreadBadge</code> already draws, and add a 1.5 dp navy ring so it separates from any cover. Coral against pink alone is only 1.4 : 1, so the ring does the real work. Downloaded and language badges keep the aqua <code>tertiary</code> rectangles, so unread is the only round item on the cover.</p>
+      <div class="facts">
+        <div class="fact"><b>Edge vs pink cover</b><span>1.1 → 11.3 : 1</span></div>
+        <div class="fact"><b>Number</b><span>6.3 : 1, Bold</span></div>
+        <div class="fact"><b>Patch surface</b><span>1 hook in LibraryBadges.kt</span></div>
+      </div>
+      <span class="file">app/src/main/java/eu/kanade/presentation/library/components/LibraryBadges.kt</span>
+<pre>@Composable
+internal fun UnreadBadge(count: Long) {
+    <span class="k">if</span> (count > 0) {
+        <span class="c">// FORK --></span>
+        <span class="k">if</span> (haruka.library.HoshinoUnreadDot(count)) <span class="k">return</span>
+        <span class="c">// FORK &lt;--</span>
+        Badge(text = "$count")
+    }
+}
+
+<span class="c">// haruka/library: returns false (draws nothing) outside the Hoshino theme.</span>
+<span class="c">// Note: BadgeGroup clips to shapes.extraSmall (8 dp). Draw the ring inside the</span>
+<span class="c">// badge's bounds (border, not an outer shadow), or the clip will cut it.</span>
+Box(
+    Modifier
+        .heightIn(min = 18.dp).widthIn(min = 18.dp)
+        .clip(CircleShape)
+        .background(MaterialTheme.colorScheme.surface)   <span class="c">// the ring</span>
+        .padding(1.5.dp)
+        .clip(CircleShape)
+        .background(MaterialTheme.colorScheme.error)     <span class="c">// coral</span>
+        .padding(horizontal = 4.dp),
+    contentAlignment = Alignment.Center,
+) { Text("$count", style = labelSmall, fontWeight = FontWeight.Bold, color = onError) }</pre>
+    </div>
+  </section>
+
+  <section class="proposal" id="nav">
+    <div class="mock">
+      <div class="phone" data-t="now" data-b="now" data-n="bold"></div>
+      <button class="cmp" type="button" id="cmp-nav">Compare with current</button>
+    </div>
+    <div class="p-text">
+      <span class="eyebrow">E · bottom bar</span>
+      <h2>Filled pink tab indicator</h2>
+      <div class="tags"><span class="tag m3e">M3E</span><span class="tag hoshino">Hoshino</span></div>
+      <p>M3 Expressive favours a high-emphasis active indicator. Fill the pill with <code>primary</code> pink, draw the icon in <code>onPrimary</code> navy, and colour the selected label pink in Bold. Only the nav item colours change, not <code>secondaryContainer</code> itself, so chips and other containers keep their current look.</p>
+      <div class="facts">
+        <div class="fact"><b>Pill vs bar</b><span>1.7 → 8.2 : 1</span></div>
+        <div class="fact"><b>Icon on pill</b><span>7.6 : 1</span></div>
+        <div class="fact"><b>Patch surface</b><span>1 hook in HomeScreen.kt</span></div>
+      </div>
+      <span class="file">app/src/main/java/eu/kanade/tachiyomi/ui/home/HomeScreen.kt · NavigationSuiteItem(…)</span>
+<pre>NavigationSuiteItem(
+    navigationSuiteType = navigationSuiteType,
+    selected = selected,
+    <span class="c">// FORK --></span>
+    colors = haruka.theme.hoshinoNavItemColors(navigationSuiteType),
+    <span class="c">// FORK &lt;--</span>
+    …
+)
+
+<span class="c">// haruka/theme: null outside Hoshino, which keeps the upstream defaults.</span>
+NavigationBarItemDefaults.colors(
+    indicatorColor = MaterialTheme.colorScheme.primary,
+    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+    selectedTextColor = MaterialTheme.colorScheme.primary,
+)</pre>
+      <p class="note">Before writing this, check the <code>colors</code> parameter name and type on the adaptive <code>NavigationSuiteItem</code> overload for the material3-adaptive version pinned in <code>libs.versions.toml</code>. It has changed between releases, and I haven't checked it against your version.</p>
+    </div>
+  </section>
+
+  <section class="plan" id="recommend">
+    <div class="proposal" style="border-top:0; padding-top:0;">
+      <div class="mock">
+        <div class="phone" data-t="plate" data-b="momo" data-n="bold"></div>
+        <button class="cmp" type="button" id="cmp-combo">Compare with current</button>
+      </div>
+      <div class="p-text">
+        <span class="eyebrow">Recommendation</span>
+        <h2>A + D + E, with B as an option</h2>
+        <ol>
+          <li><b>Try C now</b> (Comfortable grid in Display settings). If you prefer titles below covers, the overlay changes matter much less.</li>
+          <li><b>Ship A, D and E as Hoshino-only.</b> They fix all four problems with three thin FORK hooks. Other themes and the STANDARD look stay exactly as upstream, which keeps <code>patch-surface.sh</code> small.</li>
+          <li><b>Add B as a choice</b> (plate or bubble) once A is in. It's the most MomoTalk option, but it covers more art, so it's better as a preference than a default. The preference label needs a string in <code>i18n-fork</code>.</li>
+          <li>Add one shared <code>LocalHoshinoAccents</code>-style flag in <code>HarukaExpressiveTheme</code> rather than checking <code>AppTheme</code> in each hook.</li>
+        </ol>
+        <p class="note">The mockups use synthetic covers chosen as worst cases (white, pink, yellow, and lettering where the title lands), not your library. Ratios assume the dark Hoshino scheme. The light scheme needs its own pass for A and D.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="radical" id="radical">
+    <div class="r-head">
+      <span class="eyebrow">Going further</span>
+      <h2>Three radical layouts</h2>
+      <p class="lede">A–E tidy up a wall of 951 covers. These three change what the Library tab is for. The cover sits next to the title or above it, never behind it, so the legibility problem doesn't arise. Each one is built from Material 3 Expressive components that are already in your <code>material3 1.5.0-beta</code> dependency, and each uses only fields <code>LibraryManga</code> already carries (<code>unreadCount</code>, <code>latestUpload</code>, <code>lastRead</code>, <code>hasStarted</code>).</p>
+    </div>
+    <div class="r-grid">
+      <article class="concept">
+        <div class="phone tall n-bold" data-r="inbox"></div>
+        <span class="eyebrow">R1 · MomoTalk</span>
+        <h3>Inbox</h3>
+        <div class="tags"><span class="tag momo">MomoTalk</span><span class="tag m3e">M3E button group</span></div>
+        <p>Each series is a conversation: a rounded cover as the avatar, the full title over two lines, and a line saying what changed (“3 new chapters”). Rows are sorted by newest chapter, with a coral unread count on the right. All / Unread / Reading sit in a connected button group.</p>
+        <ul>
+          <li><b>Gains:</b> the title gets the whole row width. The tab answers “what's new” at a glance, as MomoTalk does.</li>
+          <li><b>Loses:</b> cover browsing. Covers become 46 dp avatars.</li>
+          <li><b>Data gap:</b> the latest chapter's <i>name</i> isn't in <code>LibraryManga</code>. Counts and times work as-is. Chapter names would need an extra query.</li>
+        </ul>
+      </article>
+      <article class="concept">
+        <div class="phone tall n-bold" data-r="shelves"></div>
+        <span class="pick">Recommended</span>
+        <span class="eyebrow">R2 · Hoshino</span>
+        <h3>Abydos shelves</h3>
+        <div class="tags"><span class="tag hoshino">Hoshino</span><span class="tag m3e">M3E carousel</span></div>
+        <p>The Library becomes a home screen. At the top is a Continue reading carousel (<code>HorizontalMultiBrowseCarousel</code>, the large-medium-small strip), with a MomoTalk bubble on the hero cover. Below are shelves by reading state: New chapters, Reading, Not started. Titles sit under each cover. “See all” opens today's grid, filtered to that shelf.</p>
+        <ul>
+          <li><b>Gains:</b> “what do I read next” fits on one screen, and the 951-cover wall is now one tap away instead of the first thing you see.</li>
+          <li><b>Loses:</b> categories lose their tabs. They could become extra shelves, or stay in “See all”.</li>
+          <li><b>Cost:</b> the most new UI of the three, with nested lazy rows. Run <code>scripts/haruka/perf/run.sh</code> before and after.</li>
+        </ul>
+      </article>
+      <article class="concept">
+        <div class="phone tall n-bold" data-r="thumb"></div>
+        <span class="eyebrow">R3 · M3E</span>
+        <h3>Thumb-first</h3>
+        <div class="tags"><span class="tag m3e">M3E floating toolbar</span><span class="tag m3e">Short nav bar</span></div>
+        <p>The top app bar goes. “Library 951” becomes a large header that scrolls away, and category chips replace the tabs. Search, filter and sort move to a <code>HorizontalFloatingToolbar</code> above a <code>ShortNavigationBar</code>. The grid becomes two columns with titles below and MomoTalk dots.</p>
+        <ul>
+          <li><b>Gains:</b> covers about 50% wider, titles that never overlap art, and every control within thumb reach on a tall phone.</li>
+          <li><b>Loses:</b> density, about 4–6 covers per screen instead of 9. The toolbar has to hide on scroll.</li>
+          <li><b>Combines</b> with R1 or R2. It only changes the controls around the content, not the content itself.</li>
+        </ul>
+      </article>
+    </div>
+    <div class="plan">
+      <h3>How a radical layout lands in the fork</h3>
+      <ol>
+        <li>Add a fork preference, <code>libraryLayout</code> (Grid / Shelves / Inbox), in <code>harukaPreferences</code>. Grid is the default and leaves upstream untouched, so the STANDARD path stays identical.</li>
+        <li>Add one FORK hook where <code>LibraryContent</code> picks the pager. It hands the already filtered and sorted items to <code>haruka.library.ShelvesLayout</code> or <code>InboxLayout</code>. No new SQL, no migrations, and backups are unaffected (hard rules 2 and 3).</li>
+        <li>Shelves are plain filters over <code>LibraryManga</code>: <code>unreadCount &gt; 0</code> sorted by <code>latestUpload</code>, <code>hasStarted</code> sorted by <code>lastRead</code>, and the rest. Shelf names and the preference labels go in <code>i18n-fork</code>.</li>
+        <li>Ship A + D + E first. Those changes make the grid behind “See all” readable too, so the work isn't wasted if you go radical later.</li>
+      </ol>
+      <p class="note">Not yet checked: I haven't read <code>LibraryContent</code>'s parameters closely enough to name the exact hook point, or tried these components in your build. The component names are confirmed in your build's compose mapping. Their exact signatures aren't.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var items = [
+    { c: "c2", art: "ループ7回目", t: "7th Time Loop - The Villainess Enjoys a Carefree Life", n: "1" },
+    { c: "c3", art: "晴れ晴れ日和", t: "A Fine and Bright Day", n: "1" },
+    { c: "c1", art: "Just Want", t: "Honto wa Issho ni, Itai dake", n: "1" },
+    { c: "c4", art: "EXCEED", t: "Exceed", n: "1" },
+    { c: "c5", art: "ざこ卒業", t: "Shiro Onihime no Zako Sotsugyou", n: "12" },
+    { c: "c6", art: "恋", t: "I May Be a Guild Receptionist, but I'll Solo Any Boss", n: "3" }
+  ];
+  var tabs = [["collections_bookmark", "Library"], ["new_releases", "Updates"], ["history", "History"], ["explore", "Browse"], ["more_horiz", "More"]];
+
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+
+  function render(phone, t, b, n) {
+    phone.className = "phone t-" + t + " b-" + b + " n-" + n;
+  }
+
+  document.querySelectorAll(".phone[data-t]").forEach(function (phone) {
+    var grid = items.map(function (it) {
+      return '<div class="item"><div class="cover ' + it.c + '"><span class="art">' + esc(it.art) +
+        '</span></div><div class="scrim"></div><span class="badge">' + it.n +
+        '</span><div class="title">' + esc(it.t) + "</div></div>";
+    }).join("");
+    var nav = tabs.map(function (tb, i) {
+      return '<div class="' + (i === 0 ? "sel" : "") + '"><span class="pill ms"><i>' + tb[0] + "</i></span>" + tb[1] + "</div>";
+    }).join("");
+    phone.innerHTML = '<div class="screen"><div class="appbar"><b>Library</b><span class="count">951</span>' +
+      '<span class="ms"><i>search</i><i>filter_list</i><i>more_vert</i></span></div>' +
+      '<div class="grid">' + grid + '</div><div class="nav">' + nav + "</div></div>";
+    render(phone, phone.dataset.t, phone.dataset.b, phone.dataset.n);
+  });
+
+  document.querySelectorAll(".cmp").forEach(function (btn) {
+    btn.setAttribute("aria-pressed", "false");
+    btn.addEventListener("click", function () {
+      var phone = btn.parentElement.querySelector(".phone");
+      var on = btn.getAttribute("aria-pressed") !== "true";
+      btn.setAttribute("aria-pressed", String(on));
+      btn.textContent = on ? "Showing current" : "Compare with current";
+      if (on) render(phone, "now", "now", "now");
+      else render(phone, phone.dataset.t, phone.dataset.b, phone.dataset.n);
+    });
+  });
+
+  // Radical concepts
+  var lib = [
+    { c: "c2", t: "7th Time Loop - The Villainess Enjoys a Carefree Life", n: 3, sub: "3 new chapters", time: "2h" },
+    { c: "c5", t: "Shiro Onihime no Zako Sotsugyou", n: 12, sub: "12 new chapters", time: "5h" },
+    { c: "c3", t: "A Fine and Bright Day", n: 1, sub: "1 new chapter", time: "Yesterday" },
+    { c: "c1", t: "Honto wa Issho ni, Itai dake", n: 1, sub: "1 new chapter", time: "Mon" },
+    { c: "c6", t: "I May Be a Guild Receptionist, but I'll Solo Any Boss", n: 0, sub: "Caught up · 42 read", time: "Sun" },
+    { c: "c4", t: "Exceed", n: 0, sub: "Caught up · 9 read", time: "Oct 12" },
+    { c: "c2", t: "Agents of the Four Seasons: Dance of Spring", n: 0, sub: "Started · 4 of 16 read", time: "Oct 9" },
+    { c: "c3", t: "Kon'yaku Haki o Neratte Kioku Soushitsu", n: 0, sub: "Not started", time: "Oct 2" }
+  ];
+  function cov(it, extra) { return '<div class="cover ' + it.c + (extra ? " " + extra : "") + '"><span class="art"></span></div>'; }
+  function nav(short) {
+    return '<div class="nav' + (short ? " short" : "") + '">' + tabs.map(function (tb, i) {
+      return '<div class="' + (i === 0 ? "sel" : "") + '"><span class="pill ms"><i>' + tb[0] + "</i></span>" + tb[1] + "</div>";
+    }).join("") + "</div>";
+  }
+  function shelfItem(it) {
+    return '<div class="si">' + cov(it) + (it.n ? '<span class="dot">' + it.n + "</span>" : "") +
+      '<div class="st">' + esc(it.t) + "</div></div>";
+  }
+  var builders = {
+    inbox: function () {
+      var rows = lib.map(function (it) {
+        return '<div class="row ' + (it.n ? "unread" : "read") + '"><div class="thumb ' + it.c + '"></div>' +
+          '<div style="min-width:0"><div class="rt">' + esc(it.t) + '</div><div class="rs">' + esc(it.sub) + "</div></div>" +
+          '<div class="rm">' + it.time + (it.n ? '<span class="dot">' + it.n + "</span>" : "") + "</div></div>";
+      }).join("");
+      return '<div class="appbar"><b>Library</b><span class="count">951</span><span class="ms"><i>search</i><i>more_vert</i></span></div>' +
+        '<div class="seg"><span class="on">All</span><span>Unread 38</span><span>Reading 12</span></div>' +
+        '<div class="body">' + rows + "</div>" + nav(false);
+    },
+    shelves: function () {
+      return '<div class="appbar"><b>Library</b><span class="count">951</span><span class="ms"><i>search</i><i>more_vert</i></span></div>' +
+        '<div class="body"><div class="sh">Continue reading</div>' +
+        '<div class="carousel"><div class="cover c6 k1"><div class="bub"><b>I May Be a Guild Receptionist…</b><span>Ch. 43 · page 12 of 30</span></div></div>' +
+        '<div class="cover c4 k2"></div><div class="cover c3 k3"></div></div>' +
+        '<div class="sh">New chapters <small>38</small><em>See all</em></div>' +
+        '<div class="srow">' + lib.slice(0, 4).map(shelfItem).join("") + "</div>" +
+        '<div class="sh">Reading <small>12</small><em>See all</em></div>' +
+        '<div class="srow">' + lib.slice(4, 8).map(shelfItem).join("") + "</div></div>" + nav(false);
+    },
+    thumb: function () {
+      return '<div class="body"><div class="big"><b>Library</b><span>951 series · 38 with new chapters</span></div>' +
+        '<div class="chips"><span class="on">All</span><span>Romance</span><span>Isekai</span><span>Completed</span></div>' +
+        '<div class="g2">' + lib.slice(0, 4).map(shelfItem).join("") + "</div></div>" +
+        '<div class="ftb"><div class="sf ms"><i>search</i>Search 951 series</div><div class="ib ms"><i>filter_list</i></div><div class="fab ms"><i>shuffle</i></div></div>' +
+        nav(true);
+    }
+  };
+  document.querySelectorAll(".phone[data-r]").forEach(function (phone) {
+    phone.innerHTML = '<div class="screen">' + builders[phone.dataset.r]() + "</div>";
+  });
+})();
+</script>
+</body></html>
