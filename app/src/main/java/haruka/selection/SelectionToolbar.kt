@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -72,12 +74,15 @@ fun SelectionToolbar(
         HorizontalFloatingToolbar(
             expanded = true,
             colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+            // The Scaffold's FAB slot passes loose height constraints; pin the M3E toolbar height.
+            modifier = Modifier.height(64.dp),
         ) {
             val countDescription = pluralStringResource(HR.plurals.selection_count, shownCount, shownCount)
             Text(
                 text = shownCount.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
+                    .align(Alignment.CenterVertically)
                     .padding(horizontal = 12.dp)
                     .clearAndSetSemantics {
                         contentDescription = countDescription
