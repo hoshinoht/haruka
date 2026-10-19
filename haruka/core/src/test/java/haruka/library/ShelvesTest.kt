@@ -2,8 +2,6 @@ package haruka.library
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
@@ -19,6 +17,7 @@ class ShelvesTest {
         lastRead: Long? = null,
         chapterFetchedAt: Long? = null,
         favoriteAt: Long? = null,
+        sourceUnavailable: Boolean = false,
     ) = ShelfInput(
         id = id,
         title = "Title $id",
@@ -30,27 +29,42 @@ class ShelvesTest {
         unreadCount = unreadCount,
         totalChapters = unreadCount,
         hasStarted = hasStarted,
+        sourceUnavailable = sourceUnavailable,
     )
 
     // Started and caught up: qualifies for no shelf, only pads the library past the minimum.
     private fun filler(count: Int, from: Long = 1000) = (0 until count).map { entry(from + it) }
 
+    private fun List<Shelf>.of(kind: ShelfKind) = firstOrNull { it.kind == kind }
+    private fun List<Shelf>.ids(kind: ShelfKind) = of(kind)?.ids.orEmpty()
+
     @Test
     fun `hidden below 20 series`() {
         val library = listOf(entry(1, hasStarted = false)) + filler(18)
-        buildShelves(library, now).shouldBeNull()
-        buildShelves(library + filler(1, from = 5000), now).shouldNotBeNull()
+        buildShelves(library, now).shouldBeEmpty()
+        buildShelves(library + filler(1, from = 5000), now).map { it.kind } shouldContainExactly
+            listOf(ShelfKind.NotStarted)
     }
 
     @Test
     fun `the minimum counts distinct series, not category rows`() {
         val library = listOf(entry(1, hasStarted = false)) + filler(18)
-        buildShelves(library + library, now).shouldBeNull()
+        buildShelves(library + library, now).shouldBeEmpty()
     }
 
     @Test
     fun `hidden when every shelf is empty`() {
-        buildShelves(filler(40), now).shouldBeNull()
+        buildShelves(filler(40), now).shouldBeEmpty()
+    }
+
+    @Test
+    fun `shelves run in a fixed order and empty ones are left out`() {
+        val library = listOf(
+            entry(1, sourceUnavailable = true),
+            entry(2, unreadCount = 1, lastRead = now),
+        ) + filler(20)
+        buildShelves(library, now).map { it.kind } shouldContainExactly
+            listOf(ShelfKind.ContinueReading, ShelfKind.NeedsNewSource)
     }
 
     @Test
@@ -62,8 +76,9 @@ class ShelvesTest {
             entry(102, unreadCount = 0, lastRead = now),
         ) + reading.shuffled(kotlin.random.Random(1)) + filler(10)
 
-        val shelves = buildShelves(library, now).shouldNotBeNull()
-        shelves.continueReading shouldContainExactly (1L..10L).toList()
+        val shelf = buildShelves(library, now).of(ShelfKind.ContinueReading)!!
+        shelf.ids shouldContainExactly (1L..10L).toList()
+        shelf.total shouldBe 13
     }
 
     @Test
@@ -76,13 +91,13 @@ class ShelvesTest {
             entry(53, hasStarted = false, unreadCount = 1, chapterFetchedAt = null),
         )
 
-        val shelves = buildShelves(library, now).shouldNotBeNull()
-        shelves.newChapters.ids shouldContainExactly (1L..15L).toList()
-        shelves.newChapters.total shouldBe 18
+        val shelf = buildShelves(library, now).of(ShelfKind.NewChapters)!!
+        shelf.ids shouldContainExactly (1L..15L).toList()
+        shelf.total shouldBe 18
     }
 
     @Test
-    fun `not started takes unread series, latest added first, unknown dates last, capped at 15`() {
+    fun `not started takes unread series, latest added first, unknown dates last`() {
         val library = listOf(
             entry(1, hasStarted = false, favoriteAt = null),
             entry(2, hasStarted = false, favoriteAt = now - 2 * day),
@@ -90,19 +105,28 @@ class ShelvesTest {
             entry(4, hasStarted = false, favoriteAt = now - 2 * day),
         ) + filler(20)
 
-        val shelves = buildShelves(library, now).shouldNotBeNull()
-        shelves.notStarted.ids shouldContainExactly listOf(3L, 2L, 4L, 1L)
-        shelves.notStarted.total shouldBe 4
-        shelves.continueReading.shouldBeEmpty()
-        shelves.newChapters.ids.shouldBeEmpty()
+        val shelves = buildShelves(library, now)
+        shelves.ids(ShelfKind.NotStarted) shouldContainExactly listOf(3L, 2L, 4L, 1L)
+        shelves.of(ShelfKind.NotStarted)!!.total shouldBe 4
+        shelves.map { it.kind } shouldContainExactly listOf(ShelfKind.NotStarted)
     }
 
     @Test
     fun `not started is capped at 15 and counts every candidate`() {
         val library = (1L..30L).map { entry(it, hasStarted = false, favoriteAt = now - it) }
-        val shelves = buildShelves(library, now).shouldNotBeNull()
-        shelves.notStarted.ids shouldContainExactly (1L..15L).toList()
-        shelves.notStarted.total shouldBe 30
+        val shelf = buildShelves(library, now).of(ShelfKind.NotStarted)!!
+        shelf.ids shouldContainExactly (1L..15L).toList()
+        shelf.total shouldBe 30
+    }
+
+    @Test
+    fun `needs a new source takes unavailable sources in library order, capped at 15 with every one counted`() {
+        val stale = (1L..20L).map { entry(it, sourceUnavailable = true) }.shuffled(kotlin.random.Random(2))
+        val library = stale + filler(5)
+
+        val shelf = buildShelves(library, now).of(ShelfKind.NeedsNewSource)!!
+        shelf.ids shouldContainExactly stale.take(15).map { it.id }
+        shelf.total shouldBe 20
     }
 
     @Test
@@ -112,15 +136,17 @@ class ShelvesTest {
             entry(1, unreadCount = 2, lastRead = now - day, chapterFetchedAt = now - day),
             // New chapters and not started both match: stays on new chapters
             entry(2, hasStarted = false, unreadCount = 4, chapterFetchedAt = now - day, favoriteAt = now),
-            entry(3, hasStarted = false, favoriteAt = now - day),
+            // Not started and needs a new source both match: stays on not started
+            entry(3, hasStarted = false, favoriteAt = now - day, sourceUnavailable = true),
+            entry(4, sourceUnavailable = true),
         ) + filler(20)
 
-        val shelves = buildShelves(library, now).shouldNotBeNull()
-        shelves.continueReading shouldContainExactly listOf(1L)
-        shelves.newChapters.ids shouldContainExactly listOf(2L)
-        shelves.newChapters.total shouldBe 1
-        shelves.notStarted.ids shouldContainExactly listOf(3L)
-        shelves.notStarted.total shouldBe 1
+        val shelves = buildShelves(library, now)
+        shelves.ids(ShelfKind.ContinueReading) shouldContainExactly listOf(1L)
+        shelves.ids(ShelfKind.NewChapters) shouldContainExactly listOf(2L)
+        shelves.of(ShelfKind.NewChapters)!!.total shouldBe 1
+        shelves.ids(ShelfKind.NotStarted) shouldContainExactly listOf(3L)
+        shelves.ids(ShelfKind.NeedsNewSource) shouldContainExactly listOf(4L)
     }
 
     @Test
@@ -130,9 +156,32 @@ class ShelvesTest {
             entry(it, unreadCount = 1, lastRead = now - it * day, chapterFetchedAt = now - it * 1000)
         } + filler(20)
 
-        val shelves = buildShelves(library, now).shouldNotBeNull()
-        shelves.continueReading shouldContainExactly (1L..10L).toList()
-        shelves.newChapters.ids shouldContainExactly listOf(11L)
+        val shelves = buildShelves(library, now)
+        shelves.ids(ShelfKind.ContinueReading) shouldContainExactly (1L..10L).toList()
+        shelves.ids(ShelfKind.NewChapters) shouldContainExactly listOf(11L)
+    }
+
+    @Test
+    fun `a shelf turned off frees its series for the shelves below`() {
+        val library = listOf(
+            entry(1, unreadCount = 2, lastRead = now - day, chapterFetchedAt = now - day),
+            entry(2, hasStarted = false, unreadCount = 4, chapterFetchedAt = now - day, favoriteAt = now),
+            entry(3, hasStarted = false, favoriteAt = now - day, sourceUnavailable = true),
+        ) + filler(20)
+
+        val withoutTop = buildShelves(library, now, ShelfKind.entries.toSet() - ShelfKind.ContinueReading)
+        withoutTop.map { it.kind } shouldContainExactly listOf(ShelfKind.NewChapters, ShelfKind.NotStarted)
+        withoutTop.ids(ShelfKind.NewChapters) shouldContainExactly listOf(1L, 2L)
+
+        val withoutMiddle = buildShelves(
+            library,
+            now,
+            setOf(ShelfKind.ContinueReading, ShelfKind.NeedsNewSource),
+        )
+        withoutMiddle.ids(ShelfKind.ContinueReading) shouldContainExactly listOf(1L)
+        withoutMiddle.ids(ShelfKind.NeedsNewSource) shouldContainExactly listOf(3L)
+
+        buildShelves(library, now, emptySet()).shouldBeEmpty()
     }
 
     @Test
@@ -140,8 +189,33 @@ class ShelvesTest {
         val inTwo = entry(1, hasStarted = false, favoriteAt = now)
         val library = listOf(inTwo, entry(2, hasStarted = false, favoriteAt = now - day)) + filler(20) + inTwo
 
-        val shelves = buildShelves(library, now).shouldNotBeNull()
-        shelves.notStarted.ids shouldContainExactly listOf(1L, 2L)
-        shelves.notStarted.total shouldBe 2
+        val shelf = buildShelves(library, now).of(ShelfKind.NotStarted)!!
+        shelf.ids shouldContainExactly listOf(1L, 2L)
+        shelf.total shouldBe 2
+    }
+
+    @Test
+    fun `see all keeps every member in list order, without the cap or the shelves above`() {
+        // Sorted by the user's sort: ids descending here
+        val list = (40L downTo 1L).map {
+            entry(
+                it,
+                hasStarted = it > 20,
+                unreadCount = if (it % 2 == 0L) 1 else 0,
+                lastRead = now - it,
+                chapterFetchedAt = now - day,
+                sourceUnavailable = it % 5 == 0L,
+            )
+        }
+
+        filterToShelf(list, ShelfKind.NotStarted, now) { it }.map { it.id } shouldContainExactly
+            (20L downTo 1L).toList()
+        // Also in Continue reading (started, unread), yet still listed under New chapters
+        filterToShelf(list, ShelfKind.NewChapters, now) { it }.map { it.id } shouldContainExactly
+            (40L downTo 1L).filter { it % 2 == 0L }
+        filterToShelf(list, ShelfKind.NeedsNewSource, now) { it }.map { it.id } shouldContainExactly
+            listOf(40L, 35L, 30L, 25L, 20L, 15L, 10L, 5L)
+        filterToShelf(list, ShelfKind.ContinueReading, now) { it }.map { it.id } shouldContainExactly
+            (40L downTo 21L).filter { it % 2 == 0L }
     }
 }

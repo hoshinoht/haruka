@@ -77,6 +77,9 @@ data object LibraryTab : Tab {
         }
 
     override suspend fun onReselect(navigator: Navigator) {
+        // FORK -->
+        if (haruka.library.shelves.LibraryReselect.consume()) return
+        // FORK <--
         requestOpenSettingsSheet()
     }
 

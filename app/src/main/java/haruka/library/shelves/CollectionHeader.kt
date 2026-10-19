@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +32,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.category.visualName
 import haruka.i18n.HR
+import haruka.library.ShelfKind
 import haruka.motion.FilterChip
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.ArrowDownward
 import mihon.icons.materialsymbols.rounded.ArrowUpward
+import mihon.icons.materialsymbols.rounded.Close
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibrarySort
 import tachiyomi.i18n.MR
@@ -65,6 +68,8 @@ internal fun CollectionHeader(
     onChangeCurrentPage: (Int) -> Unit,
     pinned: Boolean,
     bleed: Dp,
+    filter: ShelfKind?,
+    onClearFilter: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -99,7 +104,7 @@ internal fun CollectionHeader(
             Spacer(Modifier.weight(1f))
             SortLabel(sort)
         }
-        if (!categories.isNullOrEmpty()) {
+        if (!categories.isNullOrEmpty() || filter != null) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,7 +112,8 @@ internal fun CollectionHeader(
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                categories.forEachIndexed { index, category ->
+                if (filter != null) ShelfFilterChip(filter, onClearFilter)
+                categories.orEmpty().forEachIndexed { index, category ->
                     val itemCount = getItemCountForCategory(category)
                     FilterChip(
                         selected = index == currentPage,
@@ -127,6 +133,31 @@ internal fun CollectionHeader(
             },
         )
     }
+}
+
+/** The temporary "See all" filter: tapping it, or its ×, shows every series again. */
+@Composable
+private fun ShelfFilterChip(filter: ShelfKind, onClear: () -> Unit) {
+    val title = stringResource(filter.title)
+    val description = stringResource(HR.strings.library_shelf_filter_clear, title)
+    FilterChip(
+        selected = true,
+        onClick = onClear,
+        label = { Text(title) },
+        trailingIcon = {
+            Icon(
+                imageVector = MaterialSymbols.Rounded.Close,
+                contentDescription = null,
+                modifier = Modifier.size(FilterChipDefaults.IconSize),
+            )
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            selectedTrailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        modifier = Modifier.semantics { contentDescription = description },
+    )
 }
 
 // Label only: LibraryContent has no callback that opens the sort sheet, and wiring one in would take a second

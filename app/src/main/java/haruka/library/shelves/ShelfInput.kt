@@ -2,6 +2,7 @@ package haruka.library.shelves
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import haruka.i18n.HR
 import haruka.library.ChapterCountSection
@@ -12,6 +13,7 @@ import haruka.library.RecencySection
 import haruka.library.SectionKey
 import haruka.library.SectionSort
 import haruka.library.ShelfInput
+import haruka.library.ShelfKind
 import haruka.library.SymbolSection
 import haruka.library.UnknownDateSection
 import haruka.library.UnreadSection
@@ -22,7 +24,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 // The fields LibraryViewModel.applySort reads, so the buckets follow the order the list is in.
-internal fun LibraryItem.toShelfInput(): ShelfInput {
+internal fun LibraryItem.toShelfInput(unavailableSources: Set<Long> = emptySet()): ShelfInput {
     val libraryManga = libraryManga
     val manga = libraryManga.manga
     return ShelfInput(
@@ -36,8 +38,17 @@ internal fun LibraryItem.toShelfInput(): ShelfInput {
         unreadCount = libraryManga.unreadCount,
         totalChapters = libraryManga.totalChapters,
         hasStarted = libraryManga.hasStarted,
+        sourceUnavailable = manga.source in unavailableSources,
     )
 }
+
+internal val ShelfKind.title: StringResource
+    get() = when (this) {
+        ShelfKind.ContinueReading -> HR.strings.library_shelf_continue_reading
+        ShelfKind.NewChapters -> HR.strings.library_shelf_new_chapters
+        ShelfKind.NotStarted -> HR.strings.library_shelf_not_started
+        ShelfKind.NeedsNewSource -> HR.strings.library_shelf_needs_new_source
+    }
 
 // Tracker scores never reach the library screen, so that sort has no dividers yet.
 internal fun LibrarySort.Type.toSectionSort(): SectionSort = when (this) {

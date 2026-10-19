@@ -28,6 +28,16 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
     /** The library as one scroll: a pinned Collection header and dividers that follow the sort. */
     val libraryShelves: Preference<Boolean> = preferenceStore.getBoolean("haruka_library_shelves", false)
 
+    // Per-shelf visibility under Library shelves
+    val libraryShelfContinueReading: Preference<Boolean> =
+        preferenceStore.getBoolean("haruka_library_shelf_continue_reading", true)
+    val libraryShelfNewChapters: Preference<Boolean> =
+        preferenceStore.getBoolean("haruka_library_shelf_new_chapters", true)
+    val libraryShelfNotStarted: Preference<Boolean> =
+        preferenceStore.getBoolean("haruka_library_shelf_not_started", true)
+    val libraryShelfNeedsNewSource: Preference<Boolean> =
+        preferenceStore.getBoolean("haruka_library_shelf_needs_new_source", true)
+
     /** Motion across the app; pill swipe actions are part of [AnimationProfile.EXPRESSIVE]. */
     val animationProfile: Preference<AnimationProfile> =
         preferenceStore.getEnum("haruka_animation_profile", AnimationProfile.EXPRESSIVE)

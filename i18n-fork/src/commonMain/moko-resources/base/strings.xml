@@ -151,4 +151,7 @@
     <string name="library_shelf_chapter">Ch. %1$s</string>
     <string name="library_shelf_chapter_page">Ch. %1$s · page %2$d</string>
     <string name="library_shelf_resume">Resume %1$s</string>
+    <string name="library_shelf_needs_new_source">Needs a new source</string>
+    <string name="library_shelf_source_unavailable">Source unavailable</string>
+    <string name="library_shelf_filter_clear">Show all series again, without the %1$s filter</string>
 </resources>

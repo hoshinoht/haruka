@@ -260,20 +260,25 @@ private fun ReadingBubble(title: String, point: ReadingPoint?, modifier: Modifie
     }
 }
 
-/** A horizontal row of covers with titles below, ending in a dashed "See all" tile. */
+/**
+ * A horizontal row of covers with titles below, ending in a dashed "See all" tile.
+ *
+ * @param sourceUnavailable marks every cover with a "Source unavailable" chip (the Needs a new source shelf).
+ */
 @Composable
 internal fun ShelfRow(
     items: List<LibraryItem>,
     total: Int,
     actions: ShelfActions,
     onSeeAll: () -> Unit,
+    sourceUnavailable: Boolean = false,
 ) {
     LazyRow(
         contentPadding = RowPadding,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(items, key = { it.id }, contentType = { "shelf_cover" }) { item ->
-            ShelfCover(item, actions)
+            ShelfCover(item, actions, sourceUnavailable)
         }
         item(key = "see-all", contentType = "see_all") {
             SeeAllTile(total, onSeeAll)
@@ -283,7 +288,7 @@ internal fun ShelfRow(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ShelfCover(item: LibraryItem, actions: ShelfActions) {
+private fun ShelfCover(item: LibraryItem, actions: ShelfActions, sourceUnavailable: Boolean) {
     val title = rememberDisplayTitle(item.libraryManga.manga.title)
     val isSelected = item.id in actions.selection
     val haptic = LocalHapticFeedback.current
@@ -324,6 +329,14 @@ private fun ShelfCover(item: LibraryItem, actions: ShelfActions) {
                         .padding(6.dp),
                 )
             }
+            if (sourceUnavailable) {
+                SourceUnavailableChip(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                )
+            }
         }
         Text(
             text = title,
@@ -334,6 +347,24 @@ private fun ShelfCover(item: LibraryItem, actions: ShelfActions) {
             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
         )
     }
+}
+
+/** The design's warning chip: error container on the cover's foot, so it reads on any art. */
+@Composable
+private fun SourceUnavailableChip(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(HR.strings.library_shelf_source_unavailable),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onErrorContainer,
+        textAlign = TextAlign.Center,
+        // Two lines rather than an ellipsis: longer translations still read in full on a narrow cover
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+            .clip(MaterialTheme.shapes.extraSmall)
+            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.94f))
+            .padding(horizontal = 4.dp, vertical = 3.dp),
+    )
 }
 
 /** MomoTalk's coral unread dot, as in Updates conversations, with a surface ring so it separates from any cover. */

@@ -30,6 +30,8 @@ class ShelfInput(
     val totalChapters: Long,
     /** At least one chapter is read. */
     val hasStarted: Boolean,
+    /** The series' source can't be used as-is: not installed, not loaded or obsolete. */
+    val sourceUnavailable: Boolean = false,
 )
 
 /** The group an entry falls in. [id] is unique among the keys of one sort. */

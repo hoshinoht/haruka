@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.preference.PreferenceMutableState
 import eu.kanade.presentation.library.components.CommonMangaItemDefaults
 import eu.kanade.presentation.library.components.DownloadsBadge
@@ -40,7 +40,10 @@ import eu.kanade.presentation.library.components.UnreadBadge
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import haruka.i18n.HR
 import haruka.library.Section
+import haruka.library.Shelf
+import haruka.library.ShelfKind
 import haruka.library.SortSections
+import haruka.library.filterToShelf
 import haruka.motion.AnimationProfile
 import haruka.motion.LocalAnimationProfile
 import kotlinx.coroutines.delay
@@ -124,9 +127,27 @@ fun ShelvesLibrary(
             }
         },
     ) {
+        // Shelves are library-wide, so they read every category's items, not just the current page's
+        val lists = categories.map(getItemsForCategory)
+        val shelfData by rememberShelfData(categories, lists)
+        val isSearching = !searchQuery.isNullOrEmpty()
+
+        // "See all": the Collection shows one shelf's whole membership. In memory only, never a filter preference.
+        var shelfFilter by rememberSaveable { mutableStateOf<ShelfKind?>(null) }
+        LaunchedEffect(isSearching) { if (isSearching) shelfFilter = null }
+        val filter = shelfFilter.takeUnless { isSearching }
+        val unavailableSources = shelfData?.unavailableSources.orEmpty()
+        val shown = remember(items, filter, unavailableSources) {
+            if (filter == null) {
+                items
+            } else {
+                filterToShelf(items, filter, System.currentTimeMillis()) { it.toShelfInput(unavailableSources) }
+            }
+        }
+
         val header: @Composable (Boolean, Dp) -> Unit = { isPinned, headerBleed ->
             CollectionHeader(
-                count = getItemCountForCategory(category) ?: items.size,
+                count = if (filter != null) shown.size else getItemCountForCategory(category) ?: items.size,
                 sort = sort,
                 categories = chipCategories,
                 currentPage = currentPage,
@@ -134,13 +155,10 @@ fun ShelvesLibrary(
                 onChangeCurrentPage = onChangeCurrentPage,
                 pinned = isPinned,
                 bleed = headerBleed,
+                filter = filter,
+                onClearFilter = { shelfFilter = null },
             )
         }
-
-        // Shelves are library-wide, so they read every category's items, not just the current page's
-        val lists = categories.map(getItemsForCategory)
-        val shelfData by rememberShelfData(categories, lists)
-        val isSearching = !searchQuery.isNullOrEmpty()
 
         if (items.isEmpty()) {
             EmptyCollection(
@@ -154,24 +172,19 @@ fun ShelvesLibrary(
         }
 
         // Recomputed only when the list or its sort changes, never while scrolling
-        val sections = remember(items, sort.type) {
+        val sections = remember(shown, sort.type) {
             SortSections(Instant.now(), ZoneId.systemDefault(), TitleCollator)
-                .sections(sort.type.toSectionSort(), items.map { it.toShelfInput() })
+                .sections(sort.type.toSectionSort(), shown.map { it.toShelfInput() })
         }
         val monthFormatter = rememberMonthFormatter()
 
         val gridState = rememberSaveable(currentPage, saver = LazyGridState.Saver) { LazyGridState() }
-        val shelves = shelfData?.shelves?.takeUnless { isSearching }
+        val shelves = shelfData?.shelves.takeUnless { isSearching }.orEmpty()
         val shelfItems = shelfData?.items.orEmpty()
-        val continueReading = shelves?.continueReading.orEmpty().mapNotNull(shelfItems::get)
-        val newChapters = shelves?.newChapters?.ids.orEmpty().mapNotNull(shelfItems::get)
-        val notStarted = shelves?.notStarted?.ids.orEmpty().mapNotNull(shelfItems::get)
+        val continueReading = shelves.firstOrNull { it.kind == ShelfKind.ContinueReading }
+            ?.ids.orEmpty().mapNotNull(shelfItems::get)
         // Index of the Collection header: after the global search row or the shelves above it
-        val headerIndex = if (isSearching) {
-            1
-        } else {
-            listOf(continueReading, newChapters, notStarted).count { it.isNotEmpty() }
-        }
+        val headerIndex = if (isSearching) 1 else shelves.size
         val pinned by remember(headerIndex) {
             derivedStateOf {
                 gridState.firstVisibleItemIndex > headerIndex ||
@@ -179,10 +192,18 @@ fun ShelvesLibrary(
             }
         }
         val reducedMotion = LocalAnimationProfile.current == AnimationProfile.REDUCED
-        val onSeeAll: () -> Unit = {
-            scope.launch {
-                if (reducedMotion) gridState.scrollToItem(headerIndex) else gridState.animateScrollToItem(headerIndex)
-            }
+        val scrollTo: suspend (Int) -> Unit = { index ->
+            if (reducedMotion) gridState.scrollToItem(index) else gridState.animateScrollToItem(index)
+        }
+        val onSeeAll: (ShelfKind) -> Unit = { kind ->
+            shelfFilter = kind
+            scope.launch { scrollTo(headerIndex) }
+        }
+        // Re-tapping the Library tab: back to the top, or upstream's settings sheet when already there
+        LibraryReselect.Register {
+            val atTop = gridState.firstVisibleItemIndex == 0 && gridState.firstVisibleItemScrollOffset == 0
+            if (!atTop) scrollTo(0)
+            !atTop
         }
         val readingPoints by rememberReadingPoints(continueReading)
         val shelfActions = ShelfActions(
@@ -202,7 +223,10 @@ fun ShelvesLibrary(
         val onClick: (LibraryManga) -> Unit = {
             if (selection.isNotEmpty()) onToggleSelection(category, it) else onClickManga(it.manga.id)
         }
-        val onLongClick: (LibraryManga) -> Unit = { onToggleRangeSelection(category, it) }
+        // A range runs over the category's full list, so under a shelf filter it would pick hidden series too
+        val onLongClick: (LibraryManga) -> Unit = {
+            if (filter == null) onToggleRangeSelection(category, it) else onToggleSelection(category, it)
+        }
 
         // Only on the very first display: wait for the shelves so the grid doesn't open past where they appear
         if (!isSearching && shelfData == null) return@PullRefresh
@@ -238,40 +262,22 @@ fun ShelvesLibrary(
                 }
             }
 
-            if (continueReading.isNotEmpty()) {
-                item(key = "shelf-continue", span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_carousel") {
-                    Column(Modifier.horizontalBleed(bleed)) {
-                        ShelfTitle(stringResource(HR.strings.library_shelf_continue_reading), null, null)
-                        ContinueReadingCarousel(
-                            items = continueReading,
-                            readingPoints = readingPoints,
-                            actions = shelfActions,
-                            onResume = onContinueReadingClicked?.let { resume -> { resume(it.libraryManga) } },
-                        )
+            for (shelf in shelves) {
+                if (shelf.kind == ShelfKind.ContinueReading) {
+                    item(key = "shelf-continue", span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_carousel") {
+                        Column(Modifier.horizontalBleed(bleed)) {
+                            ShelfTitle(stringResource(HR.strings.library_shelf_continue_reading), null, null)
+                            ContinueReadingCarousel(
+                                items = continueReading,
+                                readingPoints = readingPoints,
+                                actions = shelfActions,
+                                onResume = onContinueReadingClicked?.let { resume -> { resume(it.libraryManga) } },
+                            )
+                        }
                     }
+                } else {
+                    shelfRow(shelf, shelf.ids.mapNotNull(shelfItems::get), bleed, shelfActions) { onSeeAll(shelf.kind) }
                 }
-            }
-            shelves?.newChapters?.let {
-                shelfRow(
-                    "shelf-new",
-                    HR.strings.library_shelf_new_chapters,
-                    newChapters,
-                    it.total,
-                    bleed,
-                    shelfActions,
-                    onSeeAll,
-                )
-            }
-            shelves?.notStarted?.let {
-                shelfRow(
-                    "shelf-not-started",
-                    HR.strings.library_shelf_not_started,
-                    notStarted,
-                    it.total,
-                    bleed,
-                    shelfActions,
-                    onSeeAll,
-                )
             }
 
             stickyHeader(key = "collection", contentType = "collection_header") { header(pinned, bleed) }
@@ -287,32 +293,36 @@ fun ShelvesLibrary(
                 )
             }
             if (sections.isEmpty()) {
-                entries(items, 0, items.size, item)
+                entries(shown, 0, shown.size, item)
             } else {
                 for (section in sections) {
                     divider(section) { SectionPill(section.key.label(monthFormatter)) }
-                    entries(items, section.start, section.count, item)
+                    entries(shown, section.start, section.count, item)
                 }
             }
         }
     }
 }
 
-// A shelf as one full-span grid item, so nothing scrolls vertically inside the grid. Empty shelves hide.
+// A shelf as one full-span grid item, so nothing scrolls vertically inside the grid. Always one item per shelf,
+// so the Collection header's index is the number of shelves.
 private fun LazyGridScope.shelfRow(
-    key: String,
-    title: StringResource,
+    shelf: Shelf,
     items: List<LibraryItem>,
-    total: Int,
     bleed: Dp,
     actions: ShelfActions,
     onSeeAll: () -> Unit,
 ) {
-    if (items.isEmpty()) return
-    item(key = key, span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_row") {
+    item(key = "shelf-${shelf.kind.name}", span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_row") {
         Column(Modifier.horizontalBleed(bleed)) {
-            ShelfTitle(stringResource(title), total, onSeeAll)
-            ShelfRow(items, total, actions, onSeeAll)
+            ShelfTitle(stringResource(shelf.kind.title), shelf.total, onSeeAll)
+            ShelfRow(
+                items = items,
+                total = shelf.total,
+                actions = actions,
+                onSeeAll = onSeeAll,
+                sourceUnavailable = shelf.kind == ShelfKind.NeedsNewSource,
+            )
         }
     }
 }
