@@ -3,6 +3,13 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
+## [Unreleased]
+
+Planned for 0.1.0-beta.4.
+
+### Library
+- Library shelves (Settings › Appearance, off by default): the library becomes one scroll with an "All series" header that stays pinned under the toolbar, showing the count and current sort. Dividers split the grid by the active sort (Today / This week / This month for dates, A–Z for titles, unread and chapter-count ranges). Category chips in the header replace the tabs when you use categories. Your display mode, columns and badges are unchanged. The setting syncs across devices.
+
 ## [0.1.0-beta.3]
 
 In progress.

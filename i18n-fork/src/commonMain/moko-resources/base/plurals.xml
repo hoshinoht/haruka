@@ -52,4 +52,8 @@
         <item quantity="one">Sync is holding back %d removal from the library until you confirm or reject it</item>
         <item quantity="other">Sync is holding back %d removals from the library until you confirm or reject them</item>
     </plurals>
+    <plurals name="library_series_count">
+        <item quantity="one">%d series</item>
+        <item quantity="other">%d series</item>
+    </plurals>
 </resources>

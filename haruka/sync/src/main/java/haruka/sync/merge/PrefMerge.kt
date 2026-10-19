@@ -15,6 +15,7 @@ val SYNCED_PREF_KEYS: Set<String> = setOf(
     "haruka_related_manga",
     "haruka_compact_titles",
     "haruka_updates_momotalk",
+    "haruka_library_shelves",
     "haruka_animation_profile",
     "haruka_dedup_group_chapters",
     "haruka_dedup_merge_split",

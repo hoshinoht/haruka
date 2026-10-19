@@ -17,6 +17,7 @@ internal val SYNCED_PREF_STORAGE: Map<String, PrefStorage> = mapOf(
     "haruka_related_manga" to PrefStorage.BOOLEAN,
     "haruka_compact_titles" to PrefStorage.BOOLEAN,
     "haruka_updates_momotalk" to PrefStorage.BOOLEAN,
+    "haruka_library_shelves" to PrefStorage.BOOLEAN,
     "haruka_animation_profile" to PrefStorage.STRING,
     "haruka_dedup_group_chapters" to PrefStorage.BOOLEAN,
     "haruka_dedup_merge_split" to PrefStorage.BOOLEAN,

@@ -53,6 +53,32 @@ fun LibraryContent(
             end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
         ),
     ) {
+        // FORK -->
+        if (haruka.library.shelves.rememberLibraryShelvesEnabled()) {
+            haruka.library.shelves.ShelvesLibrary(
+                categories = categories,
+                searchQuery = searchQuery,
+                selection = selection,
+                contentPadding = contentPadding,
+                currentPage = currentPage,
+                hasActiveFilters = hasActiveFilters,
+                showPageTabs = showPageTabs,
+                onChangeCurrentPage = onChangeCurrentPage,
+                onClickManga = onClickManga,
+                onContinueReadingClicked = onContinueReadingClicked,
+                onToggleSelection = onToggleSelection,
+                onToggleRangeSelection = onToggleRangeSelection,
+                onRefresh = onRefresh,
+                onGlobalSearchClicked = onGlobalSearchClicked,
+                getItemCountForCategory = getItemCountForCategory,
+                getDisplayMode = getDisplayMode,
+                getColumnsForOrientation = getColumnsForOrientation,
+                getItemsForCategory = getItemsForCategory,
+            )
+            return@Column
+        }
+        // FORK <--
+
         val pagerState = rememberPagerState(currentPage) { categories.size }
 
         val scope = rememberCoroutineScope()

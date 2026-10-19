@@ -125,4 +125,23 @@
     <string name="sync_banner_uploading">Syncing · Uploading</string>
     <string name="sync_banner_applying">Syncing · Updating library</string>
     <string name="sync_notification_stopped">Sync stopped</string>
+    <string name="pref_library_shelves">Library shelves</string>
+    <string name="pref_library_shelves_summary">Pin an \"All series\" header over the library and divide it into groups that follow the sort</string>
+    <string name="library_all_series">All series</string>
+    <string name="library_sort_description">Sort: %1$s, %2$s</string>
+    <string name="library_section_today">Today</string>
+    <string name="library_section_this_week">This week</string>
+    <string name="library_section_this_month">This month</string>
+    <string name="library_section_earlier_this_year">Earlier this year</string>
+    <string name="library_section_older">Older</string>
+    <string name="library_section_never_read">Never read</string>
+    <string name="library_section_unknown_date">Unknown</string>
+    <string name="library_section_other_scripts">Other</string>
+    <string name="library_section_unread_ten_or_more">10+ unread</string>
+    <string name="library_section_unread_one_to_nine">1–9 unread</string>
+    <string name="library_section_caught_up">Caught up</string>
+    <string name="library_section_chapters_hundred_or_more">100+</string>
+    <string name="library_section_chapters_fifty_to_ninety_nine">50–99</string>
+    <string name="library_section_chapters_ten_to_forty_nine">10–49</string>
+    <string name="library_section_chapters_under_ten">Under 10</string>
 </resources>

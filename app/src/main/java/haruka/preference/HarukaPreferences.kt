@@ -25,6 +25,9 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
 
     val momotalkUpdates: Preference<Boolean> = preferenceStore.getBoolean("haruka_updates_momotalk", false)
 
+    /** The library as one scroll: a pinned Collection header and dividers that follow the sort. */
+    val libraryShelves: Preference<Boolean> = preferenceStore.getBoolean("haruka_library_shelves", false)
+
     /** Motion across the app; pill swipe actions are part of [AnimationProfile.EXPRESSIVE]. */
     val animationProfile: Preference<AnimationProfile> =
         preferenceStore.getEnum("haruka_animation_profile", AnimationProfile.EXPRESSIVE)
