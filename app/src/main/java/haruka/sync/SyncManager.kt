@@ -16,6 +16,7 @@ import haruka.sync.auth.GoogleDriveAuth
 import haruka.sync.backup.RestoreMarker
 import haruka.sync.crypto.SyncKey
 import haruka.sync.drive.DriveRemoteStore
+import haruka.sync.engine.RewriteOutcome
 import haruka.sync.engine.SyncDevice
 import haruka.sync.engine.SyncListener
 import haruka.sync.engine.SyncOutcome
@@ -295,23 +296,54 @@ class SyncManager(
     }
 
     /**
-     * An empty Drive gets a new key from [passphrase]; the first sync then writes the library encrypted. A Drive
-     * library this device can already open keeps its key when [passphrase] opens it.
+     * Encrypts the Drive library under a new key from [passphrase]: an empty Drive gets it with the first sync, a
+     * plaintext library is rewritten under it, and an encrypted one whose key this device holds moves to it
+     * (changing the passphrase). A library encrypted elsewhere that [passphrase] already opens keeps its key.
      */
     override suspend fun setPassphrase(passphrase: String): PassphraseResult = passphraseCall {
-        if (remote().readHead() == null) {
-            val key = withContext(Dispatchers.Default) { SyncKey.create(passphrase) }
-            keep(key)
-            PassphraseResult.Done
-        } else {
-            when (val result = unlockResult(passphrase)) {
-                // Re-encrypting an existing remote is a rewrite commit the engine does not offer yet.
-                PassphraseResult.NotEncrypted -> PassphraseResult.Failed(REWRITE_UNSUPPORTED)
-                PassphraseResult.WrongPassphrase -> PassphraseResult.Failed(REWRITE_UNSUPPORTED)
-                else -> result
-            }
+        when (val unlocked = unlockResult(passphrase)) {
+            PassphraseResult.NotEncrypted -> rewrite(current = null, next = newKey(passphrase))
+            // Not the remote's passphrase: changing it needs the key this device holds.
+            PassphraseResult.WrongPassphrase -> heldKey()?.let { rewrite(it, newKey(passphrase)) } ?: unlocked
+            PassphraseResult.Done, is PassphraseResult.Failed -> unlocked
         }
     }
+
+    /**
+     * Turns encryption off: the Drive library is rewritten in plaintext and this device forgets the key. Devices
+     * still holding it stop with [SyncError.RemotePlaintext] until encryption is turned off there too.
+     */
+    suspend fun disableEncryption(): PassphraseResult = passphraseCall { rewrite(heldKey(), next = null) }
+
+    /**
+     * The rewrite commit to [next] (null: plaintext); [current] opens an encrypted head. Only a committed (or
+     * unneeded) rewrite changes the key this device syncs with, so it never writes under a key Drive doesn't use.
+     */
+    private suspend fun rewrite(current: SyncKey?, next: SyncKey?): PassphraseResult {
+        val outcome = try {
+            withContext(Dispatchers.IO) { engine().reencrypt(current, next) }
+        } finally {
+            mutableProgress.value = null
+        }
+        logcat(LogPriority.INFO, SYNC_LOG_TAG) { "rewrite result=${outcome.javaClass.simpleName}" }
+        return when (outcome) {
+            is RewriteOutcome.Rewritten, RewriteOutcome.Unchanged -> {
+                if (next == null) forgetKey() else keep(next)
+                PassphraseResult.Done
+            }
+            is RewriteOutcome.Stopped -> when (val error = outcome.error) {
+                // Encrypted under a key this device does not hold.
+                is SyncError.NeedsPassphrase -> PassphraseResult.WrongPassphrase
+                else -> PassphraseResult.Failed(error.toString())
+            }
+            is RewriteOutcome.Contended -> PassphraseResult.Failed(REWRITE_CONTENDED)
+        }
+    }
+
+    private suspend fun newKey(passphrase: String) = withContext(Dispatchers.Default) { SyncKey.create(passphrase) }
+
+    /** The key this device syncs with; null while encryption is off here. */
+    private fun heldKey(): SyncKey? = if (preferences.syncEncryption.get()) vault.load() else null
 
     override suspend fun unlock(passphrase: String): PassphraseResult = passphraseCall { unlockResult(passphrase) }
 
@@ -345,6 +377,14 @@ class SyncManager(
         // A sync that stopped for the passphrase can go on now.
         val last = status.status().lastResult
         if (last is SyncLastResult.Stopped && last.error is SyncError.NeedsPassphrase) syncNow()
+    }
+
+    private fun forgetKey() {
+        vault.clear()
+        preferences.syncEncryption.set(false)
+        // A sync that stopped because the remote turned plaintext can go on now.
+        val last = status.status().lastResult
+        if (last is SyncLastResult.Stopped && last.error == SyncError.RemotePlaintext) syncNow()
     }
 
     private fun remote() = DriveRemoteStore(client, auth, layout)
@@ -409,7 +449,7 @@ class SyncManager(
     }
 
     private companion object {
-        const val REWRITE_UNSUPPORTED = "Encrypting or re-keying an existing Drive library is not supported yet"
+        const val REWRITE_CONTENDED = "Other devices kept syncing; try again in a moment"
     }
 }
 

@@ -2,6 +2,7 @@ package haruka.sync
 
 import haruka.sync.codec.SyncCodec
 import haruka.sync.crypto.EncryptionCheck
+import haruka.sync.crypto.PayloadSlot
 import haruka.sync.crypto.SyncCryptoException
 import haruka.sync.crypto.SyncKey
 import haruka.sync.crypto.checkEncryption
@@ -12,6 +13,7 @@ import haruka.sync.engine.EncodedPayload
 import haruka.sync.engine.LocalApplier
 import haruka.sync.engine.LocalSource
 import haruka.sync.engine.RemoteCodec
+import haruka.sync.engine.RewriteOutcome
 import haruka.sync.engine.SyncCheckpoint
 import haruka.sync.engine.SyncDevice
 import haruka.sync.engine.SyncListener
@@ -176,6 +178,145 @@ class SyncEngine(
         }
     }
 
+    /**
+     * The rewrite commit that enables, changes or disables encryption: every payload of the head and its manifest
+     * body are stored again under [next] (null: plaintext) with the same plaintext, the same remote epoch and the
+     * next commitSeq, committed through compare-and-swap like a sync, so a commit that lands first makes it start
+     * over from the new head. [current] is the key of an encrypted head; a plaintext head needs none.
+     *
+     * Nothing is merged. Plaintext shas don't change, so every device's base stays valid and its next sync downloads
+     * only what other devices changed; devices without [next] stop with [SyncError.NeedsPassphrase] (or
+     * [SyncError.RemotePlaintext] when they hold the old key and encryption was disabled).
+     */
+    suspend fun reencrypt(current: SyncKey?, next: SyncKey?): RewriteOutcome {
+        val counting = CountingRemoteStore(remote)
+        val started = TimeSource.Monotonic.markNow()
+        var attempts = 0
+        var outcome: RewriteOutcome? = null
+        while (outcome == null) {
+            attempts++
+            outcome = try {
+                Rewrite(counting, current, next).run()
+            } catch (e: RemoteFileGoneException) {
+                // A commit landed while we copied its predecessor's payloads: start over from the new head.
+                listener.onLog("HarukaSync rewrite restart reason=gone")
+                null
+            } catch (e: CorruptRemoteException) {
+                RewriteOutcome.Stopped(SyncError.Corrupt(e.message.orEmpty()))
+            }
+            if (outcome == null && attempts >= MAX_ATTEMPTS) outcome = RewriteOutcome.Contended(attempts)
+        }
+        listener.onProgress(SyncPhase.FINISH, 1, 1)
+        listener.onLog(
+            "HarukaSync timing phase=rewrite ms=${started.elapsedNow().inWholeMilliseconds} " +
+                "result=${outcome.javaClass.simpleName} attempts=$attempts encrypted=${next != null}",
+        )
+        listener.onLog("HarukaSync requests ${counting.summary()}")
+        return outcome
+    }
+
+    /** One pass of [reencrypt]; [run] returns null to start over. */
+    private inner class Rewrite(
+        private val remote: CountingRemoteStore,
+        private val current: SyncKey?,
+        private val next: SyncKey?,
+    ) {
+        private val source = RemoteCodec(layout, current)
+        private val target = RemoteCodec(layout, next)
+        private val now = clock()
+
+        suspend fun run(): RewriteOutcome? {
+            listener.onProgress(SyncPhase.CHECK, 0, 1)
+            val head = remote.readHead() ?: return RewriteOutcome.Unchanged
+            val file = source.readManifestFile(head.bytes)
+            val state = store.readState()
+            val lineage = lineageOf(store.current, state)
+            // The same gates as a sync: a remote this device can't open or that lost its commits is not rewritten.
+            val check = checkHeader(file.header, lineage, current?.keyId)
+            if (check is HeaderCheck.Rejected) return RewriteOutcome.Stopped(check.error)
+            if (file.header.encryption?.keyId == next?.keyId) return RewriteOutcome.Unchanged
+            val old = source.openBody(file)
+            if (check == HeaderCheck.ThreeWay) {
+                checkOwnCommit(old.body, device.id, lineage!!)?.let { return RewriteOutcome.Stopped(it) }
+            }
+            listener.onProgress(SyncPhase.CHECK, 1, 1)
+
+            val slots = old.body.buckets.map { PayloadSlot.Bucket(it.index) to it.payload } +
+                listOfNotNull(
+                    old.body.categoriesRef?.let { PayloadSlot.Categories to it },
+                    old.body.prefsRef?.let { PayloadSlot.Prefs to it },
+                )
+            listener.onProgress(SyncPhase.UPLOAD, 0, slots.size)
+            val done = AtomicInteger()
+            // One payload at a time per transfer slot, so memory holds at most TRANSFER_CONCURRENCY payloads.
+            val refs = concurrently(slots) { (slot, ref) ->
+                val encoded = source.reencode(slot, ref, remote.download(ref.fileId), target)
+                encoded.ref(remote.createImmutable(encoded.file, encoded.stored), layout).also {
+                    listener.onProgress(SyncPhase.UPLOAD, done.incrementAndGet(), slots.size)
+                }
+            }
+            checkpoint(SyncCheckpoint.AFTER_UPLOAD)
+
+            listener.onProgress(SyncPhase.COMMIT, 0, 1)
+            val header = ManifestHeader(
+                FORMAT_VERSION,
+                old.header.remoteEpoch,
+                old.header.commitSeq + 1,
+                next?.params,
+            )
+            val commitId = newCommitId()
+            // refs follow slots: the buckets in order, then categories, then prefs.
+            val categoriesAt = old.body.buckets.size
+            val me = DeviceRecord(
+                device.id,
+                device.model,
+                commitId,
+                header.commitSeq,
+                lastSyncAtMillis = old.body.deviceOf(device.id)?.lastSyncAtMillis ?: now,
+            )
+            val body = old.body.copy(
+                commitId = commitId,
+                writerDeviceId = device.id,
+                writtenAtMillis = now,
+                buckets = old.body.buckets.mapIndexed { i, bucket -> bucket.copy(payload = refs[i]) },
+                categoriesRef = old.body.categoriesRef?.let { refs[categoriesAt] },
+                prefsRef = old.body.prefsRef?.let { refs.last() },
+                devices = old.body.devices.filter { it.id != device.id } + me,
+            )
+            val pending = PendingCommit(commitId, header.commitSeq)
+            store.writeState(state.copy(pendingCommit = pending))
+            val landed = when (val cas = remote.casHead(head, target.encodeManifest(Manifest(header, body)))) {
+                CasResult.Committed -> true
+                CasResult.Conflict -> {
+                    deleteQuietly(remote, refs.map { it.fileId })
+                    false
+                }
+                is CasResult.Ambiguous -> {
+                    listener.onLog("HarukaSync cas=ambiguous cause=${cas.cause.javaClass.simpleName}")
+                    landedByLineage(remote, target, next, commitId)
+                }
+            }
+            if (!landed) {
+                listener.onLog("HarukaSync rewrite restart reason=cas")
+                return null
+            }
+            checkpoint(SyncCheckpoint.AFTER_CAS)
+            // Nothing to apply: the base keeps its records, and the head it lags behind is the rewritten one.
+            store.writeState(
+                state.copy(
+                    remoteEpoch = header.remoteEpoch,
+                    baseCommitSeq = header.commitSeq,
+                    lastOwnCommitSeq = header.commitSeq,
+                    pendingCommit = null,
+                ),
+            )
+            listener.onProgress(SyncPhase.COMMIT, 1, 1)
+            // Every old payload is replaced; a device still reading one restarts and meets the new key.
+            deleteQuietly(remote, old.body.fileIds())
+            return RewriteOutcome.Rewritten(header.commitSeq, refs.size)
+        }
+    }
+
     /** One pass from reading the head to activating the new base; [run] returns null to start over. */
     private inner class Attempt(private val remote: CountingRemoteStore, private val request: SyncRequest) {
         private val key = request.key
@@ -255,13 +396,13 @@ class SyncEngine(
                     CasResult.Committed -> true
                     CasResult.Conflict -> {
                         // Definitely not written, so nothing can reference these payloads.
-                        deleteQuietly(ids)
+                        deleteQuietly(remote, ids)
                         false
                     }
                     is CasResult.Ambiguous -> {
                         listener.onLog("HarukaSync cas=ambiguous cause=${cas.cause.javaClass.simpleName}")
                         // A request that is still in flight may land later, so its payloads are left to the sweep.
-                        landedByLineage(body.commitId)
+                        landedByLineage(remote, codec, key, body.commitId)
                     }
                 }
                 if (!landed) {
@@ -330,15 +471,6 @@ class SyncEngine(
             return remote.readHead()
         }
 
-        /** After an ambiguous CAS: our commit landed if the head is it or lists it as this device's last commit. */
-        private suspend fun landedByLineage(commitId: String): Boolean {
-            val head = remote.readHead() ?: return false
-            val file = codec.readManifestFile(head.bytes)
-            if (file.header.encryption?.keyId != key?.keyId) return false
-            val body = codec.openBody(file).body
-            return body.commitId == commitId || body.deviceOf(device.id)?.lastCommitId == commitId
-        }
-
         /** Every payload of the head whose content the base does not hold (all of them without a base). */
         private suspend fun download(body: ManifestBody, base: BaseSnapshot?): Map<String, ByteArray> {
             val baseShas = base?.body?.buckets?.associate { it.index to it.payload.plaintextSha }.orEmpty()
@@ -397,15 +529,7 @@ class SyncEngine(
                 }
             }
             if (garbage.isNotEmpty()) listener.onLog("HarukaSync gc files=${garbage.size}")
-            deleteQuietly(garbage)
-        }
-
-        private suspend fun deleteQuietly(ids: Collection<String>) {
-            try {
-                for (id in ids) remote.delete(id)
-            } catch (e: IOException) {
-                listener.onLog("HarukaSync delete failed=${e.javaClass.simpleName}")
-            }
+            deleteQuietly(remote, garbage)
         }
 
         /**
@@ -738,6 +862,29 @@ class SyncEngine(
         val ms = mark.elapsedNow().inWholeMilliseconds
         listener.onLog("HarukaSync timing phase=$phase ms=$ms" + if (extra.isEmpty()) "" else " $extra")
         return TimeSource.Monotonic.markNow()
+    }
+
+    /** After an ambiguous CAS: [commitId] landed if the head is it or lists it as this device's last commit. */
+    private suspend fun landedByLineage(
+        remote: RemoteStore,
+        codec: RemoteCodec,
+        key: SyncKey?,
+        commitId: String,
+    ): Boolean {
+        val head = remote.readHead() ?: return false
+        val file = codec.readManifestFile(head.bytes)
+        if (file.header.encryption?.keyId != key?.keyId) return false
+        val body = codec.openBody(file).body
+        return body.commitId == commitId || body.deviceOf(device.id)?.lastCommitId == commitId
+    }
+
+    /** Best effort: what fails to delete stays for the sweep of a later sync. */
+    private suspend fun deleteQuietly(remote: RemoteStore, ids: Collection<String>) {
+        try {
+            for (id in ids) remote.delete(id)
+        } catch (e: IOException) {
+            listener.onLog("HarukaSync delete failed=${e.javaClass.simpleName}")
+        }
     }
 
     private suspend fun <T, R> concurrently(items: List<T>, block: suspend (T) -> R): List<R> = coroutineScope {

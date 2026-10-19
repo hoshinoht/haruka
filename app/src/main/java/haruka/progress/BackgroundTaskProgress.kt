@@ -4,7 +4,11 @@ import android.content.Context
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.util.system.workManager
+import haruka.di.harukaGraph
+import haruka.sync.SyncProgress
 import haruka.sync.backup.restoreMarker
+import haruka.sync.engine.SyncPhase
+import haruka.sync.work.SyncScheduler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,14 +20,15 @@ import kotlinx.coroutines.flow.map
 /**
  * Progress of long-running background jobs, shown as in-app banners.
  *
- * The jobs' notifiers report progress here; WorkManager decides whether a job is actually running,
- * so a killed worker can never leave a stale banner behind.
+ * The jobs' notifiers (and [haruka.sync.SyncManager.progress] for Drive sync) report progress here; WorkManager
+ * decides whether a job is actually running, so a killed worker can never leave a stale banner behind.
  */
 object BackgroundTaskProgress {
 
     enum class Kind { LIBRARY_UPDATE, RESTORE, SYNC }
 
-    data class Task(val kind: Kind, val current: Int, val total: Int)
+    /** [syncPhase] is set for Haruka's Drive sync, which labels the banner by phase. */
+    data class Task(val kind: Kind, val current: Int, val total: Int, val syncPhase: SyncPhase? = null)
 
     // Tags of the upstream workers (LibraryUpdateWorker.TAG, BackupRestoreWorker TAG). If upstream renames
     // them the banners simply never show.
@@ -60,13 +65,30 @@ object BackgroundTaskProgress {
         return combine(
             libraryUpdate,
             restore,
+            context.harukaGraph.syncManager.progress,
             workManager.isRunningFlow(LIBRARY_UPDATE_TAG),
-            workManager.isRunningFlow(RESTORE_TAG),
-        ) { update, restore, updateRunning, restoreRunning ->
+            combine(workManager.isRunningFlow(RESTORE_TAG), workManager.isRunningFlow(SyncScheduler.TAG), ::Pair),
+        ) { update, restore, sync, updateRunning, (restoreRunning, syncRunning) ->
             listOfNotNull(
                 update?.takeIf { updateRunning },
                 restore?.takeIf { restoreRunning },
+                syncTask(sync)?.takeIf { syncRunning },
             )
+        }
+    }
+
+    /**
+     * The banner task for a running Drive sync, null when there is nothing to show. Single-step phases (checking
+     * the remote head, writing the manifest) report 0/1 then 1/1, which says nothing, so they show as
+     * indeterminate; FINISH is the run's last report, right before the worker stops.
+     */
+    internal fun syncTask(progress: SyncProgress?): Task? {
+        val phase = progress?.phase ?: return null
+        return when (phase) {
+            SyncPhase.FINISH -> null
+            SyncPhase.CHECK, SyncPhase.COMMIT -> Task(Kind.SYNC, current = 0, total = 0, syncPhase = phase)
+            SyncPhase.DOWNLOAD, SyncPhase.MERGE, SyncPhase.UPLOAD, SyncPhase.APPLY ->
+                Task(Kind.SYNC, progress.done, progress.total, phase)
         }
     }
 

@@ -56,6 +56,28 @@ sealed interface SyncOutcome {
     data class Contended(val attempts: Int) : SyncOutcome
 }
 
+/** Result of `SyncEngine.reencrypt`, the rewrite commit that enables, changes or disables encryption. */
+sealed interface RewriteOutcome {
+
+    /**
+     * The head at [commitSeq] stores every payload and the manifest body under the new key (or in plaintext).
+     * Devices without that key stop with [SyncError.NeedsPassphrase] (or [SyncError.RemotePlaintext]).
+     */
+    data class Rewritten(val commitSeq: Long, val rewrittenFiles: Int) : RewriteOutcome
+
+    /**
+     * Nothing was written: the remote has no manifest yet (the first sync writes it with the new key) or is
+     * plaintext already when disabling.
+     */
+    data object Unchanged : RewriteOutcome
+
+    /** Nothing was written; as for a sync, the user (or an update) has to act first. */
+    data class Stopped(val error: SyncError) : RewriteOutcome
+
+    /** Every attempt lost its compare-and-swap to other devices' commits. Retry later. */
+    data class Contended(val attempts: Int) : RewriteOutcome
+}
+
 sealed interface UnlockResult {
     data class Unlocked(val key: SyncKey) : UnlockResult
 

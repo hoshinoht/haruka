@@ -48,4 +48,8 @@
         <item quantity="one">and %d more</item>
         <item quantity="other">and %d more</item>
     </plurals>
+    <plurals name="sync_notification_removals">
+        <item quantity="one">Sync is holding back %d removal from the library until you confirm or reject it</item>
+        <item quantity="other">Sync is holding back %d removals from the library until you confirm or reject them</item>
+    </plurals>
 </resources>

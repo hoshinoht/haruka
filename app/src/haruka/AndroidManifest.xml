@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Haruka entry points for every build type, merged by haruka.gradle.configureHarukaApp. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <!-- androidx.startup runs these at process start; libraries already declare the provider. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="haruka.sync.SyncTriggersInitializer"
+                android:value="androidx.startup" />
+        </provider>
+    </application>
+
+</manifest>

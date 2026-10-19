@@ -655,6 +655,11 @@ class MainActivity : BaseActivity() {
                 navigator.push(haruka.updateerrors.UpdateErrorsScreen())
                 null
             }
+            haruka.sync.SyncNotifier.ACTION_SHOW_SETTINGS -> {
+                navigator.popUntilRoot()
+                navigator.push(haruka.sync.ui.SyncSettingsScreen())
+                null
+            }
             // FORK <--
             Intent.ACTION_VIEW -> {
                 // Handling opening of backup files

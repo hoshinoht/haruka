@@ -13,7 +13,8 @@ import java.util.Properties
  * - Branding lives in variant source overlays under app/src/haruka/, which take priority over src/main and
  *   build-type source sets: res (every variant), res-release (release, foss), res-debug (debug, nightly).
  *   Benchmark builds keep their own src/benchmark/res label and launcher icon.
- * - Debug builds merge src/haruka/manifest-debug/AndroidManifest.xml (debug-only tools such as the Drive CAS
+ * - Every variant merges src/haruka/AndroidManifest.xml (fork entry points such as the sync lifecycle triggers);
+ *   debug builds also merge src/haruka/manifest-debug/AndroidManifest.xml (debug-only tools such as the Drive CAS
  *   self-test), so upstream's manifests stay untouched.
  * - Fork dependencies are pinned here rather than in upstream's version catalog, so catalog merges stay clean.
  */
@@ -49,6 +50,7 @@ fun configureHarukaApp(project: Project) {
                 "debug", "nightly" -> addStaticSourceDirectory("src/haruka/res-debug")
             }
         }
+        variant.sources.manifests.addStaticManifestFile("src/haruka/AndroidManifest.xml")
         if (variant.buildType == "debug") {
             variant.sources.manifests.addStaticManifestFile("src/haruka/manifest-debug/AndroidManifest.xml")
         }

@@ -29,11 +29,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppStateBanners
+import haruka.i18n.HR
 import haruka.motion.AnimationProfile
 import haruka.motion.LocalAnimationProfile
 import haruka.progress.BackgroundTaskProgress.Kind
 import haruka.progress.BackgroundTaskProgress.Task
+import haruka.sync.engine.SyncPhase
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
@@ -114,7 +117,7 @@ private fun TaskProgressRow(task: Task) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = stringResource(task.kind.label),
+                text = stringResource(task.label),
                 color = contentColor,
                 style = MaterialTheme.typography.labelMedium,
             )
@@ -164,9 +167,17 @@ private fun TaskProgressRow(task: Task) {
     }
 }
 
-private val Kind.label
-    get() = when (this) {
-        Kind.LIBRARY_UPDATE -> MR.strings.updating_library
-        Kind.RESTORE -> MR.strings.restoring_backup
-        Kind.SYNC -> MR.strings.syncing_library
+private val Task.label: StringResource
+    get() = when (syncPhase) {
+        // FINISH never reaches the banner (BackgroundTaskProgress.syncTask drops it).
+        null, SyncPhase.FINISH -> when (kind) {
+            Kind.LIBRARY_UPDATE -> MR.strings.updating_library
+            Kind.RESTORE -> MR.strings.restoring_backup
+            Kind.SYNC -> MR.strings.syncing_library
+        }
+        SyncPhase.CHECK -> HR.strings.sync_banner_checking
+        SyncPhase.DOWNLOAD -> HR.strings.sync_banner_downloading
+        SyncPhase.MERGE -> HR.strings.sync_banner_merging
+        SyncPhase.UPLOAD, SyncPhase.COMMIT -> HR.strings.sync_banner_uploading
+        SyncPhase.APPLY -> HR.strings.sync_banner_applying
     }

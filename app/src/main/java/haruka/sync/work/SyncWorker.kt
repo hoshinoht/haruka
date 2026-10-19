@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.util.system.workManager
 import haruka.di.harukaGraph
 import haruka.sync.SyncRunResult
 import haruka.sync.local.SYNC_LOG_TAG
+import haruka.sync.syncNotifier
 import logcat.LogPriority
 import logcat.logcat
 import tachiyomi.core.common.i18n.stringResource
@@ -41,7 +42,9 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : CoroutineWo
 
         setForegroundSafely()
         return try {
-            when (manager.runSync(reason)) {
+            val result = manager.runSync(reason)
+            applicationContext.syncNotifier.onRunFinished()
+            when (result) {
                 SyncRunResult.DONE, SyncRunResult.SKIPPED -> Result.success()
                 // The next trigger or periodic run tries again; the last result already says what failed.
                 SyncRunResult.RETRY -> if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.success()

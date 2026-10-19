@@ -63,6 +63,21 @@ internal class RemoteCodec(private val layout: RemoteLayout, private val key: Sy
     fun decodePrefs(ref: PayloadRef, stored: ByteArray): PrefsPayload =
         decode(ref) { SyncCodec.decodePrefs(plaintext(PayloadSlot.Prefs, ref, stored)) }
 
+    /**
+     * The payload [ref] names, verified like a decode, stored again by [target] (another key, or plaintext). The
+     * gzipped records are reused as they are, so the plaintext sha and entry count stay those of [ref].
+     */
+    fun reencode(slot: PayloadSlot, ref: PayloadRef, stored: ByteArray, target: RemoteCodec): EncodedPayload {
+        val gzipped = decode(ref) { opened(slot, ref, stored).also { checkPlaintext(ref, SyncCodec.gunzip(it)) } }
+        return target.store(slot, gzipped, ref.plaintextSha, ref.entryCount) { sha, encrypted ->
+            when (slot) {
+                is PayloadSlot.Bucket -> RemoteFile.bucket(slot.index, sha, encrypted)
+                PayloadSlot.Categories -> RemoteFile.categories(sha, encrypted)
+                PayloadSlot.Prefs -> RemoteFile.prefs(sha, encrypted)
+            }
+        }
+    }
+
     /** The envelope and plaintext header only; the header checks run before [openBody]. */
     fun readManifestFile(bytes: ByteArray): ManifestFile = try {
         ManifestFile.decode(bytes)
@@ -84,32 +99,38 @@ internal class RemoteCodec(private val layout: RemoteLayout, private val key: Sy
         plaintext: ByteArray,
         entryCount: Int,
         file: (storedSha: String, encrypted: Boolean) -> RemoteFile.Payload,
+    ): EncodedPayload = store(slot, SyncCodec.gzip(plaintext), SyncCodec.sha256Hex(plaintext), entryCount, file)
+
+    private inline fun store(
+        slot: PayloadSlot,
+        gzipped: ByteArray,
+        plaintextSha: String,
+        entryCount: Int,
+        file: (storedSha: String, encrypted: Boolean) -> RemoteFile.Payload,
     ): EncodedPayload {
-        val gzipped = SyncCodec.gzip(plaintext)
         val stored = key?.encryptPayload(layout, slot, gzipped) ?: gzipped
         val storedSha = SyncCodec.sha256Hex(stored)
-        return EncodedPayload(
-            file(storedSha, key != null),
-            stored,
-            storedSha,
-            SyncCodec.sha256Hex(plaintext),
-            entryCount,
-        )
+        return EncodedPayload(file(storedSha, key != null), stored, storedSha, plaintextSha, entryCount)
     }
 
-    private fun plaintext(slot: PayloadSlot, ref: PayloadRef, stored: ByteArray): ByteArray {
+    private fun plaintext(slot: PayloadSlot, ref: PayloadRef, stored: ByteArray): ByteArray =
+        SyncCodec.gunzip(opened(slot, ref, stored)).also { checkPlaintext(ref, it) }
+
+    /** The gzipped records of [stored] once its stored sha, its slot and (if encrypted) the key check out. */
+    private fun opened(slot: PayloadSlot, ref: PayloadRef, stored: ByteArray): ByteArray {
         if (SyncCodec.sha256Hex(stored) != ref.storedSha) {
             throw CorruptRemoteException("${ref.name} does not match its stored sha")
         }
         val file = layout.parse(ref.name) as? RemoteFile.Payload
             ?: throw CorruptRemoteException("${ref.name} is not a payload name")
         if (file.kind != slot.kind) throw CorruptRemoteException("${ref.name} referenced as ${slot.kind.wire}")
-        val gzipped = if (file.encrypted) requireKey().decryptPayload(layout, slot, stored) else stored
-        val plaintext = SyncCodec.gunzip(gzipped)
+        return if (file.encrypted) requireKey().decryptPayload(layout, slot, stored) else stored
+    }
+
+    private fun checkPlaintext(ref: PayloadRef, plaintext: ByteArray) {
         if (SyncCodec.sha256Hex(plaintext) != ref.plaintextSha) {
             throw CorruptRemoteException("${ref.name} does not match its plaintext sha")
         }
-        return plaintext
     }
 
     // A plaintext manifest naming encrypted payloads (or the reverse) is as unreadable as a flipped bit.

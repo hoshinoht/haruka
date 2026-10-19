@@ -118,4 +118,10 @@
     <string name="sync_encrypt">Encrypt</string>
     <string name="sync_change">Change</string>
     <string name="sync_unlock">Unlock</string>
+    <string name="sync_banner_checking">Syncing · Checking Google Drive</string>
+    <string name="sync_banner_downloading">Syncing · Downloading</string>
+    <string name="sync_banner_merging">Syncing · Merging</string>
+    <string name="sync_banner_uploading">Syncing · Uploading</string>
+    <string name="sync_banner_applying">Syncing · Updating library</string>
+    <string name="sync_notification_stopped">Sync stopped</string>
 </resources>

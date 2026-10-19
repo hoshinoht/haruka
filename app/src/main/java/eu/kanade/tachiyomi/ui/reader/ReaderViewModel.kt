@@ -130,6 +130,7 @@ class ReaderViewModel(
     private val downloadCache: DownloadCache,
     // FORK -->
     private val harukaDedup: haruka.chapter.dedup.DedupSurfaces,
+    private val harukaSyncTriggers: haruka.sync.SyncTriggers,
     // FORK <--
 ) : ViewModel() {
 
@@ -721,6 +722,7 @@ class ReaderViewModel(
         deleteChapterIfNeeded(readerChapter)
         // FORK -->
         manga?.let { harukaDedup.onChapterRead(it, readerChapter.chapter) }
+        harukaSyncTriggers.onChapterCompleted()
         // FORK <--
 
         val markDuplicateAsRead = libraryPreferences.markDuplicateReadChapterAsRead.get()
