@@ -34,10 +34,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.view.setComposeContent
+import haruka.di.harukaGraph
 import haruka.sync.auth.DriveAuthResult
 import haruka.sync.auth.GoogleDriveAuth
 import haruka.sync.drive.DriveRemoteStore
 import haruka.sync.remote.RemoteLayout
+import haruka.sync.ui.SyncInterval
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -57,6 +59,15 @@ import okhttp3.OkHttpClient
  * It authorizes `drive.appdata` (showing Google's account picker / consent when needed), then runs
  * [DriveCasSelfTest] in the namespace `<applicationId>.cascheck`, apart from the dev sync remote, because the
  * check deletes every file in its namespace.
+ *
+ * With the `haruka_sync` extra it instead drives the real sync scheduler and closes (`adb logcat -s HarukaSync`):
+ *
+ * ```
+ * adb shell am start -n app.haruka.dev/haruka.sync.debug.DriveCasSelfTestActivity --es haruka_sync now
+ * adb shell am start -n app.haruka.dev/haruka.sync.debug.DriveCasSelfTestActivity --es haruka_sync enable \
+ *     --ei interval 1 --ez wifi_only true --ez charging_only true
+ * adb shell am start -n app.haruka.dev/haruka.sync.debug.DriveCasSelfTestActivity --es haruka_sync disable
+ * ```
  */
 class DriveCasSelfTestActivity : BaseActivity() {
 
@@ -68,6 +79,11 @@ class DriveCasSelfTestActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        intent.getStringExtra(EXTRA_SYNC)?.let { action ->
+            runSyncAction(action)
+            finish()
+            return
+        }
         setComposeContent {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Column(
@@ -94,6 +110,31 @@ class DriveCasSelfTestActivity : BaseActivity() {
             }
         }
         if (savedInstanceState == null) viewModel.start()
+    }
+
+    private fun runSyncAction(action: String) {
+        val manager = harukaGraph.syncManager
+        when (action) {
+            "now" -> manager.syncNow()
+            "enable" -> {
+                manager.setWifiOnly(intent.getBooleanExtra("wifi_only", false))
+                manager.setChargingOnly(intent.getBooleanExtra("charging_only", false))
+                val hours = intent.getIntExtra("interval", SyncInterval.DEFAULT.hours)
+                manager.setInterval(SyncInterval.entries.firstOrNull { it.hours == hours } ?: SyncInterval.DEFAULT)
+                manager.setEnabled(true)
+            }
+            "disable" -> manager.setEnabled(false)
+            else -> {
+                Log.w(SYNC_TAG, "debug action unknown: $action")
+                return
+            }
+        }
+        Log.i(SYNC_TAG, "debug action=$action enqueued")
+    }
+
+    private companion object {
+        const val EXTRA_SYNC = "haruka_sync"
+        const val SYNC_TAG = "HarukaSync"
     }
 }
 

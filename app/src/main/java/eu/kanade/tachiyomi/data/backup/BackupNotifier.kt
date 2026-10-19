@@ -128,7 +128,7 @@ class BackupNotifier(
 
     fun showRestoreError(error: String?) {
         // FORK -->
-        haruka.progress.BackgroundTaskProgress.onRestoreFinished()
+        haruka.progress.BackgroundTaskProgress.onRestoreFinished(context)
         // FORK <--
         context.cancelNotification(Notifications.ID_RESTORE_PROGRESS)
 
@@ -148,7 +148,7 @@ class BackupNotifier(
         sync: Boolean,
     ) {
         // FORK -->
-        haruka.progress.BackgroundTaskProgress.onRestoreFinished()
+        haruka.progress.BackgroundTaskProgress.onRestoreFinished(context)
         // FORK <--
         val contentTitle = if (sync) {
             context.stringResource(MR.strings.library_sync_complete)

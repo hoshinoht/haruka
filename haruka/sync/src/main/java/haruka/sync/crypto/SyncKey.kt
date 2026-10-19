@@ -8,6 +8,9 @@ import haruka.sync.remote.Manifest
 import haruka.sync.remote.ManifestFile
 import haruka.sync.remote.RemoteKind
 import haruka.sync.remote.RemoteLayout
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoBuf
+import kotlinx.serialization.protobuf.ProtoNumber
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.security.SecureRandom
@@ -60,6 +63,12 @@ class SyncKey private constructor(
         val body = open(key, manifestAad(layout, file.header), file.storedBody)
         return Manifest(file.header, SyncCodec.decodeManifestBody(body))
     }
+
+    /**
+     * This key and its params as one blob, for the app to wrap with a platform keystore (Android Keystore) so the
+     * passphrase isn't asked again on every sync. Secret material: never store or log it unwrapped.
+     */
+    fun export(): ByteArray = exportFormat.encodeToByteArray(ExportedKey.serializer(), ExportedKey(params, key.encoded))
 
     override fun toString(): String = "SyncKey(keyId=$keyId)"
 
@@ -125,6 +134,31 @@ class SyncKey private constructor(
                 null
             }
         }
+
+        /**
+         * The key [export] produced. The key check runs again, so a blob that was altered or belongs to other params
+         * never yields a key that fails on the next sync.
+         * @throws SyncCryptoException when [exported] is malformed or its key does not open its key check.
+         */
+        fun import(exported: ByteArray): SyncKey {
+            val decoded = try {
+                exportFormat.decodeFromByteArray(ExportedKey.serializer(), exported)
+            } catch (e: IllegalArgumentException) {
+                // SerializationException is one; the decoder throws the base type for some malformed input.
+                throw SyncCryptoException("Malformed exported key", e)
+            }
+            if (decoded.key.size !=
+                KEY_BITS / 8
+            ) {
+                throw SyncCryptoException("Exported key has ${decoded.key.size} bytes")
+            }
+            val key = SecretKeySpec(decoded.key, "AES")
+            decoded.key.fill(0)
+            open(key, keyCheckAad(decoded.params.keyId), decoded.params.keyCheck)
+            return SyncKey(decoded.params, key)
+        }
+
+        private val exportFormat = ProtoBuf
 
         /**
          * PBKDF2 over the NFC form of [passphrase], so composed and decomposed input of the same text (different
@@ -206,6 +240,13 @@ class SyncKey private constructor(
         }
     }
 }
+
+/** The wire form of [SyncKey.export]; device-local, never written to the remote. */
+@Serializable
+private class ExportedKey(
+    @ProtoNumber(1) val params: EncryptionParams,
+    @ProtoNumber(2) val key: ByteArray,
+)
 
 /**
  * The logical place of a payload in the remote. Payload names carry the sha of the ciphertext, so the associated

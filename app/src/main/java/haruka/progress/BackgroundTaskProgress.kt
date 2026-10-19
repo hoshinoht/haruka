@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.util.system.workManager
+import haruka.sync.backup.restoreMarker
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,8 +48,10 @@ object BackgroundTaskProgress {
         restore.value = Task(if (sync) Kind.SYNC else Kind.RESTORE, current, total)
     }
 
-    fun onRestoreFinished() {
+    /** Called on every end of a restore (success, error, cancel); the marker makes the next sync union-merge. */
+    fun onRestoreFinished(context: Context) {
         restore.value = null
+        context.restoreMarker.onRestoreFinished()
     }
 
     /** Tasks to show, top to bottom. */

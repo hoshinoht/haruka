@@ -104,6 +104,9 @@ object SettingsDataScreen : SearchableSettings {
             Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.pref_storage_location_info)),
 
             getBackupAndRestoreGroup(backupPreferences = backupPreferences),
+            // FORK -->
+            haruka.sync.ui.syncSettingsPreference(),
+            // FORK <--
             getDataGroup(),
             getExportGroup(),
         )

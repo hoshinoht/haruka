@@ -34,4 +34,24 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
         "haruka_beta_updates",
         SemVer.parse(BuildConfig.VERSION_NAME)?.isPrerelease == true,
     )
+
+    // Sync settings are device-local: app-state keys never go into Mihon backups, and no haruka_sync_* key syncs.
+
+    /** Automatic syncs (periodic and triggers); a manual "Sync now" runs either way. */
+    val syncEnabled: Preference<Boolean> =
+        preferenceStore.getBoolean(Preference.appStateKey("haruka_sync_enabled"), false)
+
+    /** Hours between periodic syncs; 0 turns the periodic sync off. */
+    val syncIntervalHours: Preference<Int> =
+        preferenceStore.getInt(Preference.appStateKey("haruka_sync_interval_hours"), 6)
+
+    val syncWifiOnly: Preference<Boolean> =
+        preferenceStore.getBoolean(Preference.appStateKey("haruka_sync_wifi_only"), false)
+
+    val syncChargingOnly: Preference<Boolean> =
+        preferenceStore.getBoolean(Preference.appStateKey("haruka_sync_charging_only"), false)
+
+    /** The library in Drive is end-to-end encrypted with a key this device holds (wrapped by Android Keystore). */
+    val syncEncryption: Preference<Boolean> =
+        preferenceStore.getBoolean(Preference.appStateKey("haruka_sync_encryption"), false)
 }

@@ -7,6 +7,7 @@ import haruka.chapter.dedup.DedupSettings
 import haruka.chapter.dedup.OfficialCatalogLoader
 import haruka.library.LibraryToggle
 import haruka.preference.HarukaPreferences
+import haruka.sync.SyncManager
 import haruka.updateerrors.UpdateErrorStore
 import mihon.app.di.appGraph
 
@@ -21,6 +22,7 @@ interface HarukaGraph {
     val updateErrorStore: UpdateErrorStore
     val dedupSettings: DedupSettings
     val officialCatalogLoader: OfficialCatalogLoader
+    val syncManager: SyncManager
 }
 
 val Context.harukaGraph: HarukaGraph get() = appGraph as HarukaGraph

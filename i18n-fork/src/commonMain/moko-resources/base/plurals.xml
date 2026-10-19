@@ -24,4 +24,28 @@
         <item quantity="one">%d selected</item>
         <item quantity="other">%d selected</item>
     </plurals>
+    <plurals name="sync_interval_summary">
+        <item quantity="one">Every hour</item>
+        <item quantity="other">Every %d hours</item>
+    </plurals>
+    <plurals name="sync_interval_short">
+        <item quantity="one">%d h</item>
+        <item quantity="other">%d h</item>
+    </plurals>
+    <plurals name="sync_conflicts">
+        <item quantity="one">%d setting was changed on two devices; this device\'s value was kept</item>
+        <item quantity="other">%d settings were changed on two devices; this device\'s values were kept</item>
+    </plurals>
+    <plurals name="sync_removals_remote">
+        <item quantity="one">%d entry was removed from the library on another device</item>
+        <item quantity="other">%d entries were removed from the library on another device</item>
+    </plurals>
+    <plurals name="sync_removals_local">
+        <item quantity="one">%d entry was removed from the library on this device</item>
+        <item quantity="other">%d entries were removed from the library on this device</item>
+    </plurals>
+    <plurals name="sync_removals_more">
+        <item quantity="one">and %d more</item>
+        <item quantity="other">and %d more</item>
+    </plurals>
 </resources>
