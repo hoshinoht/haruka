@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /**
  * Progress of long-running background jobs, shown as in-app banners.
@@ -51,6 +53,7 @@ object BackgroundTaskProgress {
 
     fun onRestoreProgress(current: Int, total: Int, sync: Boolean) {
         restore.value = Task(if (sync) Kind.SYNC else Kind.RESTORE, current, total)
+        restoreMarker.onRestoreProgress()
     }
 
     /** Called on every end of a restore (success, error, cancel); the marker makes the next sync union-merge. */
@@ -58,6 +61,10 @@ object BackgroundTaskProgress {
         restore.value = null
         context.restoreMarker.onRestoreFinished()
     }
+
+    // The upstream progress hook passes no Context; the marker is app-scoped, so the application context reaches the
+    // same instance onRestoreFinished uses.
+    private val restoreMarker by lazy { Injekt.get<Context>().restoreMarker }
 
     /** Tasks to show, top to bottom. */
     fun visibleTasks(context: Context): Flow<List<Task>> {

@@ -545,7 +545,10 @@ private class CategoryGen(private val random: Random) {
 
     private fun chance(percent: Int) = random.nextInt(100) < percent
 
-    /** Live categories with dense orders and unique names, plus young tombstones of other uuids. */
+    /**
+     * Live categories with dense orders and unique names, plus young tombstones of other uuids, some of them left
+     * by a collapse into a uuid of the pool (live, deleted, itself or in a cycle).
+     */
     fun base(): CategoriesPayload {
         val uuids = (0..<10).shuffled(random).take(random.nextInt(0, 9)).map { "u$it" }
         val liveCount = random.nextInt(0, uuids.size + 1)
@@ -560,6 +563,7 @@ private class CategoryGen(private val random: Random) {
                 order = i.toLong(),
                 flags = random.nextLong(0, 8),
                 deletedAtMillis = MergeArbs.NOW - random.nextLong(5, 170) * MergeArbs.DAY,
+                mergedIntoUuid = if (chance(30)) uuids.random(random) else null,
             )
         }
         return CategoriesPayload(live + tombstones).canonical()

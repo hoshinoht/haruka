@@ -6,6 +6,7 @@ import haruka.sync.model.CategoryRecord
 import haruka.sync.model.EntryKey
 import haruka.sync.model.EntryRecord
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
@@ -94,7 +95,7 @@ class CategoryMergeTest {
         categories.merged shouldBe payload(
             cat("a", "Fav"),
             cat("a9", "New", order = 1),
-            cat("b2", "New", order = 1).copy(deletedAtMillis = NOW),
+            cat("b2", "New", order = 1).copy(deletedAtMillis = NOW, mergedIntoUuid = "a9"),
         )
         categories.remap shouldBe mapOf("b2" to "a9")
         categories.localChanges.create shouldBe listOf(cat("a9", "New", order = 1))
@@ -110,11 +111,87 @@ class CategoryMergeTest {
         val remote = payload(cat("r0", "Later", order = 1), cat("u8", "B2"))
         val first = CategoryMerge.merge(base, listOf(cat("u8", "Later")), remote, NOW)
 
-        first.merged shouldBe payload(cat("r0", "Later"), cat("u8", "B2").copy(deletedAtMillis = NOW))
+        first.merged shouldBe payload(
+            cat("r0", "Later"),
+            cat("u8", "B2").copy(deletedAtMillis = NOW, mergedIntoUuid = "r0"),
+        )
         first.remap shouldBe mapOf("u8" to "r0")
         val applied = first.merged.categories.filter { it.deletedAtMillis == null }
-        CategoryMerge.merge(base, applied, remote, NOW).merged shouldBe first.merged
-        CategoryMerge.merge(first.merged, applied, first.merged, NOW + DAY).merged shouldBe first.merged
+        // Against the pre-collapse remote the applied result reads as a plain local delete of u8: nothing left
+        // names what it collapsed into. The engine never merges that state (it applies only after the commit
+        // lands), so only the pointer may differ.
+        val stale = CategoryMerge.merge(base, applied, remote, NOW).merged
+        stale shouldBe first.merged.copy(categories = first.merged.categories.map { it.copy(mergedIntoUuid = null) })
+        val settled = CategoryMerge.merge(first.merged, applied, first.merged, NOW + DAY)
+        settled.merged shouldBe first.merged
+        settled.remap.shouldBeEmpty()
+    }
+
+    @Test
+    fun `a membership added to a category collapsed elsewhere moves to the survivor`() {
+        // Device A renames u8 to the name r0 already has remotely and collapses u8 into r0.
+        val base = payload(cat("u8", "B2"))
+        val collapsed = CategoryMerge.merge(
+            base,
+            listOf(cat("u8", "Later")),
+            payload(cat("r0", "Later", order = 1), cat("u8", "B2")),
+            NOW,
+        ).merged
+
+        // Device B, still on the base, assigned an entry to u8 meanwhile and syncs after A.
+        val categories = CategoryMerge.merge(base, base.categories, collapsed, NOW)
+
+        categories.merged shouldBe collapsed
+        categories.remap shouldBe mapOf("u8" to "r0")
+        categories.localChanges.create shouldBe listOf(cat("r0", "Later"))
+        categories.localChanges.delete shouldBe listOf("u8")
+        mergeEntry(categories, base = "", local = "u8", remote = "").categoryUuids shouldBe listOf("r0")
+    }
+
+    @Test
+    fun `a membership committed before a collapse moves to the survivor`() {
+        // Device B committed an entry in u8; device A then collapses u8 into r0.
+        val base = payload(cat("u8", "B2"))
+        val categories = CategoryMerge.merge(
+            base,
+            listOf(cat("u8", "Later")),
+            payload(cat("r0", "Later", order = 1), cat("u8", "B2")),
+            NOW,
+        )
+
+        categories.remap shouldBe mapOf("u8" to "r0")
+        mergeEntry(categories, base = "", local = "", remote = "u8").categoryUuids shouldBe listOf("r0")
+    }
+
+    @Test
+    fun `a membership follows a chain of collapses to the live survivor`() {
+        // c3 collapsed into c2, which later collapsed into c1; this device last synced before both.
+        val base = payload(cat("c3", "Fav"))
+        val remote = payload(
+            cat("c1", "Fav"),
+            cat("c2", "Fav").copy(deletedAtMillis = NOW - DAY, mergedIntoUuid = "c1"),
+            cat("c3", "Fav").copy(deletedAtMillis = NOW - 2 * DAY, mergedIntoUuid = "c2"),
+        )
+        val categories = CategoryMerge.merge(base, base.categories, remote, NOW)
+
+        categories.merged shouldBe remote
+        categories.remap shouldBe mapOf("c2" to "c1", "c3" to "c1")
+        mergeEntry(categories, base = "", local = "c3", remote = "").categoryUuids shouldBe listOf("c1")
+    }
+
+    @Test
+    fun `a pointer cycle or a deleted survivor drops the membership`() {
+        val base = payload(cat("x", "X"), cat("y", "Y", order = 1), cat("z", "Z", order = 2))
+        val remote = payload(
+            cat("x", "X").copy(deletedAtMillis = NOW - DAY, mergedIntoUuid = "y"),
+            cat("y", "Y").copy(deletedAtMillis = NOW - DAY, mergedIntoUuid = "x"),
+            cat("z", "Z").copy(deletedAtMillis = NOW - DAY, mergedIntoUuid = "gone"),
+        )
+        val categories = CategoryMerge.merge(base, base.categories, remote, NOW)
+
+        categories.remap.shouldBeEmpty()
+        categories.deleted shouldBe setOf("x", "y", "z")
+        mergeEntry(categories, base = "", local = "x,y,z", remote = "").categoryUuids.shouldBeEmpty()
     }
 
     @Test

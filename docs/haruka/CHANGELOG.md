@@ -5,7 +5,16 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 
 ## [0.1.0-beta.2]
 
-In progress.
+Library sync across your devices through your own Google Drive, plus chapter-list fixes and a leaner fork.
+
+### Sync
+- Sync your library between devices with Google Drive (Settings › Data and storage › Google Drive). Haruka keeps its data in a hidden app folder in your Drive that other apps can't see; there is no Haruka server. See [sync.md](sync.md).
+- Synced: library entries, categories, read and bookmark state, last page, reading history, tracker links, duplicate-chapter rules and Haruka settings.
+- Changes from different devices are combined, not overwritten: a chapter read anywhere stays read, the furthest page wins, and for settings the device that syncs wins.
+- Removing many entries at once (more than 25, or 10% of the library) waits for your confirmation on the Sync screen.
+- Syncs automatically after you finish a chapter, when you open or leave the app, and on a schedule you choose (Wi-Fi only and charging only are optional).
+- Optional end-to-end encryption with a passphrase. A lost passphrase cannot be recovered.
+- Restoring a backup never deletes anything through sync: the next sync combines the restored library with the other devices.
 
 ### Chapters
 - Parts named "Chapter 21 -1", "-2", … are recognised as parts of chapter 21 even when the source numbers them all 21.
@@ -14,8 +23,11 @@ In progress.
 
 ### Look and feel
 - Hoshino is listed first in the theme picker.
+- Warning colours in Hoshino are coral instead of pink, so "18+" and "Mixed" extension labels are easy to tell apart.
 
 ### Internal
+- Haruka now touches fewer Mihon files (73 before sync, 75 with it, down from 89), and its own code lives in separate `:haruka:core`, `:haruka:motion` and `:haruka:sync` modules.
+- Startup profiles are Mihon's own plus Haruka rules; measured no slower.
 - Performance checks kept in `scripts/haruka/perf` (cold start, list jank, Perfetto trace).
 
 ## [0.1.0-beta.1]

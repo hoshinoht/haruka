@@ -157,6 +157,7 @@ object SyncArbs {
                 order = long(),
                 flags = long(),
                 deletedAtMillis = orNull(20) { long() },
+                mergedIntoUuid = orNull(20) { text(6) },
             )
         }.distinctBy { it.uuid },
     ).canonical()

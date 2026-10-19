@@ -128,6 +128,11 @@ data class CategoryRecord(
     @ProtoNumber(4) val flags: Long = 0,
     /** Tombstone time; null while the category exists. */
     @ProtoNumber(5) val deletedAtMillis: Long? = null,
+    /**
+     * On a tombstone left by collapsing equal names, the uuid it collapsed into, so devices that still assign
+     * entries to it move those memberships instead of dropping them. Null on live categories and plain deletes.
+     */
+    @ProtoNumber(6) val mergedIntoUuid: String? = null,
 )
 
 /** A whitelisted fork preference in its stored string form; an absent record means the preference is unset. */

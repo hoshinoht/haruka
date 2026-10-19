@@ -71,7 +71,13 @@ class CategoryMergePropertiesTest {
     ) { s ->
         val m = merge(s.base, s.local, s.remote).merged
 
-        merge(s.base, live(m), s.remote).merged shouldBe m
+        // Against the pre-merge remote, a collapse loser the base had live reads as a plain local delete: nothing
+        // left names its survivor. The engine never merges that state (it applies only after the commit lands),
+        // so that merge may only lose collapse pointers, never change or add one.
+        val stale = merge(s.base, live(m), s.remote).merged
+        stale.withoutPointers() shouldBe m.withoutPointers()
+        val pointers = m.pointers()
+        stale.pointers().filter { (uuid, into) -> pointers[uuid] != into }.shouldBeEmpty()
         val settled = merge(m, live(m), m)
         settled.merged shouldBe m
         settled.remoteDirty shouldBe false
@@ -110,4 +116,10 @@ class CategoryMergePropertiesTest {
         changes.order.forEachIndexed { i, uuid -> byUuid[uuid] = byUuid.getValue(uuid).copy(order = i.toLong()) }
         return byUuid.values.sortedBy { it.uuid }
     }
+
+    private fun CategoriesPayload.pointers(): Map<String, String> =
+        categories.mapNotNull { c -> c.mergedIntoUuid?.let { c.uuid to it } }.toMap()
+
+    private fun CategoriesPayload.withoutPointers(): CategoriesPayload =
+        copy(categories = categories.map { it.copy(mergedIntoUuid = null) })
 }

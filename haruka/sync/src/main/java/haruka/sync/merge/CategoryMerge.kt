@@ -27,7 +27,11 @@ data class CategoryMergeResult(
     /** True when [merged] differs from the remote payload and must be uploaded. */
     val remoteDirty: Boolean,
     val localChanges: CategoryChangeSet,
-    /** Uuids collapsed into a same-named category with a smaller uuid; pass to [EntryMergeOptions.categoryRemap]. */
+    /**
+     * Categories this merge deletes that were collapsed into a same-named category, here or on another device
+     * (directly or through a chain of collapse tombstones), mapped to the live survivor; pass to
+     * [EntryMergeOptions.categoryRemap].
+     */
     val remap: Map<String, String>,
     /** Every uuid that is not live after the merge; pass to [EntryMergeOptions.deletedCategories]. */
     val deleted: Set<String>,
@@ -98,15 +102,28 @@ object CategoryMerge {
         val live = ArrayList<CategoryRecord>()
         val tombstones = ArrayList<CategoryRecord>()
         val deleted = HashSet<String>()
+        // Collapse pointers of every buried category, and the buried ones whose memberships still have to move:
+        // those the base already had deleted moved theirs when that delete was applied.
+        val pointers = HashMap<String, String>()
+        val moved = ArrayList<String>()
 
         // A tombstone's payload is the remote's copy, then the base's, so re-merging an applied result rewrites
-        // nothing; only a category neither side knows yet keeps its merged fields.
-        fun bury(uuid: String, merged: CategoryRecord?) {
+        // nothing; only a category neither side knows yet keeps its merged fields. A collapse names its survivor;
+        // any other delete keeps the pointer the stored tombstone has.
+        fun bury(uuid: String, merged: CategoryRecord?, mergedInto: String? = null) {
             deleted += uuid
             val bc = b[uuid]
             val rc = r[uuid]
             val deletedAt = maxOfNullable(bc?.deletedAtMillis, rc?.deletedAtMillis) ?: nowMillis
-            if (!isExpired(deletedAt, nowMillis)) tombstones += (rc ?: bc ?: merged!!).copy(deletedAtMillis = deletedAt)
+            val source = rc ?: bc ?: merged!!
+            val into = mergedInto ?: source.mergedIntoUuid
+            if (into != null) {
+                pointers[uuid] = into
+                if (bc?.deletedAtMillis == null) moved += uuid
+            }
+            if (!isExpired(deletedAt, nowMillis)) {
+                tombstones += source.copy(deletedAtMillis = deletedAt, mergedIntoUuid = into)
+            }
         }
 
         for (uuid in uuids) {
@@ -138,17 +155,16 @@ object CategoryMerge {
         }
 
         // Mihon keeps category names unique: equal names collapse into the smallest uuid (uuids iterate sorted).
-        val remap = HashMap<String, String>()
         val survivors = LinkedHashMap<String, CategoryRecord>()
         for (category in live) {
             val survivor = survivors[category.name]
             if (survivor == null) {
                 survivors[category.name] = category
             } else {
-                remap[category.uuid] = survivor.uuid
-                bury(category.uuid, merged = category)
+                bury(category.uuid, merged = category, mergedInto = survivor.uuid)
             }
         }
+        val remap = remap(moved, pointers, survivors.values.mapTo(HashSet()) { it.uuid })
         val ordered = order(b, l, r, survivors.values, union = base == null, conflicts)
             .mapIndexed { index, category -> category.withOrder(index.toLong()) }
 
@@ -162,6 +178,21 @@ object CategoryMerge {
             deleted = deleted,
             conflicts = conflicts,
         )
+    }
+
+    /**
+     * Follows each [moved] uuid's [pointers] to the end of its chain; a chain that ends in a category that is not
+     * [live] (deleted, pruned, or a cycle) maps nothing, so its memberships are dropped like any deleted category's.
+     */
+    private fun remap(moved: List<String>, pointers: Map<String, String>, live: Set<String>): Map<String, String> {
+        val remap = HashMap<String, String>()
+        for (uuid in moved) {
+            val seen = hashSetOf(uuid)
+            var target = pointers.getValue(uuid)
+            while (seen.add(target)) target = pointers[target] ?: break
+            if (target in live) remap[uuid] = target
+        }
+        return remap
     }
 
     private fun localChanges(local: Map<String, CategoryRecord>, ordered: List<CategoryRecord>): CategoryChangeSet {

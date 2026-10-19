@@ -166,7 +166,7 @@ class SyncManager(
         val uploadUnderNewEpoch = status.uploadUnderNewEpoch
         val request = SyncRequest(
             key = key,
-            // Read right before each run: a restore that just finished must force union mode.
+            // Read right before each run: a restore that started or finished since must force union mode.
             lastRestoreAtMillis = restoreMarker.lastRestoreAtMillis(),
             confirmRemovals = decision?.takeIf { it.confirm }?.keys.orEmpty().toSet(),
             rejectRemovals = decision?.takeUnless { it.confirm }?.keys.orEmpty().toSet(),

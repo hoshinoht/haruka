@@ -56,6 +56,48 @@ class RestoreMarkerTest {
     }
 
     @Test
+    fun `a restore killed mid-way is recorded by its first progress report`() {
+        val marker = marker(stored = 1_700_000_000_000)
+
+        marker.onRestoreProgress(nowMillis = 1_800_000_000_000)
+
+        marker.lastRestoreAtMillis() shouldBe 1_800_000_000_000
+    }
+
+    @Test
+    fun `later progress reports of the same restore leave the marker alone`() {
+        val marker = marker()
+
+        marker.onRestoreProgress(nowMillis = 1_800_000_000_000)
+        marker.onRestoreProgress(nowMillis = 1_800_000_000_500)
+        marker.onRestoreProgress(nowMillis = 1_800_000_001_000)
+
+        marker.lastRestoreAtMillis() shouldBe 1_800_000_000_000
+    }
+
+    @Test
+    fun `the end of a restore moves the marker past its start`() {
+        // A sync that ran mid-restore recorded the start as seen; the end must still force union mode again.
+        val marker = marker()
+
+        marker.onRestoreProgress(nowMillis = 1_800_000_000_000)
+        marker.onRestoreFinished(nowMillis = 1_800_000_000_000)
+
+        marker.lastRestoreAtMillis() shouldBe 1_800_000_000_001
+    }
+
+    @Test
+    fun `the next restore is recorded at its start again`() {
+        val marker = marker()
+
+        marker.onRestoreProgress(nowMillis = 1_800_000_000_000)
+        marker.onRestoreFinished(nowMillis = 1_800_000_010_000)
+        marker.onRestoreProgress(nowMillis = 1_900_000_000_000)
+
+        marker.lastRestoreAtMillis() shouldBe 1_900_000_000_000
+    }
+
+    @Test
     fun `Mihon backups never carry the marker, even with private settings included`() {
         val store = mockk<PreferenceStore> {
             every { getAll() } returns mapOf(

@@ -38,6 +38,7 @@ The name is 遥か, "far away": the long haul of a reading list that never ends.
 | **Extensions** | [keiyoushi/extensions-source](https://github.com/keiyoushi/extensions-source), unmodified extension API |
 | **Backups** | Mihon's format; restore a Mihon (or Komikku) backup to move in |
 | **Updates** | In-app updater from this repository, with an optional beta channel |
+| **Sync** | Optional, through a hidden app folder in your own Google Drive; no Haruka server |
 
 ## Features
 
@@ -52,6 +53,11 @@ The name is 遥か, "far away": the long haul of a reading list that never ends.
 - **Progress banners:** library updates and backup restores show progress inside the app.
 - **Update errors:** a screen listing the series that failed the last library update.
 - **Related titles and short titles:** suggestions from the extension on each series, and titles without trailing lists of alternative names.
+
+### Sync
+- **Google Drive sync:** library, categories, reading progress, history, tracker links and Haruka settings stay the same on every device, stored only in a hidden folder in your own Drive.
+- **Combines, never overwrites:** a chapter read anywhere stays read, the furthest page wins, and large removals wait for your confirmation.
+- **Automatic:** after reading, on app open and close, and on a schedule; optional end-to-end encryption. Details in [sync.md](../docs/haruka/sync.md).
 
 ### Migration
 - **Range selection:** long-press to select a range, select all or none, jump to either end.
