@@ -25,7 +25,7 @@ class UpdatesGroupingTest {
         )
 
         rows shouldBe listOf(
-            GroupedRow.Header(today),
+            GroupedRow.Header(today, chapterCount = 4),
             GroupedRow.Group(GroupKey(today, 10), listOf(Update(1, 10, today), Update(3, 10, today))),
             GroupedRow.Group(GroupKey(today, 20), listOf(Update(2, 20, today), Update(4, 20, today))),
         )
@@ -39,9 +39,9 @@ class UpdatesGroupingTest {
         )
 
         rows shouldBe listOf(
-            GroupedRow.Header(today),
+            GroupedRow.Header(today, chapterCount = 1),
             GroupedRow.Group(GroupKey(today, 10), listOf(Update(1, 10, today))),
-            GroupedRow.Header(yesterday),
+            GroupedRow.Header(yesterday, chapterCount = 1),
             GroupedRow.Group(GroupKey(yesterday, 10), listOf(Update(2, 10, yesterday))),
         )
     }

@@ -1,39 +1,22 @@
 package haruka.updates
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.components.relativeDateText
 import eu.kanade.presentation.manga.components.ChapterDownloadAction
-import eu.kanade.presentation.updates.UpdatesUiItem
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import haruka.di.harukaGraph
-import haruka.i18n.HR
 import haruka.motion.ExpandableRows
 import haruka.motion.listItemMotion
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
-import mihon.icons.materialsymbols.rounded.KeyboardArrowUp
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.ListGroupHeader
-import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
@@ -97,9 +80,10 @@ fun groupedUpdatesUiItems(
         },
     ) { row ->
         when (row) {
-            is GroupedRow.Header -> ListGroupHeader(
+            is GroupedRow.Header -> UpdatesDateHeader(
+                date = row.date,
+                chapterCount = row.chapterCount,
                 modifier = listItemMotion(this),
-                text = relativeDateText(row.date),
             )
             is GroupedRow.Group -> if (grouping.conversations) {
                 UpdatesConversation(
@@ -156,10 +140,13 @@ private fun UpdatesGroup(
             onClickCover = onClickCover,
             onClickUpdate = onClickUpdate,
             onDownloadChapter = onDownloadChapter,
+            showSeries = true,
+            expandButton = {
+                if (group.items.size > 1) {
+                    GroupExpandButton(hiddenCount = group.hidden.size, expanded = expanded, onClick = onToggleExpanded)
+                }
+            },
         )
-        if (group.items.size > 1) {
-            ExpandToggle(hiddenCount = group.hidden.size, expanded = expanded, onClick = onToggleExpanded)
-        }
         ExpandableRows(expanded) {
             group.hidden.forEachIndexed { index, item ->
                 UpdateRow(
@@ -171,6 +158,7 @@ private fun UpdatesGroup(
                     onClickCover = onClickCover,
                     onClickUpdate = onClickUpdate,
                     onDownloadChapter = onDownloadChapter,
+                    showSeries = false,
                     modifier = Modifier.revealedRow(index),
                 )
             }
@@ -188,10 +176,12 @@ private fun UpdateRow(
     onClickCover: (UpdatesItem) -> Unit,
     onClickUpdate: (UpdatesItem) -> Unit,
     onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
+    showSeries: Boolean,
     modifier: Modifier = Modifier,
+    expandButton: @Composable () -> Unit = {},
 ) {
     fun select(fromLongPress: Boolean) = selectAll(targets, !selected, fromLongPress, onUpdateSelected)
-    UpdatesUiItem(
+    UpdatesRow(
         update = item.update,
         selected = selected,
         readProgress = item.update.lastPageRead
@@ -205,7 +195,9 @@ private fun UpdateRow(
         }.takeIf { !selectionMode },
         downloadStateProvider = item.downloadStateProvider,
         downloadProgressProvider = item.downloadProgressProvider,
+        showSeries = showSeries,
         modifier = modifier,
+        expandButton = expandButton,
     )
 }
 
@@ -229,35 +221,4 @@ internal fun downloadTargets(
     onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
 ) {
     onDownloadChapter(if (action == ChapterDownloadAction.START) targets else listOf(item), action)
-}
-
-@Composable
-private fun ExpandToggle(hiddenCount: Int, expanded: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(start = 72.dp, end = 16.dp, top = 2.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = if (expanded) {
-                MaterialSymbols.Rounded.KeyboardArrowUp
-            } else {
-                MaterialSymbols.Rounded.KeyboardArrowDown
-            },
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            text = if (expanded) {
-                stringResource(HR.strings.updates_group_collapse)
-            } else {
-                pluralStringResource(HR.plurals.updates_group_more_chapters, hiddenCount, hiddenCount)
-            },
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 4.dp),
-        )
-    }
 }

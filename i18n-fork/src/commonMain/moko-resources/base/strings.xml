@@ -4,6 +4,7 @@
     <string name="pref_panorama_covers_summary">Fit landscape covers inside the frame instead of cropping them</string>
     <string name="pref_group_updates">Group chapters by entry</string>
     <string name="updates_group_collapse">Show less</string>
+    <string name="updates_group_hide">Hide chapters</string>
     <string name="action_jump_to_top">Jump to top</string>
     <string name="action_jump_to_bottom">Jump to bottom</string>
     <string name="action_migrate_unavailable">Migrate all unavailable</string>

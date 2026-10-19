@@ -9,7 +9,8 @@ import kotlinx.datetime.LocalDate
  * manga stays on top and nothing moves across days.
  */
 sealed interface GroupedRow<out T> {
-    data class Header(val date: LocalDate) : GroupedRow<Nothing>
+    /** A day's heading; [chapterCount] is how many chapters arrived that day. */
+    data class Header(val date: LocalDate, val chapterCount: Int) : GroupedRow<Nothing>
 
     /** All of one manga's chapters for one day, newest first. [items] is never empty. */
     data class Group<T>(val key: GroupKey, val items: List<T>) : GroupedRow<T> {
@@ -37,7 +38,7 @@ inline fun <T> groupUpdates(
             while (end < items.size && date(items[end]) == day) end++
             end
         }
-        rows += GroupedRow.Header(day)
+        rows += GroupedRow.Header(day, chapterCount = dayEnd - index)
         // LinkedHashMap keeps first-appearance order of each manga within the day
         val byManga = LinkedHashMap<Long, ArrayList<T>>()
         for (i in index until dayEnd) {
