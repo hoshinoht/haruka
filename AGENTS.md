@@ -37,3 +37,9 @@ scripts/haruka/patch-surface.sh   # upstream files touched outside fork-owned pa
 ```
 
 Keep the patch surface trending down.
+
+## Baseline profiles
+
+- `app/src/main/baselineProfiles/*.txt` are generated. On an upstream sync conflict, take upstream's copy, then regenerate: temporarily set `useConnectedDevices = true` (and drop `managedDevices`) in `baseline-profile/build.gradle.kts`, run `./gradlew :app:generateBaselineProfile` with a phone attached, and revert that file. It installs and drives `app.haruka` (release ID); other installs are untouched.
+- Fork rules live in `app/src/haruka/baselineProfiles/haruka-prof.txt` (wildcards for all of `haruka/**`), so generation never drops them.
+- `benchmark` builds install as "Haruka Bench" (`app.haruka.benchmark`, aqua icon). They are profileable but not debuggable, so measure with `dumpsys gfxinfo`, `am start -W` and Perfetto, after `cmd package compile -f -m speed-profile app.haruka.benchmark`.

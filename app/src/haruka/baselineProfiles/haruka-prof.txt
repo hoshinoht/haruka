@@ -1,0 +1,4 @@
+# Haruka fork code: AOT-compile all of it on install. The generated baseline-prof.txt comes from empty-library
+# runs, which never compose the fork's list rows, covers, grouping, banners or swipe pills.
+HSPLharuka/**->**(**)**
+Lharuka/**

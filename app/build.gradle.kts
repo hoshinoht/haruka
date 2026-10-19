@@ -122,7 +122,12 @@ android {
 
     sourceSets {
         getByName("nightly").res.directories.add("src/debug/res")
-        getByName("benchmark").res.directories.add("src/debug/res")
+        // FORK --> benchmark uses its own src/benchmark/res (aqua icon, "Haruka Bench" label)
+        // getByName("benchmark").res.directories.add("src/debug/res")
+        // FORK <--
+        // FORK --> fork rules live outside the generated baselineProfiles dir so regenerating never drops them
+        getByName("main").baselineProfiles.directories.add("src/haruka/baselineProfiles")
+        // FORK <--
     }
 
     splits {
