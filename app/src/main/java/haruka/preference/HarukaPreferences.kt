@@ -3,6 +3,8 @@ package haruka.preference
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import eu.kanade.tachiyomi.BuildConfig
+import haruka.release.SemVer
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 
@@ -22,4 +24,10 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
     val momotalkUpdates: Preference<Boolean> = preferenceStore.getBoolean("haruka_updates_momotalk", false)
 
     val pillSwipe: Preference<Boolean> = preferenceStore.getBoolean("haruka_pill_swipe", true)
+
+    // Beta installs stay on the beta channel by default; stable installs only get stable releases.
+    val betaUpdates: Preference<Boolean> = preferenceStore.getBoolean(
+        "haruka_beta_updates",
+        SemVer.parse(BuildConfig.VERSION_NAME)?.isPrerelease == true,
+    )
 }

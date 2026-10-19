@@ -11,6 +11,9 @@ import tachiyomi.domain.release.interactor.GetApplicationRelease
 @Inject
 class AppUpdateChecker(
     private val getApplicationRelease: GetApplicationRelease,
+    // FORK -->
+    private val harukaReleaseChecker: haruka.release.HarukaReleaseChecker,
+    // FORK <--
 ) {
 
     suspend fun checkForUpdate(forceCheck: Boolean = false): GetApplicationRelease.Result {
@@ -20,6 +23,11 @@ class AppUpdateChecker(
         // }
 
         return withContext(Dispatchers.IO) {
+            // FORK --> SemVer tags and the beta channel; nightly keeps upstream's commit-count check below
+            if (!isNightlyBuildType) {
+                return@withContext harukaReleaseChecker.check(BuildConfig.VERSION_NAME, GITHUB_REPO, isFossBuildType)
+            }
+            // FORK <--
             val result = getApplicationRelease.await(
                 GetApplicationRelease.Arguments(
                     isFossBuildType,

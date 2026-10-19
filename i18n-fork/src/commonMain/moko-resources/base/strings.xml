@@ -51,4 +51,7 @@
     <string name="theme_hoshino">Hoshino</string>
     <string name="pref_pill_swipe">Pill swipe actions</string>
     <string name="pref_pill_swipe_summary">Chapter swipe actions appear in a pill that lights up once letting go will apply the action</string>
+    <string name="pref_beta_updates">Receive beta updates</string>
+    <string name="pref_beta_updates_summary">Also offer prerelease builds, which may be less stable</string>
+    <string name="about_mihon_base">Based on Mihon</string>
 </resources>

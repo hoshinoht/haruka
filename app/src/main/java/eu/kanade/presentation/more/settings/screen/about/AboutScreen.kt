@@ -109,6 +109,9 @@ object AboutScreen : Screen() {
                         },
                     )
                 }
+                // FORK -->
+                item { haruka.release.MihonBaseVersion() }
+                // FORK <--
 
                 if (updaterEnabled) {
                     item {
@@ -147,6 +150,9 @@ object AboutScreen : Screen() {
                             },
                         )
                     }
+                    // FORK -->
+                    item { haruka.release.BetaUpdatesSwitch() }
+                    // FORK <--
                 }
 
                 if (!BuildConfig.DEBUG) {
@@ -267,7 +273,13 @@ object AboutScreen : Screen() {
                 }
             }
             else -> {
-                val channel = if (isFossBuildType) "FOSS" else "Stable"
+                // FORK --> prerelease version names (0.1.0-beta.1) are betas, not stable builds
+                val channel = when {
+                    isFossBuildType -> "FOSS"
+                    '-' in BuildConfig.VERSION_NAME -> "Beta"
+                    else -> "Stable"
+                }
+                // FORK <--
                 "$channel v${BuildConfig.VERSION_NAME}".let {
                     if (withBuildDate) {
                         "$it (${getFormattedBuildTime()})"

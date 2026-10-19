@@ -39,8 +39,13 @@ android {
         applicationId = "app.haruka"
         // FORK <--
 
-        versionCode = 38
-        versionName = "0.21.2"
+        // FORK --> Haruka's own SemVer; versionCode = major*1_000_000 + minor*10_000 + patch*100 + beta number
+        // (99 for a stable release), so every beta sorts below its stable release.
+        versionCode = 10001
+        versionName = "0.1.0-beta.1"
+        // Upstream Mihon release this build is based on; bump on each upstream sync.
+        buildConfigField("String", "MIHON_VERSION", "\"0.21.2\"")
+        // FORK <--
 
         buildConfigField("boolean", "TELEMETRY_INCLUDED", "${Config.includeTelemetry}")
         buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
