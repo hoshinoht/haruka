@@ -3,6 +3,10 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
+## [0.1.0-beta.3]
+
+In progress.
+
 ## [0.1.0-beta.2]
 
 Library sync across your devices through your own Google Drive, plus chapter-list fixes and a leaner fork.
