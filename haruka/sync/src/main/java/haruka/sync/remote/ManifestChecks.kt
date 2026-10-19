@@ -20,6 +20,21 @@ sealed interface SyncError {
      * ("Upload this device's library": a union commit under a new epoch).
      */
     data class RemoteRolledBack(val foundSeq: Long?, val expectedSeq: Long) : SyncError
+
+    /** The passphrase entered does not unlock the remote's key [keyId]. */
+    data class WrongPassphrase(val keyId: String) : SyncError
+
+    /**
+     * Remote bytes are unreadable: a manifest or payload that does not decode, fails authentication (tampered,
+     * truncated, moved) or does not match the sha the manifest records, or key params this build can't use.
+     */
+    data class Corrupt(val detail: String) : SyncError
+
+    /**
+     * This device encrypts but the remote is plaintext (encryption turned off elsewhere, or the remote replaced);
+     * writing would publish the library unencrypted or re-encrypt the remote without anyone asking.
+     */
+    data object RemotePlaintext : SyncError
 }
 
 /** What this device remembers of the remote head its base was merged with. */
