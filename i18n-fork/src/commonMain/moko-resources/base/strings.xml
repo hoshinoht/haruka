@@ -154,4 +154,19 @@
     <string name="library_shelf_needs_new_source">Needs a new source</string>
     <string name="library_shelf_source_unavailable">Source unavailable</string>
     <string name="library_shelf_filter_clear">Show all series again, without the %1$s filter</string>
+    <string name="migration_confidence_high">High</string>
+    <string name="migration_confidence_check">Check</string>
+    <string name="migration_confidence_low">Low</string>
+    <string name="migration_confidence_description">Match confidence %1$s: %2$s</string>
+    <string name="migration_reason_progress">Read to Ch. %1$s · match has %2$s</string>
+    <string name="migration_reason_title_differs">Title differs</string>
+    <string name="migration_reason_title_matches">Title matches</string>
+    <string name="migration_reason_author_differs">Different author</string>
+    <string name="migration_reason_author_matches">Same author</string>
+    <string name="migration_review_title">Review matches</string>
+    <string name="migration_review_summary">These matches may be wrong. Accept them, search manually or skip them before continuing.</string>
+    <string name="migration_review_accept">Accept</string>
+    <string name="migration_review_accepted">Accepted</string>
+    <string name="migration_review_accept_all">Accept all &amp; continue</string>
+    <string name="migration_review_continue">Continue with accepted</string>
 </resources>

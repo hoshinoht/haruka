@@ -153,14 +153,17 @@ fun MigrationListScreenContent(
                     )
 
                     val result by item.searchResult.collectAsState()
-                    MigrationListItemResult(
+                    // FORK --> match confidence under the target
+                    haruka.migration.MigrationResultWithConfidence(
                         modifier = Modifier
                             .weight(1f)
                             .align(Alignment.Top)
                             .fillMaxHeight(),
+                        mangaId = item.manga.id,
                         result = result,
                         onItemClick = onItemClick,
                     )
+                    // FORK <--
 
                     MigrationListItemAction(
                         modifier = Modifier.weight(0.2f),

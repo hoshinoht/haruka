@@ -67,7 +67,14 @@ class MigrationListScreen(private val mangaIds: Collection<Long>, private val ex
             onSkip = { viewModel.removeManga(it) },
             onMigrate = { viewModel.migrateNow(mangaId = it, replace = true) },
             onCopy = { viewModel.migrateNow(mangaId = it, replace = false) },
-            openMigrationDialog = viewModel::showMigrateDialog,
+            // FORK --> review flagged matches before the bulk dialog
+            openMigrationDialog = haruka.migration.migrationReviewGate(
+                items = state.items,
+                onSearchManually = { navigator push MigrateSearchScreen(it.manga.id) },
+                onSkip = viewModel::removeManga,
+                openMigrationDialog = viewModel::showMigrateDialog,
+            ),
+            // FORK <--
         )
 
         when (val dialog = state.dialog) {

@@ -14,6 +14,9 @@ Planned for 0.1.0-beta.4.
 - Under the shelves, an "All series" header stays pinned under the toolbar with the count and current sort. Dividers split the grid by the active sort (Today / This week / This month for dates, A–Z for titles, unread and chapter-count ranges). Category chips in the header replace the tabs when you use categories. Your display mode, columns and badges are unchanged. The settings sync across devices.
 - With shelves on, tapping the Library tab again scrolls back to the top; tapping it at the top opens the library settings as before.
 
+### Migration
+- Bulk migration rates each match High, Check or Low with a coloured chip and a short reason under the target ("Read to Ch. 120 · match has 98", "Title differs", "Different author"), from title similarity, the author and whether the match reaches your furthest read chapter. Before Migrate all or Copy all, Check and Low matches open a review sheet where you accept, search manually or skip each one; with nothing to review, the usual dialog opens straight away.
+
 ## [0.1.0-beta.3]
 
 In progress.
