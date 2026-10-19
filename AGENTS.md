@@ -51,8 +51,8 @@ Haruka's project page is `.github/README.md`, which GitHub shows in place of the
 
 ## Baseline profiles
 
-- `app/src/main/baselineProfiles/*.txt` are generated. On an upstream sync conflict, take upstream's copy, then regenerate: temporarily set `useConnectedDevices = true` (and drop `managedDevices`) in `baseline-profile/build.gradle.kts`, run `./gradlew :app:generateBaselineProfile` with a phone attached, and revert that file. It installs and drives `app.haruka` (release ID); other installs are untouched.
-- Fork rules live in `app/src/haruka/baselineProfiles/haruka-prof.txt` (wildcards for all of `haruka/**`), so generation never drops them.
+- `app/src/main/baselineProfiles/*.txt` are upstream's files, unmodified. Haruka's code is covered by wildcard rules in `app/src/haruka/baselineProfiles/haruka-prof.txt`, merged in by `configureHarukaApp`. Measured on a Galaxy S25+ (2026-10-19), upstream's profiles plus the fork rules matched or beat profiles regenerated for Haruka (cold start ~585 ms, jank ≤0.75%), so do not regenerate them.
+- If a future measurement regresses, regenerating is possible: temporarily set `useConnectedDevices = true` (and drop `managedDevices`) in `baseline-profile/build.gradle.kts`, run `./gradlew :app:generateBaselineProfile` with a phone attached, and revert that file. It drives `app.haruka`; other installs are untouched.
 - `benchmark` builds install as "Haruka Bench" (`app.haruka.benchmark`, aqua icon). They are profileable but not debuggable.
 
 ## Performance checks
