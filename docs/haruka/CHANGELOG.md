@@ -7,6 +7,14 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 
 In progress.
 
+### Chapters
+- Parts named "Chapter 21 -1", "-2", … are recognised as parts of chapter 21 even when the source numbers them all 21.
+- A whole chapter is preferred over the same chapter split into parts (unless the parts are more official).
+- Tapping a split chapter opens its first unread part, and the reader goes through the parts in order.
+
+### Look and feel
+- Hoshino is listed first in the theme picker.
+
 ### Internal
 - Performance checks kept in `scripts/haruka/perf` (cold start, list jank, Perfetto trace).
 

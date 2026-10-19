@@ -79,6 +79,9 @@ private fun AppThemesList(
     val appThemes = remember {
         AppTheme.entries
             .filterNot { it.titleRes == null || (it == AppTheme.MONET && !DeviceUtil.isDynamicColorAvailable) }
+            // FORK --> Haruka's default theme leads the list
+            .sortedByDescending { it == AppTheme.HOSHINO }
+        // FORK <--
     }
     LazyRow(
         contentPadding = PaddingValues(horizontal = PrefsHorizontalPadding),

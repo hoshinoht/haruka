@@ -86,6 +86,28 @@ class LogicalChaptersTest {
     }
 
     @Test
+    fun `dash-numbered parts sharing the whole chapter number merge in part order`() {
+        // The Saintess Re...: the source numbers every part 21 and names them "Chapter 21 -1" .. "-4", newest first.
+        val result = group(
+            chapter(5, 21.0, "Official", name = "Chapter 21 -4"),
+            chapter(4, 21.0, "Official", name = "Chapter 21 -3"),
+            chapter(3, 21.0, "Official", name = "Chapter 21 -2"),
+            chapter(2, 21.0, "Official", name = "Chapter 21 -1"),
+            chapter(1, 21.0, "Official", name = "Chapter 21"),
+        )
+        result.shape() shouldBe listOf(Triple(21.0, 0, listOf(listOf(2L, 3L, 4L, 5L), listOf(1L))))
+    }
+
+    @Test
+    fun `a dash range or a dash before a title is not a part`() {
+        partIndex(chapter(1, 21.0, name = "Ch. 21-22")) shouldBe 0
+        partIndex(chapter(2, 21.0, name = "Chapter 21 - 100 Days Later")) shouldBe 0
+        partIndex(chapter(3, 21.0, name = "Chapter 21 - The Duke")) shouldBe 0
+        partIndex(chapter(4, 21.0, name = "Chapter 21 -2")) shouldBe 2
+        partIndex(chapter(5, 21.0, name = "Chapter 21 - 3: Reunion")) shouldBe 3
+    }
+
+    @Test
     fun `parts merge per scanlator`() {
         val result = group(chapter(1, 1.1, "A"), chapter(2, 1.2, "B"))
         result.shape() shouldBe listOf(

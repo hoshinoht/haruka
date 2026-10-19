@@ -32,7 +32,8 @@ class DedupSurfaces(
 
     /**
      * The reader's [chapters] (in reading order) cut down to each chapter's winner, replacing upstream's
-     * removeDuplicates. The chapter being read keeps its copy.
+     * removeDuplicates. The chapter being read keeps its copy. A split winner's parts are put in part order, since a
+     * source that numbers every part as the whole chapter leaves their order to ties in the chapter sort.
      */
     suspend fun readerChapters(manga: Manga, chapters: List<Chapter>, current: Chapter): List<Chapter> =
         withContext(Dispatchers.IO) {
@@ -40,7 +41,7 @@ class DedupSurfaces(
             val downloaded = downloadManager.getDownloadedChapterIds(chapters, manga)
             val deduped = deduper.dedupe(chapters.map { it.toDedupChapter() }, options) { it.id in downloaded }
             val keep = readerChapterIds(deduped, current.id)
-            chapters.filter { it.id in keep }
+            inPartOrder(chapters.filter { it.id in keep }, deduped)
         }
 
     /** Drops [chapters] queued automatically whose chapter already has a downloaded copy, when the user wants that. */
@@ -81,4 +82,21 @@ class DedupSurfaces(
         val copies = copiesToMarkRead(config, chapters, setOf(chapter.id))
         if (copies.isNotEmpty()) setReadStatus.await(read = true, chapters = copies.toTypedArray())
     }
+}
+
+/** [chapters] with each split winner's parts rearranged, within the slots they already hold, into part order. */
+internal fun inPartOrder(chapters: List<Chapter>, deduped: List<DedupedChapter>): List<Chapter> {
+    val splits = deduped.filter { it.winner.parts.size > 1 }
+    if (splits.isEmpty()) return chapters
+    val result = chapters.toMutableList()
+    val indexById = HashMap<Long, Int>(chapters.size * 2)
+    chapters.forEachIndexed { index, chapter -> indexById[chapter.id] = index }
+    val byId = chapters.associateBy { it.id }
+    for (split in splits) {
+        val parts = split.winner.parts.mapNotNull { byId[it.id] }
+        val slots = parts.mapNotNull { indexById[it.id] }.sorted()
+        if (slots.size != parts.size) continue
+        slots.forEachIndexed { i, slot -> result[slot] = parts[i] }
+    }
+    return result
 }

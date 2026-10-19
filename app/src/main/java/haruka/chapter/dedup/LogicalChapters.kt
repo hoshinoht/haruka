@@ -206,6 +206,16 @@ private val CHAPTER_DECIMAL = Regex("""\b(?:chapter|chap|ch)\.?\s*(\d+)\.(\d+)""
 private val PART_ONLY = Regex("""\b(?:part|pt)\.?\s*(\d+)""", RegexOption.IGNORE_CASE)
 
 /**
+ * "Chapter 21 -3": a spaced dash then a small number ending the name (or followed by a title separator). Some sources
+ * number every part as the whole chapter (21) and only the name tells the parts apart. A range ("Ch. 21-22") has no
+ * space before the dash and is not matched.
+ */
+private val CHAPTER_DASH_PART = Regex(
+    """\b(?:chapter|chap|ch)\.?\s*(\d+)\s+-\s*(\d{1,2})(?=\s*(?:$|[:(\[]|-\s))""",
+    RegexOption.IGNORE_CASE,
+)
+
+/**
  * Part index of [chapter] (12.3 or "Ch. 12 Part 3" is part 3), or 0 for a whole chapter or an unknown number.
  *
  * The chapter number is a Double, so "Ch. 1.10" arrives as 1.1; the name is read first to recover the real index,
@@ -224,7 +234,16 @@ internal fun partIndex(chapter: DedupChapter): Int {
             parsePart(digits).let { if (it > 0) return it }
         }
     }
-    if (isWhole) return 0
+    if (isWhole) {
+        CHAPTER_DASH_PART.find(name)?.let { match ->
+            if (match.groupValues[1].toLongOrNull() ==
+                whole
+            ) {
+                parsePart(match.groupValues[2]).let { if (it > 0) return it }
+            }
+        }
+        return 0
+    }
 
     CHAPTER_DECIMAL.find(name)?.let { match ->
         val digits = match.groupValues[2]

@@ -95,4 +95,23 @@ class DuplicateCopiesTest {
         readerChapterIds(deduped, currentId = 11) shouldBe setOf(10L, 11L)
         readerChapterIds(deduped, currentId = 12) shouldBe setOf(10L, 12L)
     }
+
+    @Test
+    fun `a split winner is read in part order even when every part has the whole chapter number`() {
+        // Sorted by number, the tie leaves the source's newest-first order: 22, -4, -3, -2, -1, 20.
+        val dedup = listOf(
+            chapter(9, 22.0, "Official"),
+            chapter(5, 21.0, "Official", name = "Chapter 21 -4"),
+            chapter(4, 21.0, "Official", name = "Chapter 21 -3"),
+            chapter(3, 21.0, "Official", name = "Chapter 21 -2"),
+            chapter(2, 21.0, "Official", name = "Chapter 21 -1"),
+            chapter(8, 20.0, "Official"),
+        )
+        val chapters = dedup.map {
+            tachiyomi.domain.chapter.model.Chapter.create()
+                .copy(id = it.id, name = it.name, chapterNumber = it.chapterNumber, scanlator = it.scanlator)
+        }
+        val deduped = ChapterDeduper(testCatalog).dedupe(dedup)
+        inPartOrder(chapters, deduped).map { it.id } shouldBe listOf(9L, 2L, 3L, 4L, 5L, 8L)
+    }
 }

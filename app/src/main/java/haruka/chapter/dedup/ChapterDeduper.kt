@@ -133,14 +133,21 @@ private class Candidate(
     val newestUpload = copy.parts.maxOf { it.dateUpload }
     val sourceOrder = copy.parts.minOf { it.sourceOrder }
     val id = copy.parts.minOf { it.id }
+    val split = copy.parts.size > 1
 }
 
 /** Orders better candidates first. Reads precomputed fields only. */
 private class CandidateComparator(rules: List<DedupRule>) : Comparator<Candidate> {
 
-    /** The rules with the low-quality demotion (null) inserted first, or second behind a leading DOWNLOADED. */
-    private val steps: Array<DedupRule?> = ArrayList<DedupRule?>(rules.size + 1).apply {
+    /**
+     * The rules with the low-quality demotion (null) inserted first, or second behind a leading DOWNLOADED, and the
+     * whole-over-split preference ([WHOLE_STEP]) right after the official rules: a whole upload of a chapter beats
+     * the same chapter split into parts, unless the parts are more official.
+     */
+    private val steps: Array<Any?> = ArrayList<Any?>(rules.size + 2).apply {
         addAll(rules)
+        val afterOfficial = maxOf(indexOf(DedupRule.OFFICIAL), indexOf(DedupRule.OFFICIAL_UNCERTAIN)) + 1
+        add(afterOfficial, WHOLE_STEP)
         add(if (rules.firstOrNull() == DedupRule.DOWNLOADED) 1 else 0, null)
     }.toTypedArray()
 
@@ -148,15 +155,19 @@ private class CandidateComparator(rules: List<DedupRule>) : Comparator<Candidate
         for (step in steps) {
             val result = when (step) {
                 null -> a.lowQuality.compareTo(b.lowQuality)
+                WHOLE_STEP -> a.split.compareTo(b.split)
                 DedupRule.DOWNLOADED -> b.downloaded.compareTo(a.downloaded)
                 DedupRule.OFFICIAL -> b.official.compareTo(a.official)
                 DedupRule.OFFICIAL_UNCERTAIN -> b.maybeOfficial.compareTo(a.maybeOfficial)
                 DedupRule.USER_RANK -> a.rank.compareTo(b.rank)
                 DedupRule.NEWEST_UPLOAD -> b.newestUpload.compareTo(a.newestUpload)
                 DedupRule.SOURCE_ORDER -> a.sourceOrder.compareTo(b.sourceOrder)
+                else -> error("Unknown dedup step $step")
             }
             if (result != 0) return result
         }
         return a.id.compareTo(b.id)
     }
 }
+
+private val WHOLE_STEP = Any()

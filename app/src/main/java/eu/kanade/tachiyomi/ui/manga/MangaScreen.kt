@@ -113,7 +113,9 @@ class MangaScreen(
             chapterSwipeStartAction = viewModel.chapterSwipeStartAction,
             chapterSwipeEndAction = viewModel.chapterSwipeEndAction,
             navigateUp = navigator::pop,
-            onChapterClicked = { openChapter(context, it) },
+            // FORK --> a split chapter's head row resumes at its first unread part
+            onChapterClicked = { openChapter(context, haruka.chapter.ui.resumePart(successState, it)) },
+            // FORK <--
             onDownloadChapter = viewModel::runChapterDownloadActions.takeIf { !successState.source.isLocalOrStub() },
             downloadProgressProvider = viewModel::getDownloadProgress,
             onAddToLibraryClicked = {

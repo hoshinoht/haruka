@@ -37,6 +37,26 @@ class ChapterDeduperTest {
     }
 
     @Test
+    fun `a whole chapter beats the same chapter split into newer parts`() {
+        winnerOf(
+            chapter(5, 21.0, "Official", name = "Chapter 21 -4", dateUpload = 50),
+            chapter(4, 21.0, "Official", name = "Chapter 21 -3", dateUpload = 40),
+            chapter(3, 21.0, "Official", name = "Chapter 21 -2", dateUpload = 30),
+            chapter(2, 21.0, "Official", name = "Chapter 21 -1", dateUpload = 20),
+            chapter(1, 21.0, "Official", name = "Chapter 21", dateUpload = 10),
+        ) shouldBe listOf(1L)
+    }
+
+    @Test
+    fun `official parts still beat an unofficial whole chapter`() {
+        winnerOf(
+            chapter(1, 7.0, "Group A"),
+            chapter(2, 7.1, "Official"),
+            chapter(3, 7.2, "Official"),
+        ) shouldBe listOf(2L, 3L)
+    }
+
+    @Test
     fun `official beats doubtfully official`() {
         winnerOf(chapter(1, 1.0, "Official?"), chapter(2, 1.0, "Official")) shouldBe listOf(2L)
     }
