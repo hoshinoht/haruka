@@ -8,8 +8,6 @@ import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.domain.ui.model.TabletUiMode
 import eu.kanade.domain.ui.model.ThemeMode
 import eu.kanade.domain.ui.model.TimeFormat
-import eu.kanade.tachiyomi.util.system.DeviceUtil
-import eu.kanade.tachiyomi.util.system.isDynamicColorAvailable
 import logcat.LogPriority
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
@@ -28,14 +26,9 @@ class UiPreferences(
 
     val themeMode: Preference<ThemeMode> = preferenceStore.getEnum("pref_theme_mode_key", ThemeMode.SYSTEM)
 
-    val appTheme: Preference<AppTheme> = preferenceStore.getEnum(
-        "pref_app_theme",
-        if (DeviceUtil.isDynamicColorAvailable) {
-            AppTheme.MONET
-        } else {
-            AppTheme.DEFAULT
-        },
-    )
+    // FORK --> Haruka ships Hoshino as its default theme, also where dynamic colour is available
+    val appTheme: Preference<AppTheme> = preferenceStore.getEnum("pref_app_theme", AppTheme.HOSHINO)
+    // FORK <--
 
     val themeDarkAmoled: Preference<Boolean> = preferenceStore.getBoolean("pref_theme_dark_amoled_key", false)
 

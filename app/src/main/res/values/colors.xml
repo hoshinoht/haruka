@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="splash">@color/accent_blue</color>
+    <!-- FORK: splash matches the default Hoshino theme (navy behind the white は) -->
+    <color name="splash">#111B2B</color>
 
     <color name="accent_blue">#0058A0</color>
     <color name="icon_background">#FAFAFA</color>
