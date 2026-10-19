@@ -41,6 +41,7 @@ include(":i18n")
 // FORK -->
 include(":haruka:core")
 include(":haruka:motion")
+include(":haruka:sync")
 include(":i18n-fork")
 // FORK <--
 include(":icons:custom-material-symbols")

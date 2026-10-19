@@ -49,5 +49,6 @@ fun configureHarukaApp(project: Project) {
     }
 
     project.dependencies.add("implementation", project.project(":haruka:core"))
+    project.dependencies.add("implementation", project.project(":haruka:sync"))
     project.dependencies.add("implementation", project.project(":i18n-fork"))
 }

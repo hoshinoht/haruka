@@ -15,6 +15,7 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 - New code lives in fork modules under `haruka/` or the `haruka.*` package in the app; packages stay `haruka.*` either way:
   - `:haruka:core` (`haruka/core/`): pure logic with no app or upstream module dependencies (chapter dedup and grouping, release versions, titles, swipe geometry) plus the data it bundles (`src/main/assets/haruka/official-scanlators.json`). Its tests live in `haruka/core/src/test`.
   - `:haruka:motion` (`haruka/motion/`): animation profiles and motion drop-ins, depending only on Compose. `presentation-core` re-exports it (`api`), so upstream code in `presentation-core` and the app can call `haruka.motion.*`.
+  - `:haruka:sync` (`haruka/sync/`): library sync engine with no app or upstream module dependencies (sync records, codec, merge, base store, remote stores). The wire format is fork-owned; field numbers in `haruka.sync.model` never change meaning, incompatible changes bump `FORMAT_VERSION`.
   - `app/src/main/java/haruka/**`: glue that needs app internals (screens, ViewModels, preferences, DI, adapters from domain models such as `Chapter.toDedupChapter()`).
   - New fork modules are included in the existing FORK block of `settings.gradle.kts`; the app depends on them through `configureHarukaApp`.
 - Edits to upstream files are thin hooks wrapped in markers:
