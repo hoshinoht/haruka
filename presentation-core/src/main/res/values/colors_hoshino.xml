@@ -15,10 +15,10 @@
     <color name="hoshino_onTertiary">#FFFFFF</color>
     <color name="hoshino_tertiaryContainer">#C9EEF6</color>
     <color name="hoshino_onTertiaryContainer">#002F39</color>
-    <color name="hoshino_error">#BC355A</color>
+    <color name="hoshino_error">#BA1A1A</color>
     <color name="hoshino_onError">#FFFFFF</color>
-    <color name="hoshino_errorContainer">#FFD9E1</color>
-    <color name="hoshino_onErrorContainer">#40061A</color>
+    <color name="hoshino_errorContainer">#FFDAD6</color>
+    <color name="hoshino_onErrorContainer">#410002</color>
     <color name="hoshino_background">#FAF4F8</color>
     <color name="hoshino_onBackground">#24334E</color>
     <color name="hoshino_surface">#FAF4F8</color>
