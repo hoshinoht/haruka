@@ -13,6 +13,9 @@ import java.util.Properties
  * - Branding lives in variant source overlays under app/src/haruka/, which take priority over src/main and
  *   build-type source sets: res (every variant), res-release (release, foss), res-debug (debug, nightly).
  *   Benchmark builds keep their own src/benchmark/res label and launcher icon.
+ * - Debug builds merge src/haruka/manifest-debug/AndroidManifest.xml (debug-only tools such as the Drive CAS
+ *   self-test), so upstream's manifests stay untouched.
+ * - Fork dependencies are pinned here rather than in upstream's version catalog, so catalog merges stay clean.
  */
 fun configureHarukaApp(project: Project) {
     val version = Properties().apply {
@@ -46,9 +49,17 @@ fun configureHarukaApp(project: Project) {
                 "debug", "nightly" -> addStaticSourceDirectory("src/haruka/res-debug")
             }
         }
+        if (variant.buildType == "debug") {
+            variant.sources.manifests.addStaticManifestFile("src/haruka/manifest-debug/AndroidManifest.xml")
+        }
     }
 
     project.dependencies.add("implementation", project.project(":haruka:core"))
     project.dependencies.add("implementation", project.project(":haruka:sync"))
     project.dependencies.add("implementation", project.project(":i18n-fork"))
+    // Google Identity AuthorizationClient for Drive sync (haruka.sync.auth).
+    project.dependencies.add("implementation", "com.google.android.gms:play-services-auth:$PLAY_SERVICES_AUTH")
 }
+
+// Latest stable on Google Maven (play-services-auth maven-metadata.xml, checked 2026-10-19).
+private const val PLAY_SERVICES_AUTH = "22.0.0"

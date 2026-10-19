@@ -81,6 +81,9 @@ class DedupSettings(preferenceStore: PreferenceStore, private val catalogLoader:
 
     fun override(mangaId: Long): MangaDedupOverride? = overrides.get()[mangaId]
 
+    /** Every stored override, keyed by local manga id; one read for callers that walk the whole library. */
+    fun allOverrides(): Map<Long, MangaDedupOverride> = overrides.get()
+
     /** Stores [override]; an all-null override is removed so the map only holds real choices. */
     fun setOverride(mangaId: Long, override: MangaDedupOverride?) {
         val current = overrides.get()

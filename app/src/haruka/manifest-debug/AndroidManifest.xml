@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only Haruka entry points, merged into debug builds by haruka.gradle.configureHarukaApp. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Drive CAS self-test; exported so `adb shell am start -n` can open it. -->
+        <activity
+            android:name="haruka.sync.debug.DriveCasSelfTestActivity"
+            android:exported="true"
+            android:label="Drive CAS self-test"
+            android:theme="@style/Theme.Tachiyomi" />
+    </application>
+
+</manifest>
