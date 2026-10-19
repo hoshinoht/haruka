@@ -3,6 +3,13 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
+## [0.1.0-beta.2]
+
+In progress.
+
+### Internal
+- Performance checks kept in `scripts/haruka/perf` (cold start, list jank, Perfetto trace).
+
 ## [0.1.0-beta.1]
 
 First beta. Haruka installs beside Mihon (`app.haruka`); restore a Mihon backup to bring your library over.
