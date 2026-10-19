@@ -25,7 +25,7 @@ done
 echo "Files added outside fork-owned paths: $(count "$added_outside")"
 [ -n "$added_outside" ] && printf '  %s\n' $added_outside
 
-markers="$(git grep -c -e '// FORK -->' -e '<!-- FORK -->' -- . ':!AGENTS.md' ':!scripts/haruka' | awk -F: '{s+=$NF} END {print s+0}')"
+markers="$(git grep -c -e '// FORK -->' -e '<!-- FORK -->' -- . ':!AGENTS.md' ':!scripts/haruka' ':!docs/haruka' | awk -F: '{s+=$NF} END {print s+0}')"
 echo "FORK hook blocks: $markers"
 
 # Shadow imports: an upstream file swaps an import for a same-named haruka.* drop-in; the import line is the hook.
