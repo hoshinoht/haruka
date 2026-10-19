@@ -49,8 +49,13 @@
     <string name="pref_updates_conversations">Show as conversations</string>
     <string name="updates_conversation_expand">Show chapters</string>
     <string name="theme_hoshino">Hoshino</string>
-    <string name="pref_pill_swipe">Pill swipe actions</string>
-    <string name="pref_pill_swipe_summary">Chapter swipe actions appear in a pill that lights up once letting go will apply the action</string>
+    <string name="pref_animation_profile">Animations</string>
+    <string name="animation_profile_standard">Standard</string>
+    <string name="animation_profile_expressive">Expressive</string>
+    <string name="animation_profile_reduced">Reduced</string>
+    <string name="animation_profile_standard_summary">Mihon\'s animations</string>
+    <string name="animation_profile_expressive_summary">Springy Material 3 Expressive motion and pill swipe actions</string>
+    <string name="animation_profile_reduced_summary">Short fades instead of movement. Also used when system animations are off</string>
     <string name="pref_beta_updates">Receive beta updates</string>
     <string name="pref_beta_updates_summary">Also offer prerelease builds, which may be less stable</string>
     <string name="about_mihon_base">Based on Mihon</string>

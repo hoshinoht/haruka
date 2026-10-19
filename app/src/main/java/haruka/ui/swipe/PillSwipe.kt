@@ -32,22 +32,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.tachiyomi.data.download.model.Download
-import haruka.i18n.HR
+import haruka.motion.AnimationProfile
+import haruka.motion.LocalAnimationProfile
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import me.saket.swipe.SwipeAction
 import me.saket.swipe.SwipeableActionsBox
 import me.saket.swipe.SwipeableActionsState
 import me.saket.swipe.rememberSwipeableActionsState
-import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.BookmarkAdd
 import mihon.icons.materialsymbols.rounded.BookmarkRemove
@@ -57,8 +55,6 @@ import mihon.icons.materialsymbols.rounded.Download
 import mihon.icons.materialsymbols.rounded.FileDownloadOff
 import mihon.icons.materialsymbols.rounded.RemoveDone
 import tachiyomi.domain.library.service.LibraryPreferences.ChapterSwipeAction
-import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.collectAsState
 import kotlin.math.roundToInt
 
 private val PillMargin = 8.dp
@@ -81,8 +77,8 @@ private val PillCornerSpring = spring<Dp>(
 )
 
 /**
- * Chapter-row swipe box. With the `haruka_pill_swipe` setting on, the row slides with rounded corners over a
- * growing action pill; with it off, [SwipeableActionsBox] is called with exactly the arguments upstream passes.
+ * Chapter-row swipe box. With the Expressive animation profile, the row slides with rounded corners over a
+ * growing action pill; otherwise [SwipeableActionsBox] is called with exactly the arguments upstream passes.
  *
  * The chapter parameters drive the pill actions. [modifier], [startActions], [endActions], [swipeThreshold] and
  * [backgroundUntilSwipeThreshold] are upstream's own values; the pill path reuses only [modifier] and
@@ -103,10 +99,7 @@ fun ChapterSwipeBox(
     backgroundUntilSwipeThreshold: Color,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val context = LocalContext.current
-    val preference = remember { context.appGraph.harukaPreferences.pillSwipe }
-    val enabled by preference.collectAsState()
-    if (!enabled) {
+    if (LocalAnimationProfile.current != AnimationProfile.EXPRESSIVE) {
         SwipeableActionsBox(
             modifier = modifier,
             startActions = startActions,
@@ -295,14 +288,4 @@ private fun isArmed(state: SwipeableActionsState, thresholdPx: Float): Boolean =
 
 private object NoHapticFeedback : HapticFeedback {
     override fun performHapticFeedback(hapticFeedbackType: HapticFeedbackType) = Unit
-}
-
-@Composable
-fun pillSwipePreference(): Preference.PreferenceItem.SwitchPreference {
-    val context = LocalContext.current
-    return Preference.PreferenceItem.SwitchPreference(
-        preference = remember { context.appGraph.harukaPreferences.pillSwipe },
-        title = stringResource(HR.strings.pref_pill_swipe),
-        subtitle = stringResource(HR.strings.pref_pill_swipe_summary),
-    )
 }

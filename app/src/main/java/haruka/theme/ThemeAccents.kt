@@ -12,9 +12,8 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.tachiyomi.R
 
-/** Motion, shapes and typography handed to `MaterialExpressiveTheme` next to the colour scheme. */
+/** Shapes and typography handed to `MaterialExpressiveTheme` next to the colour scheme; motion follows the animation profile. */
 internal class ThemeAccents(
-    val motionScheme: MotionScheme,
     val shapes: Shapes,
     val typography: Typography,
 )
@@ -27,7 +26,6 @@ internal fun themeAccents(appTheme: AppTheme): ThemeAccents =
  * nested theme (the theme picker previews) does not inherit Hoshino's accents from the outer theme.
  */
 private val UpstreamAccents = ThemeAccents(
-    motionScheme = MotionScheme.expressive(),
     shapes = Shapes(),
     typography = Typography(),
 )
@@ -38,7 +36,6 @@ private fun TextStyle.rounded() = copy(fontFamily = ZenMaruGothic, fontWeight = 
 
 // Rounded headings and roomier corners echo the MomoTalk look; body and label text stay on the system font.
 private val HoshinoAccents = ThemeAccents(
-    motionScheme = MotionScheme.expressive(),
     shapes = Shapes(
         extraSmall = RoundedCornerShape(8.dp),
         small = RoundedCornerShape(12.dp),

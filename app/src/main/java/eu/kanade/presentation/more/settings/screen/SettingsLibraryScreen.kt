@@ -260,7 +260,6 @@ object SettingsLibraryScreen : SearchableSettings {
                 ),
                 // FORK -->
                 haruka.chapter.dedup.ui.dedupSettingsPreference(),
-                haruka.ui.swipe.pillSwipePreference(),
                 // FORK <--
             ),
         )

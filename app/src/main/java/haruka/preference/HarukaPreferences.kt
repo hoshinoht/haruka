@@ -4,9 +4,11 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import eu.kanade.tachiyomi.BuildConfig
+import haruka.motion.AnimationProfile
 import haruka.release.SemVer
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
+import tachiyomi.core.common.preference.getEnum
 
 /** Haruka-only preferences. Keys are prefixed `haruka_` so they never collide with upstream keys. */
 @Inject
@@ -23,7 +25,9 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
 
     val momotalkUpdates: Preference<Boolean> = preferenceStore.getBoolean("haruka_updates_momotalk", false)
 
-    val pillSwipe: Preference<Boolean> = preferenceStore.getBoolean("haruka_pill_swipe", true)
+    /** Motion across the app; pill swipe actions are part of [AnimationProfile.EXPRESSIVE]. */
+    val animationProfile: Preference<AnimationProfile> =
+        preferenceStore.getEnum("haruka_animation_profile", AnimationProfile.EXPRESSIVE)
 
     // Beta installs stay on the beta channel by default; stable installs only get stable releases.
     val betaUpdates: Preference<Boolean> = preferenceStore.getBoolean(
