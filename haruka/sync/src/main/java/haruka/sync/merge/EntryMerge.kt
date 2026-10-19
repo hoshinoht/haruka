@@ -338,14 +338,17 @@ private class BucketMerger(private val options: EntryMergeOptions) {
         val lastPageRead = merge3(b.lastPageRead, l.lastPageRead, r.lastPageRead) {
             maxOf(l.lastPageRead, r.lastPageRead)
         }
-        // A re-read beats a concurrent clear; a one-sided clear (null) propagates.
+        // History (readAt, duration) is one register: Mihon writes both on every read, often with the duration
+        // unchanged. A one-sided clear (null, 0) propagates, a re-read beats a concurrent clear and keeps its own
+        // duration, and two re-reads take the later time and the longer duration.
         val readAt = merge3(b.historyReadAtMillis, l.historyReadAtMillis, r.historyReadAtMillis) {
             maxOfNullable(l.historyReadAtMillis, r.historyReadAtMillis)
         }
-        val duration = if (readAt == null) {
-            0L
-        } else {
-            merge3(b.historyDurationMs, l.historyDurationMs, r.historyDurationMs) {
+        val duration = when {
+            readAt == null -> 0L
+            l.historyReadAtMillis == null -> r.historyDurationMs
+            r.historyReadAtMillis == null -> l.historyDurationMs
+            else -> merge3(b.historyDurationMs, l.historyDurationMs, r.historyDurationMs) {
                 maxOf(l.historyDurationMs, r.historyDurationMs)
             }
         }

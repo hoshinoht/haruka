@@ -76,6 +76,16 @@ class EntryMergeTest {
     }
 
     @Test
+    fun `a re-read with no added duration keeps it against a concurrent clear`() {
+        // Mihon re-stamps readAt with 0 added duration when no reading timer ran.
+        val base = entry(ch("1", readAt = 1_000, duration = 100))
+        val reread = entry(ch("1", readAt = 2_000, duration = 100))
+
+        merge(base, entry(ch("1")), reread).single().chapters.single() shouldBe ch("1", readAt = 2_000, duration = 100)
+        merge(base, reread, entry(ch("1"))).single().chapters.single() shouldBe ch("1", readAt = 2_000, duration = 100)
+    }
+
+    @Test
     fun `a one-sided history clear propagates and resets the duration`() {
         val base = entry(ch("1", readAt = 1_000, duration = 100))
         // The remote record carries a stray duration; a cleared history always means duration 0.

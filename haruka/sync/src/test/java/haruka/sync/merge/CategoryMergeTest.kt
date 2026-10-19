@@ -105,15 +105,60 @@ class CategoryMergeTest {
     }
 
     @Test
-    fun `reorders on both sides keep the syncing device's order`() {
+    fun `a collapsed category's tombstone is not rewritten by a re-merge`() {
+        val base = payload(cat("u8", "B2"))
+        val remote = payload(cat("r0", "Later", order = 1), cat("u8", "B2"))
+        val first = CategoryMerge.merge(base, listOf(cat("u8", "Later")), remote, NOW)
+
+        first.merged shouldBe payload(cat("r0", "Later"), cat("u8", "B2").copy(deletedAtMillis = NOW))
+        first.remap shouldBe mapOf("u8" to "r0")
+        val applied = first.merged.categories.filter { it.deletedAtMillis == null }
+        CategoryMerge.merge(base, applied, remote, NOW).merged shouldBe first.merged
+        CategoryMerge.merge(first.merged, applied, first.merged, NOW + DAY).merged shouldBe first.merged
+    }
+
+    @Test
+    fun `reorders on both sides keep the syncing device's order as one conflict`() {
         val base = payload(cat("A", "A", order = 0), cat("B", "B", order = 1), cat("C", "C", order = 2))
         val local = listOf(cat("C", "C", order = 0), cat("A", "A", order = 1), cat("B", "B", order = 2))
         val remote = payload(cat("B", "B", order = 0), cat("A", "A", order = 1), cat("C", "C", order = 2))
         val result = CategoryMerge.merge(base, local, remote, NOW)
 
         result.merged.categories.sortedBy { it.order }.map { it.uuid } shouldBe listOf("C", "A", "B")
-        result.conflicts.map { it.subject } shouldBe listOf("category B")
+        result.conflicts shouldBe listOf(MergeConflict("categories", "order"))
         result.localChanges.order.shouldBeEmpty()
+    }
+
+    @Test
+    fun `a delete that renumbers this device keeps a remote move`() {
+        val base = payload(cat("A", "A", order = 0), cat("B", "B", order = 1), cat("C", "C", order = 2))
+        val local = listOf(cat("B", "B", order = 0), cat("C", "C", order = 1))
+        val remote = payload(cat("A", "A", order = 1), cat("B", "B", order = 2), cat("C", "C", order = 0))
+        val result = CategoryMerge.merge(base, local, remote, NOW)
+
+        result.merged.categories.filter { it.deletedAtMillis == null }.sortedBy { it.order }.map { it.uuid } shouldBe
+            listOf("C", "B")
+        result.localChanges.order shouldBe listOf("C", "B")
+        result.conflicts.shouldBeEmpty()
+    }
+
+    @Test
+    fun `categories new on both sides interleave after the category they follow, by uuid`() {
+        val base = payload(cat("A", "A", order = 0), cat("B", "B", order = 1))
+        val local = listOf(cat("A", "A", order = 0), cat("n3", "Mine", order = 1), cat("B", "B", order = 2))
+        val remote = payload(
+            cat("n0", "First", order = 0),
+            cat("A", "A", order = 1),
+            cat("n1", "Theirs", order = 2),
+            cat("B", "B", order = 3),
+        )
+        val result = CategoryMerge.merge(base, local, remote, NOW)
+        val swapped = CategoryMerge.merge(base, remote.categories, payload(*local.toTypedArray()), NOW)
+
+        result.merged.categories.sortedBy { it.order }.map { it.uuid } shouldBe listOf("n0", "A", "n1", "n3", "B")
+        swapped.merged shouldBe result.merged
+        CategoryMerge.merge(base, result.merged.categories, remote, NOW).merged shouldBe result.merged
+        result.conflicts.shouldBeEmpty()
     }
 
     @Test

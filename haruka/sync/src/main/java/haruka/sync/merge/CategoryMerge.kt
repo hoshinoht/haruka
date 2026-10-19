@@ -98,6 +98,17 @@ object CategoryMerge {
         val live = ArrayList<CategoryRecord>()
         val tombstones = ArrayList<CategoryRecord>()
         val deleted = HashSet<String>()
+
+        // A tombstone's payload is the remote's copy, then the base's, so re-merging an applied result rewrites
+        // nothing; only a category neither side knows yet keeps its merged fields.
+        fun bury(uuid: String, merged: CategoryRecord?) {
+            deleted += uuid
+            val bc = b[uuid]
+            val rc = r[uuid]
+            val deletedAt = maxOfNullable(bc?.deletedAtMillis, rc?.deletedAtMillis) ?: nowMillis
+            if (!isExpired(deletedAt, nowMillis)) tombstones += (rc ?: bc ?: merged!!).copy(deletedAtMillis = deletedAt)
+        }
+
         for (uuid in uuids) {
             val bc = b[uuid]
             val lc = l[uuid]
@@ -110,9 +121,7 @@ object CategoryMerge {
                 lc == null && rc != null && rc.deletedAtMillis != null
             }
             if (isDeleted) {
-                deleted += uuid
-                val deletedAt = maxOfNullable(bc?.deletedAtMillis, rc?.deletedAtMillis) ?: nowMillis
-                if (!isExpired(deletedAt, nowMillis)) tombstones += (rc ?: bc!!).copy(deletedAtMillis = deletedAt)
+                bury(uuid, merged = null)
                 continue
             }
             val bv = bc ?: CategoryRecord(uuid)
@@ -122,7 +131,8 @@ object CategoryMerge {
             live += CategoryRecord(
                 uuid = uuid,
                 name = conflicts.pickSetting(subject, "name", bv.name, lv.name, rv.name),
-                order = conflicts.pickSetting(subject, "order", bv.order, lv.order, rv.order),
+                // Placeholder: [order] merges the order over the whole live list.
+                order = lv.order,
                 flags = conflicts.pickSetting(subject, "flags", bv.flags, lv.flags, rv.flags),
             )
         }
@@ -136,12 +146,10 @@ object CategoryMerge {
                 survivors[category.name] = category
             } else {
                 remap[category.uuid] = survivor.uuid
-                deleted += category.uuid
-                tombstones += category.copy(deletedAtMillis = nowMillis)
+                bury(category.uuid, merged = category)
             }
         }
-        val ordered = survivors.values
-            .sortedWith(compareBy<CategoryRecord> { it.order }.thenBy { it.uuid })
+        val ordered = order(b, l, r, survivors.values, union = base == null, conflicts)
             .mapIndexed { index, category -> category.withOrder(index.toLong()) }
 
         val merged = CategoriesPayload(ordered + tombstones).canonical()
@@ -181,6 +189,67 @@ object CategoryMerge {
             order = if (moved || delete.isNotEmpty()) ordered.map { it.uuid } else emptyList(),
             delete = delete,
         )
+    }
+
+    /**
+     * Orders [live]. The categories live on all three sides form one register: their relative order is the
+     * syncing device's when it differs from the base's (a conflict when the remote's differs too), else the
+     * remote's. A category new on one side follows the shared category it follows there, among the others new
+     * after it by that side's position, then uuid; one new on both sides takes this device's place. Union mode
+     * takes the remote's order and appends the categories live only here, in this device's order.
+     */
+    private fun order(
+        b: Map<String, CategoryRecord>,
+        l: Map<String, CategoryRecord>,
+        r: Map<String, CategoryRecord>,
+        live: Collection<CategoryRecord>,
+        union: Boolean,
+        conflicts: MutableList<MergeConflict>,
+    ): List<CategoryRecord> {
+        val byUuid = live.associateBy { it.uuid }
+        val byOrder = compareBy<CategoryRecord>({ it.order }, { it.uuid })
+
+        /** The live categories this side has live, in its order. */
+        fun sequence(side: Map<String, CategoryRecord>): List<String> =
+            live.mapNotNull { category -> side[category.uuid]?.takeIf { it.deletedAtMillis == null } }
+                .sortedWith(byOrder)
+                .map { it.uuid }
+
+        val localSequence = sequence(l)
+        val remoteSequence = sequence(r)
+        if (union) {
+            val onRemote = remoteSequence.toHashSet()
+            return (remoteSequence + localSequence.filterNot(onRemote::contains)).map(byUuid::getValue)
+        }
+
+        // A live category the base has is live on every side: a delete anywhere wins.
+        val baseSequence = sequence(b)
+        val isShared = baseSequence.toHashSet()
+        val shared = conflicts.pickSetting(
+            subject = "categories",
+            field = "order",
+            base = baseSequence,
+            local = localSequence.filter(isShared::contains),
+            remote = remoteSequence.filter(isShared::contains),
+        )
+        // Sort key: the high half is 1 + the index of the shared category a category is or follows (0 before the
+        // first one), the low half 1 + its position among the new categories following that one (0 for the shared
+        // category itself, so it leads them). This device places a category new on both sides.
+        val slot = HashMap<String, Long>(live.size)
+        shared.forEachIndexed { index, uuid -> slot[uuid] = (index + 1L) shl 32 }
+        for (sequence in listOf(localSequence, remoteSequence)) {
+            var anchor = 0L
+            var position = 0L
+            for (uuid in sequence) {
+                if (uuid in isShared) {
+                    anchor = slot.getValue(uuid)
+                    position = 0
+                } else {
+                    slot.putIfAbsent(uuid, anchor + 1 + position++)
+                }
+            }
+        }
+        return live.sortedWith(compareBy<CategoryRecord>({ slot.getValue(it.uuid) }, { it.uuid }))
     }
 }
 
