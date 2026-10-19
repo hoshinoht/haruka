@@ -44,4 +44,16 @@ Keep the patch surface trending down.
 
 - `app/src/main/baselineProfiles/*.txt` are generated. On an upstream sync conflict, take upstream's copy, then regenerate: temporarily set `useConnectedDevices = true` (and drop `managedDevices`) in `baseline-profile/build.gradle.kts`, run `./gradlew :app:generateBaselineProfile` with a phone attached, and revert that file. It installs and drives `app.haruka` (release ID); other installs are untouched.
 - Fork rules live in `app/src/haruka/baselineProfiles/haruka-prof.txt` (wildcards for all of `haruka/**`), so generation never drops them.
-- `benchmark` builds install as "Haruka Bench" (`app.haruka.benchmark`, aqua icon). They are profileable but not debuggable, so measure with `dumpsys gfxinfo`, `am start -W` and Perfetto, after `cmd package compile -f -m speed-profile app.haruka.benchmark`.
+- `benchmark` builds install as "Haruka Bench" (`app.haruka.benchmark`, aqua icon). They are profileable but not debuggable.
+
+## Performance checks
+
+Run after an upstream sync or a fork change that touches lists, covers or startup, with a real library restored in Haruka Bench:
+
+```bash
+./gradlew assembleBenchmark && adb install -r app/build/outputs/apk/benchmark/app-arm64-v8a-benchmark.apk
+scripts/haruka/perf/run.sh before <manga-id-with-long-chapter-list>   # cold start + jank on Library, Updates, chapters
+scripts/haruka/perf/trace.sh /tmp/scroll.pftrace                       # Perfetto trace of the open screen
+```
+
+Compare against the previous run; reference on a Galaxy S25+ with ~950 series: cold start ~590 ms (floored by Mihon's 500 ms splash), jank under 1.5% on all three lists.
