@@ -18,7 +18,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,13 +62,14 @@ import tachiyomi.presentation.core.util.collectAsState
 import kotlin.math.roundToInt
 
 private val PillMargin = 8.dp
+
+// Fallback when the action slot does not pass the row's height; normally the pill fills the row minus margins.
 private val PillHeight = 40.dp
 private val PillIconSize = 24.dp
 private val MaxRowCorner = 20.dp
 
 // Below the threshold the pill is a rounded square; once armed it morphs into a full stadium.
 private val PillCornerIdle = 12.dp
-private val PillCornerArmed = PillHeight / 2
 
 private val PillSpring = spring<Float>(
     dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -242,8 +245,11 @@ private fun SwipePill(
         targetValue = if (armed) colors.onPrimary else colors.onSecondaryContainer,
         label = "pillIcon",
     )
+    // The pill spans the row's height, so its stadium radius follows the measured height.
+    var pillHeightPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
     val corner by animateDpAsState(
-        targetValue = if (armed) PillCornerArmed else PillCornerIdle,
+        targetValue = if (armed && pillHeightPx > 0) with(density) { (pillHeightPx / 2).toDp() } else PillCornerIdle,
         animationSpec = PillCornerSpring,
         label = "pillCorner",
     )
@@ -252,16 +258,16 @@ private fun SwipePill(
         animationSpec = PillSpring,
         label = "pillIconScale",
     )
-    val pillMarginPx = with(LocalDensity.current) { PillMargin.toPx() }
+    val pillMarginPx = with(density) { PillMargin.toPx() }
 
     Box(
         modifier = Modifier
-            .padding(horizontal = PillMargin)
-            .layout { measurable, _ ->
+            .padding(PillMargin)
+            .layout { measurable, constraints ->
                 val frame = pillSwipeFrame(state.offset.value, thresholdPx, pillMarginPx, 0f)
-                val placeable = measurable.measure(
-                    Constraints.fixed(frame.pillWidth.roundToInt(), PillHeight.roundToPx()),
-                )
+                val height = if (constraints.hasBoundedHeight) constraints.maxHeight else PillHeight.roundToPx()
+                pillHeightPx = height
+                val placeable = measurable.measure(Constraints.fixed(frame.pillWidth.roundToInt(), height))
                 layout(placeable.width, placeable.height) { placeable.place(0, 0) }
             }
             .clip(RoundedCornerShape(corner))

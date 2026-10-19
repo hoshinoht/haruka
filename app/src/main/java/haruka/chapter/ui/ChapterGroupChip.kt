@@ -19,7 +19,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -103,8 +106,31 @@ fun ChapterGroupChip(row: ChapterGroupRow?, modifier: Modifier = Modifier) {
     }
 }
 
-/** Indents the rows an expanded group reveals under its head. */
-fun chapterGroupIndent(row: ChapterGroupRow?): Modifier =
-    if (row != null && !row.head) Modifier.padding(start = ChildIndent) else Modifier
+/**
+ * Marks an expanded group as one region: its head and revealed rows share a tinted background, and the revealed
+ * rows are indented behind a primary-coloured rail so they read as copies of the head, not separate chapters.
+ */
+@Composable
+fun chapterGroupIndent(row: ChapterGroupRow?): Modifier {
+    if (row == null || (row.head && !row.expanded)) return Modifier
+    val region = MaterialTheme.colorScheme.surfaceContainerHigh
+    if (row.head) return Modifier.background(region)
+    val rail = MaterialTheme.colorScheme.primary
+    return Modifier
+        .background(region)
+        .drawBehind {
+            val x = RailInset.toPx()
+            drawLine(
+                color = rail,
+                start = Offset(x, 0f),
+                end = Offset(x, size.height),
+                strokeWidth = RailWidth.toPx(),
+                cap = StrokeCap.Round,
+            )
+        }
+        .padding(start = ChildIndent)
+}
 
 private val ChildIndent = 24.dp
+private val RailInset = 20.dp
+private val RailWidth = 3.dp
