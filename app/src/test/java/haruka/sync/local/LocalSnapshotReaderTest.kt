@@ -3,9 +3,8 @@ package haruka.sync.local
 import eu.kanade.tachiyomi.source.model.UpdateStrategy
 import haruka.chapter.dedup.DedupSettings
 import haruka.chapter.dedup.MangaDedupOverride
-import haruka.sync.merge.LocalCategory
+import haruka.sync.engine.LocalCategoryRow
 import haruka.sync.model.BUCKET_COUNT
-import haruka.sync.model.CategoryRecord
 import haruka.sync.model.ChapterRecord
 import haruka.sync.model.DedupOverrideRecord
 import haruka.sync.model.EntryKey
@@ -24,7 +23,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -122,7 +120,7 @@ class LocalSnapshotReaderTest {
     private fun stubLibrary(favorites: List<Manga>, others: List<Manga> = emptyList()) {
         coEvery { mangaRepository.getFavorites() } returns favorites
         coEvery { mangaRepository.getMangaByUrlAndSourceId(any(), any()) } answers {
-            others.firstOrNull { it.url == firstArg<String>() && it.source == secondArg<Long>() }
+            (favorites + others).firstOrNull { it.url == firstArg<String>() && it.source == secondArg<Long>() }
         }
         coEvery { chapterRepository.getChaptersByMangaIds(any()) } answers { chapters.slice(firstArg()) }
         coEvery { historyRepository.getHistoryByMangaIds(any()) } answers { history.slice(firstArg()) }
@@ -132,17 +130,27 @@ class LocalSnapshotReaderTest {
         every { dedupSettings.allOverrides() } returns overrides
     }
 
+    /** One pass the way the engine reads: every bucket in ascending order with its share of [knownKeys]. */
+    private fun readAll(
+        reader: LocalSnapshotReader,
+        knownKeys: Set<EntryKey>,
+        categoryUuids: Map<Long, String>,
+    ): List<List<EntryRecord>> = runBlocking {
+        (0..<BUCKET_COUNT).map { index ->
+            reader.readBucket(index, knownKeys.filterTo(HashSet()) { bucketOf(it) == index }, categoryUuids)
+        }
+    }
+
     @Test
     fun `entries carry the observed library state with categories, overrides and history`() {
         stubLibrary(favorites = listOf(mangaA, mangaB), others = listOf(mangaC))
 
-        val buckets = runBlocking { reader().readEntries(setOf(keyA, keyC, keyGone), uuids).toList() }
+        val buckets = readAll(reader(), setOf(keyA, keyC, keyGone), uuids)
 
-        buckets.map { it.index } shouldBe (0..<BUCKET_COUNT).toList()
-        for (bucket in buckets) {
-            for (entry in bucket.entries) bucketOf(entry.key) shouldBe bucket.index
+        for ((index, entries) in buckets.withIndex()) {
+            for (entry in entries) bucketOf(entry.key) shouldBe index
         }
-        buckets.flatMap { it.entries } shouldContainExactlyInAnyOrder listOf(
+        buckets.flatten() shouldContainExactlyInAnyOrder listOf(
             EntryRecord(
                 key = keyA,
                 favorite = true,
@@ -179,10 +187,11 @@ class LocalSnapshotReaderTest {
             EntryRecord(key = keyB, favorite = true, favoriteAtMillis = null, categoryUuids = listOf("u-reading")),
             EntryRecord(key = keyC, favorite = false, chapters = listOf(ChapterRecord(url = "/c/1", name = "/c/1"))),
         )
-        // Base keys already among the favorites need no lookup; a row that is gone is simply absent.
+        // Known keys already among the favorites need no lookup; a row that is gone is simply absent.
         coVerify(exactly = 1) { mangaRepository.getMangaByUrlAndSourceId("/c", 2) }
         coVerify(exactly = 1) { mangaRepository.getMangaByUrlAndSourceId("/gone", 2) }
         coVerify(exactly = 0) { mangaRepository.getMangaByUrlAndSourceId("/a", 1) }
+        coVerify(exactly = 1) { mangaRepository.getFavorites() }
     }
 
     @Test
@@ -194,16 +203,16 @@ class LocalSnapshotReaderTest {
         val batches = mutableListOf<List<Long>>()
         coEvery { chapterRepository.getChaptersByMangaIds(capture(batches)) } returns emptyMap()
 
-        val buckets = runBlocking { reader().readEntries(emptySet(), uuids).toList() }
+        val buckets = readAll(reader(), emptySet(), uuids)
 
-        buckets.sumOf { it.entries.size } shouldBe 250
+        buckets.sumOf { it.size } shouldBe 250
         batches.flatten() shouldContainExactlyInAnyOrder library.map { it.id }
         val bucketOfId = library.associate { it.id to bucketOf(EntryKey(it.source, it.url)) }
         val bucketSets = batches.map { batch ->
             batch.size shouldBeLessThanOrEqual 100
             batch.map { bucketOfId.getValue(it) }.toSet()
         }
-        // A bucket is never split across batches, so each emitted bucket comes from one batch.
+        // A bucket is never split across batches, so each returned bucket comes from one batch.
         bucketSets.flatten().size shouldBe bucketSets.flatten().toSet().size
         coVerify(exactly = 0) { mangaRepository.getMangaByUrlAndSourceId(any(), any()) }
     }
@@ -212,28 +221,41 @@ class LocalSnapshotReaderTest {
     fun `entries in an unmapped category fail instead of dropping the membership`() {
         stubLibrary(favorites = listOf(mangaB))
 
-        shouldThrow<IllegalStateException> {
-            runBlocking { reader().readEntries(emptySet(), mapOf(2L to "u-done")).toList() }
-        }
+        shouldThrow<IllegalStateException> { readAll(reader(), emptySet(), mapOf(2L to "u-done")) }
     }
 
     @Test
-    fun `categories skip the system category and map through the uuid store`() {
+    fun `a current read maps unmapped categories to a placeholder and keeps the snapshot`() {
+        stubLibrary(favorites = listOf(mangaB))
+        val reader = reader()
+        readAll(reader, emptySet(), uuids)
+
+        val current = runBlocking { reader.readCurrent(listOf(keyB, keyGone), mapOf(2L to "u-done")) }
+
+        current.keys shouldContainExactly setOf(keyB)
+        current.getValue(keyB).record.categoryUuids shouldContainExactly listOf("${UNMAPPED_CATEGORY_PREFIX}1")
+        val observed = reader.observed(keyB)!!
+        val asRead = EntryRecord(keyB, favorite = true, categoryUuids = listOf("u-reading"))
+        observed.matches(asRead, liveUuids = setOf("u-reading")) shouldBe true
+        observed.matches(current.getValue(keyB).record, liveUuids = setOf("u-reading")) shouldBe false
+        // A membership in a category the apply deleted is expected to be gone; other state still has to match.
+        observed.matches(EntryRecord(keyB, favorite = true), liveUuids = emptySet()) shouldBe true
+        observed.matches(EntryRecord(keyB, favorite = false), liveUuids = emptySet()) shouldBe false
+    }
+
+    @Test
+    fun `categories skip the system category and are remembered`() {
         val system = Category(id = Category.UNCATEGORIZED_ID, name = "", order = 0, flags = 0)
         coEvery { categoryRepository.getAll() } returns listOf(system, reading, done)
+        val reader = reader()
 
-        val categories = runBlocking { reader().readCategories() }
+        val categories = runBlocking { reader.readCategories() }
 
-        categories shouldContainExactly listOf(reading, done)
-        categories.toLocalCategories(mapOf("u-reading" to 1L, "u-stale" to 7L)) shouldContainExactly listOf(
-            LocalCategory(id = 1, uuid = "u-reading", name = "Reading"),
-            LocalCategory(id = 2, uuid = null, name = "Done"),
+        categories shouldContainExactly listOf(
+            LocalCategoryRow(id = 1, name = "Reading", order = 1, flags = 0),
+            LocalCategoryRow(id = 2, name = "Done", order = 2, flags = 4),
         )
-        categories.toCategoryRecords(uuids) shouldContainExactly listOf(
-            CategoryRecord(uuid = "u-reading", name = "Reading", order = 1, flags = 0),
-            CategoryRecord(uuid = "u-done", name = "Done", order = 2, flags = 4),
-        )
-        shouldThrow<IllegalStateException> { categories.toCategoryRecords(mapOf(1L to "u-reading")) }
+        reader.observedCategories shouldBe categories
     }
 
     @Test
@@ -246,19 +268,23 @@ class LocalSnapshotReaderTest {
                 InMemoryPreference("haruka_beta_updates", true, false),
             ),
         )
+        val reader = reader(store)
 
-        reader(store).readPrefs() shouldBe PrefsPayload(
+        val prefs = runBlocking { reader.readPrefs() }
+
+        prefs shouldBe PrefsPayload(
             listOf(
                 PrefRecord("haruka_animation_profile", "REDUCED"),
                 PrefRecord("haruka_dedup_ranking", """["A","B"]"""),
                 PrefRecord("haruka_panorama_covers", "false"),
             ),
         )
+        reader.observedPrefs shouldBe prefs
     }
 
     @Test
     fun `every synced pref key has a known storage type`() {
-        reader().readPrefs() shouldBe PrefsPayload()
+        runBlocking { reader().readPrefs() } shouldBe PrefsPayload()
     }
 
     private fun <V> Map<Long, V>.slice(ids: List<Long>): Map<Long, V> = filterKeys { it in ids }
