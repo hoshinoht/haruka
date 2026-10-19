@@ -26,8 +26,9 @@ First beta. Haruka installs beside Mihon (`app.haruka`); restore a Mihon backup 
 - Long-press adds or removes an entry from global search results.
 
 ### Look and feel
-- Hoshino theme in dark and light, with pink unread badges.
+- Hoshino theme in dark and light, with pink unread badges. It is the default theme.
 - Selection actions sit in a floating toolbar.
+- Animations setting (Settings › Appearance): Standard keeps Mihon's motion; Expressive (default) uses Material 3 Expressive springs, morphing loading indicators, wavy progress, button press morphs and pill swipe actions; Reduced uses short fades and is applied automatically when system animations are off.
 
 ### Fixes and performance
 - The fast scroller can be grabbed while the list is still moving.
@@ -36,4 +37,7 @@ First beta. Haruka installs beside Mihon (`app.haruka`); restore a Mihon backup 
 
 ### Updates
 - The in-app updater follows Haruka releases. Beta builds receive beta updates; turn this off in Settings › About.
-- Settings › About shows the Mihon release Haruka is based on.
+- Settings › About shows the Mihon base Haruka is built on (Mihon's development branch).
+
+### Known issues
+- Settings › Advanced › Use high quality renderer is Mihon's experimental reader. It is off by default and is used for every reading mode, long strip included, when on.

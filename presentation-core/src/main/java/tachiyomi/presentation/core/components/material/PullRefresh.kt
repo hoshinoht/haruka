@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -40,7 +39,8 @@ fun PullRefresh(
     ) {
         content()
 
-        PullToRefreshDefaults.Indicator(
+        // FORK -->
+        haruka.motion.ProfilePullToRefreshIndicator(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(indicatorPadding),
@@ -49,5 +49,6 @@ fun PullRefresh(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        // FORK <--
     }
 }

@@ -112,7 +112,9 @@ object HomeScreen : Screen() {
                 ) {
                     AnimatedContent(
                         targetState = tabNavigator.current,
-                        transitionSpec = {
+                        // FORK -->
+                        transitionSpec = haruka.motion.fadeThroughTransition {
+                            // FORK <--
                             materialFadeThroughIn(
                                 initialScale = 1f,
                                 durationMillis = TabFadeDuration,

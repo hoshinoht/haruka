@@ -125,7 +125,7 @@ class DedupSettingsScreen : Screen() {
                         onMoveUp = { settings.rules.set(DedupRanking.moveUp(rules, index)) },
                         onMoveDown = { settings.rules.set(DedupRanking.moveDown(rules, index)) },
                         startInset = PrefsHorizontalPadding,
-                        modifier = Modifier.animateItem(),
+                        modifier = haruka.motion.listItemMotion(this),
                     )
                 }
 
@@ -158,7 +158,7 @@ class DedupSettingsScreen : Screen() {
                         onMoveDown = { settings.rankedScanlators.set(DedupRanking.moveDown(ranking, index)) },
                         onRemove = { settings.rankedScanlators.set(ranking.filterIndexed { i, _ -> i != index }) },
                         startInset = PrefsHorizontalPadding,
-                        modifier = Modifier.animateItem(),
+                        modifier = haruka.motion.listItemMotion(this),
                     )
                 }
             }

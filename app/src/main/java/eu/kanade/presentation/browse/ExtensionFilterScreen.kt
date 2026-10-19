@@ -58,7 +58,9 @@ private fun ExtensionFilterContent(
     ) {
         items(state.languages) { language ->
             SwitchPreferenceWidget(
-                modifier = Modifier.animateItem(),
+                // FORK -->
+                modifier = haruka.motion.listItemMotion(this),
+                // FORK <--
                 title = LocaleHelper.getSourceDisplayName(language, context),
                 checked = language in state.enabledLanguages,
                 onCheckedChanged = { onClickLang(language) },

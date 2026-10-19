@@ -110,7 +110,9 @@ private fun CategoryContent(
         ) { category ->
             ReorderableItem(reorderableState, category.key) {
                 CategoryListItem(
-                    modifier = Modifier.animateItem(),
+                    // FORK -->
+                    modifier = haruka.motion.listItemMotion(this@items),
+                    // FORK <--
                     category = category,
                     onRename = { onClickRename(category) },
                     onDelete = { onClickDelete(category) },

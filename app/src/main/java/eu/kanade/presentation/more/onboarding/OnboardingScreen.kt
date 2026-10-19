@@ -75,12 +75,17 @@ fun OnboardingScreen(
         ) {
             AnimatedContent(
                 targetState = currentStep,
-                transitionSpec = {
+                // FORK -->
+                transitionSpec = haruka.motion.sharedAxisXTransition(
+                    slideDistance = slideDistance,
+                    forward = { targetState > initialState },
+                ) { forward ->
                     materialSharedAxisX(
-                        forward = targetState > initialState,
+                        forward = forward,
                         slideDistance = slideDistance,
                     )
                 },
+                // FORK <--
                 label = "stepContent",
             ) {
                 steps[it].Content()

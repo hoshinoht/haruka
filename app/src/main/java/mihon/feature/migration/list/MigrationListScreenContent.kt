@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -125,7 +124,9 @@ fun MigrationListScreenContent(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .animateItem()
+                        // FORK -->
+                        .then(haruka.motion.listItemMotion(this))
+                        // FORK <--
                         .padding(
                             start = MaterialTheme.padding.medium,
                             end = MaterialTheme.padding.small,
@@ -272,7 +273,9 @@ fun MigrationListItemResult(
                         .aspectRatio(MangaCover.Book.ratio),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator()
+                    // FORK -->
+                    haruka.motion.ScreenLoadingIndicator()
+                    // FORK <--
                 }
             }
             MigratingManga.SearchResult.NotFound -> {

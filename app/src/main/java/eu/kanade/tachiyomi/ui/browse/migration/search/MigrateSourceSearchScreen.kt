@@ -78,6 +78,9 @@ data class MigrateSourceSearchScreen(
                 )
             },
             floatingActionButton = {
+                // FORK -->
+                val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
+                // FORK <--
                 SmallExtendedFloatingActionButton(
                     text = { Text(text = stringResource(MR.strings.action_filter)) },
                     icon = { Icon(MaterialSymbols.Rounded.FilterList, contentDescription = null) },
@@ -86,6 +89,10 @@ data class MigrateSourceSearchScreen(
                         visible = state.filters.isNotEmpty(),
                         alignment = Alignment.BottomEnd,
                     ),
+                    // FORK -->
+                    shape = fabPressMorph.shape,
+                    interactionSource = fabPressMorph.interactionSource,
+                    // FORK <--
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

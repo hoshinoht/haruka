@@ -200,6 +200,9 @@ object DownloadQueueScreen : Screen() {
             },
             floatingActionButton = {
                 val isRunning by viewModel.isDownloaderRunning.collectAsStateWithLifecycle()
+                // FORK -->
+                val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
+                // FORK <--
                 SmallExtendedFloatingActionButton(
                     text = {
                         val id = if (isRunning) {
@@ -229,6 +232,10 @@ object DownloadQueueScreen : Screen() {
                         visible = downloadList.isNotEmpty(),
                         alignment = Alignment.BottomEnd,
                     ),
+                    // FORK -->
+                    shape = fabPressMorph.shape,
+                    interactionSource = fabPressMorph.interactionSource,
+                    // FORK <--
                 )
             },
         ) { contentPadding ->

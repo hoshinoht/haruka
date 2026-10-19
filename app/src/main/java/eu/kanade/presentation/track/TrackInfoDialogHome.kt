@@ -1,6 +1,5 @@
 package eu.kanade.presentation.track
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -81,7 +80,9 @@ fun TrackInfoDialogHome(
 ) {
     Column(
         modifier = Modifier
-            .animateContentSize()
+            // FORK -->
+            .then(haruka.motion.contentSizeMotion())
+            // FORK <--
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)

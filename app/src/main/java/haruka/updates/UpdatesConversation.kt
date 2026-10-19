@@ -35,6 +35,7 @@ import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.relativeTimeSpanString
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import haruka.i18n.HR
+import haruka.motion.ExpandableRows
 import haruka.title.rememberDisplayTitle
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.roundedfilled.Bookmark
@@ -91,16 +92,17 @@ internal fun UpdatesConversation(
             onClickCover = onClickCover,
             onDownloadChapter = onDownloadChapter,
         )
-        if (expanded) {
+        ExpandableRows(expanded) {
             Column(modifier = Modifier.padding(bottom = MaterialTheme.padding.small)) {
                 // Oldest first, as in a chat, so the newest chapter sits last like the preview says.
-                group.items.asReversed().forEach { item ->
+                group.items.asReversed().forEachIndexed { index, item ->
                     ChapterBubble(
                         item = item,
                         selectionMode = selectionMode,
                         onUpdateSelected = onUpdateSelected,
                         onClickUpdate = onClickUpdate,
                         onDownloadChapter = onDownloadChapter,
+                        modifier = Modifier.revealedRow(index),
                     )
                 }
             }
@@ -237,6 +239,7 @@ private fun ChapterBubble(
     onUpdateSelected: (UpdatesItem, Boolean, Boolean) -> Unit,
     onClickUpdate: (UpdatesItem) -> Unit,
     onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
     val update = item.update
@@ -249,7 +252,7 @@ private fun ChapterBubble(
         ?.let { stringResource(MR.strings.chapter_progress, it + 1) }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .selectedBackground(item.selected)
             .combinedClickable(

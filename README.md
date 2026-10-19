@@ -1,90 +1,127 @@
-<!-- FORK -->
-> **Haruka** (遥か, "far away") is a personal fork of Mihon for long-haul readers: hundreds of series, thousands of chapters, one clean chapter list. Planned additions: bulk-migration extras, grouped Updates, panorama covers, long-press add/remove everywhere, progress banners and official-first chapter deduplication, while staying merge-compatible with upstream and with keiyoushi extensions. Not affiliated with Mihon; report Haruka issues [here](https://github.com/hoshinoht/haruka/issues), not upstream. Fork rules: [AGENTS.md](AGENTS.md).
-<!-- /FORK -->
-
 <div align="center">
 
-<a href="https://mihon.app">
-    <img src="./.github/assets/logo.png" alt="Mihon logo" title="Mihon logo" width="80"/>
-</a>
+<img src="./.github/assets/haruka-logo.png" alt="Haruka logo" width="96"/>
 
-# Mihon [App](#)
+# Haruka (遥か, "far away")
 
-### Full-featured reader
-Discover and read manga, webtoons, comics, and more – easier than ever on your Android device.
+**My personal build of [Mihon](https://github.com/mihonapp/mihon), tuned for a very long reading list.**
 
-[![Discord server](https://img.shields.io/discord/1195734228319617024.svg?label=&labelColor=6A7EC2&color=7389D8&logo=discord&logoColor=FFFFFF)](https://discord.gg/mihon)
-[![GitHub downloads](https://img.shields.io/github/downloads/mihonapp/mihon/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://mihon.app/download)
+*Hundreds of series, hundreds of thousands of chapters, and one clean chapter list per series. Android 8.0+.*
 
-[![CI](https://img.shields.io/github/actions/workflow/status/mihonapp/mihon/build.yml?labelColor=27303D)](https://github.com/mihonapp/mihon/actions/workflows/build_push.yml)
-[![License: Apache-2.0](https://img.shields.io/github/license/mihonapp/mihon?labelColor=27303D&color=0877d2)](/LICENSE)
-[![Translation status](https://img.shields.io/weblate/progress/mihon?labelColor=27303D&color=946300)](https://hosted.weblate.org/engage/mihon/)
+[![Release](https://img.shields.io/github/v/release/hoshinoht/haruka?include_prereleases&label=release&labelColor=111b2b&color=b04a7a)](https://github.com/hoshinoht/haruka/releases)
+[![Based on Mihon](https://img.shields.io/badge/based%20on-Mihon-0877d2?labelColor=111b2b)](https://github.com/mihonapp/mihon)
+[![Extensions](https://img.shields.io/badge/extensions-keiyoushi-087a92?labelColor=111b2b)](https://github.com/keiyoushi/extensions-source)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-62667c?labelColor=111b2b)](./LICENSE)
 
-## Download
-
-[![Mihon Stable](https://img.shields.io/github/release/mihonapp/mihon.svg?maxAge=3600&label=Stable&labelColor=06599d&color=043b69)](https://mihon.app/download)
-[![Mihon Beta](https://img.shields.io/github/v/release/mihonapp/mihon-preview.svg?maxAge=3600&label=Beta&labelColor=2c2c47&color=1c1c39)](https://mihon.app/download)
-
-*Requires Android 8.0 or higher.*
-
-## Features
-
-<div align="left">
-
-* Local reading of content.
-* A configurable reader with multiple viewers, reading directions and other settings.
-* Tracker support: [MangaBaka](https://mangabaka.org), [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.app/), [MangaUpdates](https://mangaupdates.com), [Shikimori](https://shikimori.one), [Bangumi](https://bgm.tv/), and [Hikka](https://hikka.io/) support.
-* Categories to organize your library.
-* Light and dark themes.
-* Schedule updating your library for new chapters.
-* Create backups locally to read offline or to your desired cloud service.
-* Plus much more...
+[Why](#why-haruka) · [Features](#features) · [Install](#install) · [Staying close to Mihon](#staying-close-to-mihon) · [Development](#development) · [Credits](#credits)
 
 </div>
 
-## Contributing
+> **Everything Mihon does, plus the handful of things I kept wishing it did.**
+> Haruka is not a replacement for Mihon and is not affiliated with it. If you want the app most people use, [get Mihon](https://mihon.app).
 
-[Code of conduct](./CODE_OF_CONDUCT.md) · [Contributing guide](./CONTRIBUTING.md)
+> [!NOTE]
+> Beta. Haruka follows Mihon's development branch and is built and used by one person. Backups stay restorable by stock Mihon, and keiyoushi extensions work unchanged. Please report Haruka problems [here](https://github.com/hoshinoht/haruka/issues), not to the Mihon project.
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## Why Haruka
 
-Before reporting a new issue, take a look at the [FAQ](https://mihon.app/docs/faq/general), the [changelog](https://mihon.app/changelogs/) and the already opened [issues](https://github.com/mihonapp/mihon/issues); if you got any questions, join our [Discord server](https://discord.gg/mihon).
+My library outgrew the way chapter lists work. A popular series often has the same chapter from the official release, two scanlation groups and an aggregator, so the list repeats every chapter three or four times. Haruka keeps one copy of each chapter, preferring the official one, and keeps the rest a tap away. The other features came from the same habit: reading a lot, across many sources, and wanting the app to keep up.
 
+The name is 遥か, "far away": the long haul of a reading list that never ends. The look is borrowed from Takanashi Hoshino of Blue Archive, pink on Abydos navy.
 
-### Repositories
+## At a glance
 
-[![mihonapp/website - GitHub](https://github-stats-extended.vercel.app/api/pin/?username=mihonapp&repo=website&bg_color=161B22&text_color=c9d1d9&title_color=0877d2&icon_color=0877d2&border_radius=8&hide_border=true&description_lines_count=2)](https://github.com/mihonapp/website/)
-[![mihonapp/bitmap.kt - GitHub](https://github-stats-extended.vercel.app/api/pin/?username=mihonapp&repo=bitmap.kt&bg_color=161B22&text_color=c9d1d9&title_color=0877d2&icon_color=0877d2&border_radius=8&hide_border=true&description_lines_count=2)](https://github.com/mihonapp/bitmap.kt/)
+| | |
+|---|---|
+| **Base** | [mihonapp/mihon](https://github.com/mihonapp/mihon) `main`, merged weekly |
+| **Package** | `app.haruka`, installs beside Mihon |
+| **Extensions** | [keiyoushi/extensions-source](https://github.com/keiyoushi/extensions-source), unmodified extension API |
+| **Backups** | Mihon's format; restore a Mihon (or Komikku) backup to move in |
+| **Updates** | In-app updater from this repository, with an optional beta channel |
 
-### Credits
+## Features
 
-Thank you to all the people who have contributed!
+### Chapters
+- **Official-first deduplication:** one copy per chapter in the list, reader, downloads and read marking, with your own rules, scanlator ranking and per-series overrides.
+- **Versions on demand:** other copies and split parts sit under a small chip on the chapter row.
+- **Duplicates marked together:** finishing a chapter marks its other copies read.
+
+### Library and updates
+- **Grouped Updates:** chapters grouped per series and day, optionally as conversations.
+- **Panorama covers:** wide covers shown in full instead of cropped.
+- **Progress banners:** library updates and backup restores show progress inside the app.
+- **Update errors:** a screen listing the series that failed the last library update.
+- **Related titles and short titles:** suggestions from the extension on each series, and titles without trailing lists of alternative names.
+
+### Migration
+- **Range selection:** long-press to select a range, select all or none, jump to either end.
+- **Unavailable sources:** flagged in Migrate and movable all at once.
+- **Long-press to add or remove** a series from global search results.
+
+### Look and feel
+- **Hoshino theme:** the default, in dark and light.
+- **Animations:** *Standard* is Mihon's motion; *Expressive* adds Material 3 Expressive springs, morphing loaders and pill swipe actions; *Reduced* keeps motion to short fades and follows the system setting.
+- **Floating selection toolbar** on multi-select screens.
+
+The full list per release is in the [Haruka changelog](./docs/haruka/CHANGELOG.md). Everything else is Mihon: see [Mihon's site](https://mihon.app) and its [changelog](./CHANGELOG.md).
+
+## Install
+
+**Requirements:** Android 8.0 or newer.
+
+1. Download `haruka-arm64-v8a-<version>.apk` from [Releases](https://github.com/hoshinoht/haruka/releases) (most phones), or the universal `haruka-<version>.apk`.
+2. Install it. Haruka installs next to Mihon; it does not replace it.
+3. To bring your library over, create a backup in Mihon and restore it in Haruka (More › Data and storage › Restore backup).
+
+## Staying close to Mihon
+
+Haruka is a thin layer on top of Mihon, kept thin on purpose so that every Mihon improvement arrives with little effort.
+
+```mermaid
+flowchart LR
+  M["mihonapp/mihon main"] -->|weekly sync PR| D["Haruka dev"]
+  F["haruka/** fork code"] --> D
+  D -->|tag v*| R["signed APKs on Releases"]
+  K["keiyoushi extensions"] --> R
+```
+
+- **Fork code lives apart:** Haruka's features live in their own packages; Mihon's files only get small marked hooks.
+- **No database changes:** Mihon's schema is untouched, so upgrades and backups keep working both ways.
+- **Extensions untouched:** the extension API and loader match Mihon exactly.
+- **Converge when Mihon catches up:** if Mihon ships an equivalent feature, Haruka drops its own version.
+
+The rules are in [AGENTS.md](./AGENTS.md).
+
+## Development
+
+```bash
+./gradlew spotlessApply spotlessCheck
+./gradlew testDebugUnitTest
+./gradlew assembleDebug
+scripts/haruka/patch-surface.sh   # how much of Mihon Haruka touches
+```
+
+Releases are built by GitHub Actions from a `v*` tag; `scripts/haruka/build-release.sh` builds the same signed APKs locally.
+
+## Credits
+
+Haruka exists because of [Mihon](https://github.com/mihonapp/mihon) and everyone who built it and Tachiyomi before it. Thank you.
 
 <a href="https://github.com/mihonapp/mihon/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=mihonapp/mihon" alt="Mihon app contributors" title="Mihon app contributors" width="800"/>
+  <img src="https://contrib.rocks/image?repo=mihonapp/mihon" alt="Mihon contributors" width="600"/>
 </a>
+
+Some features are adapted from [Komikku](https://github.com/komikku-app/komikku) and [TachiyomiSY](https://github.com/jobobby04/TachiyomiSY). The rounded headings use Zen Maru Gothic under the SIL Open Font License (see [NOTICE](./NOTICE)).
 
 ### Disclaimer
 
-The developer(s) of this application does not have any affiliation with the content providers available, and this application hosts zero content.
+Haruka hosts no content and has no affiliation with the content providers its extensions reach.
 
 ### License
+
+Apache License 2.0, like Mihon. See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
 
 <pre>
 Copyright © 2015 Javier Tomás
 Copyright © 2024 Mihon Open Source Project
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 </pre>
-
-</div>

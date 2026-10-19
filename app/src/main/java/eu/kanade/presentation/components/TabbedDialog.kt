@@ -1,6 +1,5 @@
 package eu.kanade.presentation.components
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -50,6 +49,9 @@ fun TabbedDialog(
         onDismissRequest = onDismissRequest,
     ) {
         val scope = rememberCoroutineScope()
+        // FORK -->
+        val scrollToTab = haruka.motion.pagerTabScroll()
+        // FORK <--
 
         Column {
             Row {
@@ -61,7 +63,9 @@ fun TabbedDialog(
                     tabTitles.fastForEachIndexed { index, tab ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                            // FORK -->
+                            onClick = { scope.launch { scrollToTab(pagerState, index) } },
+                            // FORK <--
                             text = { TabText(text = tab) },
                             unselectedContentColor = MaterialTheme.colorScheme.onSurface,
                         )
@@ -72,7 +76,9 @@ fun TabbedDialog(
             }
 
             HorizontalPager(
-                modifier = Modifier.animateContentSize(),
+                // FORK -->
+                modifier = haruka.motion.contentSizeMotion(),
+                // FORK <--
                 state = pagerState,
                 verticalAlignment = Alignment.Top,
                 pageContent = { page -> content(page) },

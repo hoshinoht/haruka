@@ -172,7 +172,9 @@ private fun ExtensionDetails(
             key = { it.source.id },
         ) { source ->
             SourceSwitchPreference(
-                modifier = Modifier.animateItem(),
+                // FORK -->
+                modifier = haruka.motion.listItemMotion(this),
+                // FORK <--
                 source = source,
                 onClickSourcePreferences = onClickSourcePreferences,
                 onClickSource = onClickSource,

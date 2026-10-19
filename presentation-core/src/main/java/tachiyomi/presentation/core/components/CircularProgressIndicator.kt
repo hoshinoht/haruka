@@ -41,6 +41,12 @@ fun CombinedCircularProgressIndicator(
     progress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
+    // FORK -->
+    if (haruka.motion.LocalAnimationProfile.current != haruka.motion.AnimationProfile.STANDARD) {
+        haruka.motion.ProfileCombinedProgressIndicator(progress = progress, modifier = modifier)
+        return
+    }
+    // FORK <--
     AnimatedContent(
         targetState = progress() == 0f,
         transitionSpec = { fadeIn() togetherWith fadeOut() },

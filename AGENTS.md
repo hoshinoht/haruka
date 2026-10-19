@@ -38,6 +38,8 @@ scripts/haruka/patch-surface.sh   # upstream files touched outside fork-owned pa
 
 Keep the patch surface trending down.
 
+`README.md` is Haruka's own page, not a hooked upstream file. On an upstream sync conflict keep Haruka's version (`git checkout --ours README.md`) and carry over only facts that changed upstream (supported Android version, licence).
+
 ## Baseline profiles
 
 - `app/src/main/baselineProfiles/*.txt` are generated. On an upstream sync conflict, take upstream's copy, then regenerate: temporarily set `useConnectedDevices = true` (and drop `managedDevices`) in `baseline-profile/build.gradle.kts`, run `./gradlew :app:generateBaselineProfile` with a phone attached, and revert that file. It installs and drives `app.haruka` (release ID); other installs are untouched.

@@ -18,11 +18,18 @@ fun CategoryFloatingActionButton(
     onCreate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // FORK -->
+    val pressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
+    // FORK <--
     SmallExtendedFloatingActionButton(
         text = { Text(text = stringResource(MR.strings.action_add)) },
         icon = { Icon(imageVector = MaterialSymbols.Rounded.Add, contentDescription = null) },
         onClick = onCreate,
         expanded = lazyListState.shouldExpandFAB(),
         modifier = modifier,
+        // FORK -->
+        shape = pressMorph.shape,
+        interactionSource = pressMorph.interactionSource,
+        // FORK <--
     )
 }

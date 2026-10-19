@@ -92,7 +92,14 @@ fun HistoryItem(
         }
 
         if (!history.coverData.isMangaFavorite) {
-            IconButton(onClick = onClickFavorite) {
+            // FORK -->
+            val favoritePressMorph = haruka.motion.rememberIconButtonPressMorph()
+            IconButton(
+                onClick = onClickFavorite,
+                shape = favoritePressMorph.shape,
+                interactionSource = favoritePressMorph.interactionSource,
+            ) {
+                // FORK <--
                 Icon(
                     imageVector = MaterialSymbols.Rounded.Favorite,
                     contentDescription = stringResource(MR.strings.add_to_library),
@@ -101,7 +108,14 @@ fun HistoryItem(
             }
         }
 
-        IconButton(onClick = onClickDelete) {
+        // FORK -->
+        val deletePressMorph = haruka.motion.rememberIconButtonPressMorph()
+        IconButton(
+            onClick = onClickDelete,
+            shape = deletePressMorph.shape,
+            interactionSource = deletePressMorph.interactionSource,
+        ) {
+            // FORK <--
             Icon(
                 imageVector = MaterialSymbols.Rounded.Delete,
                 contentDescription = stringResource(MR.strings.action_delete),

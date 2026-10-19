@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -326,17 +325,19 @@ fun WebViewScreenContent(
                     }
                 }
                 when (val loadingState = currentWindow.state.loadingState) {
-                    is LoadingState.Initializing -> LinearProgressIndicator(
+                    // FORK -->
+                    is LoadingState.Initializing -> haruka.motion.ProfileLinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter),
                     )
-                    is LoadingState.Loading -> LinearProgressIndicator(
+                    is LoadingState.Loading -> haruka.motion.ProfileLinearProgressIndicator(
                         progress = { loadingState.progress },
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter),
                     )
+                    // FORK <--
                     else -> {}
                 }
             }

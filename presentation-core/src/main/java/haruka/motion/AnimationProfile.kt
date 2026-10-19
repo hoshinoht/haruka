@@ -1,10 +1,15 @@
 package haruka.motion
 
+import android.content.ContentResolver
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 
@@ -29,14 +34,29 @@ enum class AnimationProfile {
  */
 val LocalAnimationProfile = staticCompositionLocalOf { AnimationProfile.STANDARD }
 
-/** The chosen profile, downgraded to [AnimationProfile.REDUCED] when the system "Remove animations" is on. */
+/** The chosen profile, downgraded to [AnimationProfile.REDUCED] while the system "Remove animations" is on. */
 @Composable
-@ReadOnlyComposable
 fun effectiveAnimationProfile(chosen: AnimationProfile): AnimationProfile {
     val resolver = LocalContext.current.contentResolver
-    val animatorScale = Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+    // Observed, so toggling the system setting with the app open takes effect without a restart.
+    val animatorScale by produceState(animatorScale(resolver), resolver) {
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                value = animatorScale(resolver)
+            }
+        }
+        resolver.registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            false,
+            observer,
+        )
+        awaitDispose { resolver.unregisterContentObserver(observer) }
+    }
     return if (animatorScale == 0f) AnimationProfile.REDUCED else chosen
 }
+
+private fun animatorScale(resolver: ContentResolver): Float =
+    Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 
 /**
  * Component motion for `MaterialExpressiveTheme`. Mihon already passes the expressive scheme, so both

@@ -140,7 +140,9 @@ private fun MigrateSourceList(
             key = { (source, _) -> "migrate-${source.id}" },
         ) { (source, count) ->
             MigrateSourceItem(
-                modifier = Modifier.animateItem(),
+                // FORK -->
+                modifier = haruka.motion.listItemMotion(this),
+                // FORK <--
                 source = source,
                 count = count,
                 onClickItem = { onClickItem(source) },

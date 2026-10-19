@@ -143,7 +143,11 @@ private fun DownloadingIndicator(
                 stroke = stroke,
                 trackStroke = stroke,
                 // Only an active download waves, so a queued one reads as waiting
-                amplitude = if (downloadState == Download.State.DOWNLOADING) INDICATOR_AMPLITUDE else 0f,
+                // FORK -->
+                amplitude = haruka.motion.wavyAmplitude(
+                    if (downloadState == Download.State.DOWNLOADING) INDICATOR_AMPLITUDE else 0f,
+                ),
+                // FORK <--
                 wavelength = IndicatorWavelength,
             )
         } else {
@@ -159,7 +163,11 @@ private fun DownloadingIndicator(
                 trackColor = trackColor,
                 stroke = stroke,
                 trackStroke = stroke,
-                amplitude = { WavyProgressIndicatorDefaults.indicatorAmplitude(it) * INDICATOR_AMPLITUDE },
+                // FORK -->
+                amplitude = haruka.motion.wavyAmplitude {
+                    WavyProgressIndicatorDefaults.indicatorAmplitude(it) * INDICATOR_AMPLITUDE
+                },
+                // FORK <--
                 wavelength = IndicatorWavelength,
             )
         }

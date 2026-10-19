@@ -24,11 +24,18 @@ fun IconToggleButton(
     title: String,
     modifier: Modifier = Modifier,
 ) {
+    // FORK -->
+    val pressMorph = haruka.motion.rememberFilledIconToggleButtonPressMorph(checked)
+    // FORK <--
     FilledIconToggleButton(
         checked = checked,
         onCheckedChange = onCheckedChange,
         modifier = modifier
             .height(48.dp),
+        // FORK -->
+        shape = pressMorph.shape,
+        interactionSource = pressMorph.interactionSource,
+        // FORK <--
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),

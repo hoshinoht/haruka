@@ -1,6 +1,5 @@
 package eu.kanade.presentation.manga.components
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -28,6 +27,9 @@ fun MangaNotesDisplay(
 
     val richTextState = rememberRichTextState()
     val primaryColor = MaterialTheme.colorScheme.primary
+    // FORK -->
+    val fadeSpec = haruka.motion.listEffectsSpec(FADE_TIME)
+    // FORK <--
     LaunchedEffect(content) {
         richTextState.setMarkdown(content)
 
@@ -37,7 +39,9 @@ fun MangaNotesDisplay(
         }
 
         alpha.snapTo(targetValue = 0f)
-        alpha.animateTo(targetValue = 1f, animationSpec = FADE_TIME)
+        // FORK -->
+        alpha.animateTo(targetValue = 1f, animationSpec = fadeSpec)
+        // FORK <--
     }
     LaunchedEffect(Unit) {
         richTextState.config.unorderedListIndent = 4
@@ -51,7 +55,9 @@ fun MangaNotesDisplay(
         RichText(
             modifier = modifier
                 // Only animate size if the notes changes
-                .then(if (contentUpdatedOnce) Modifier.animateContentSize() else Modifier)
+                // FORK -->
+                .then(if (contentUpdatedOnce) haruka.motion.contentSizeMotion() else Modifier)
+                // FORK <--
                 .alpha(alpha.value),
             style = MaterialTheme.typography.bodyMedium,
             state = richTextState,

@@ -25,6 +25,8 @@ import eu.kanade.presentation.updates.UpdatesUiItem
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import haruka.i18n.HR
+import haruka.motion.ExpandableRows
+import haruka.motion.listItemMotion
 import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
@@ -95,7 +97,7 @@ fun LazyListScope.groupedUpdatesUiItems(
     ) { row ->
         when (row) {
             is GroupedRow.Header -> ListGroupHeader(
-                modifier = Modifier.animateItem(),
+                modifier = listItemMotion(this),
                 text = relativeDateText(row.date),
             )
             is GroupedRow.Group -> if (grouping.conversations) {
@@ -108,7 +110,7 @@ fun LazyListScope.groupedUpdatesUiItems(
                     onClickCover = onClickCover,
                     onClickUpdate = onClickUpdate,
                     onDownloadChapter = onDownloadChapter,
-                    modifier = Modifier.animateItem(),
+                    modifier = listItemMotion(this),
                 )
             } else {
                 UpdatesGroup(
@@ -120,7 +122,7 @@ fun LazyListScope.groupedUpdatesUiItems(
                     onClickCover = onClickCover,
                     onClickUpdate = onClickUpdate,
                     onDownloadChapter = onDownloadChapter,
-                    modifier = Modifier.animateItem(),
+                    modifier = listItemMotion(this),
                 )
             }
         }
@@ -157,8 +159,8 @@ private fun UpdatesGroup(
         if (group.items.size > 1) {
             ExpandToggle(hiddenCount = group.hidden.size, expanded = expanded, onClick = onToggleExpanded)
         }
-        if (expanded) {
-            group.hidden.forEach { item ->
+        ExpandableRows(expanded) {
+            group.hidden.forEachIndexed { index, item ->
                 UpdateRow(
                     item = item,
                     targets = listOf(item),
@@ -168,6 +170,7 @@ private fun UpdatesGroup(
                     onClickCover = onClickCover,
                     onClickUpdate = onClickUpdate,
                     onDownloadChapter = onDownloadChapter,
+                    modifier = Modifier.revealedRow(index),
                 )
             }
         }
@@ -184,6 +187,7 @@ private fun UpdateRow(
     onClickCover: (UpdatesItem) -> Unit,
     onClickUpdate: (UpdatesItem) -> Unit,
     onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     fun select(fromLongPress: Boolean) = selectAll(targets, !selected, fromLongPress, onUpdateSelected)
     UpdatesUiItem(
@@ -200,6 +204,7 @@ private fun UpdateRow(
         }.takeIf { !selectionMode },
         downloadStateProvider = item.downloadStateProvider,
         downloadProgressProvider = item.downloadProgressProvider,
+        modifier = modifier,
     )
 }
 

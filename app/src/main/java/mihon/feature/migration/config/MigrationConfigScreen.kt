@@ -148,6 +148,9 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                 )
             },
             floatingActionButton = {
+                // FORK -->
+                val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
+                // FORK <--
                 SmallExtendedFloatingActionButton(
                     text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
                     icon = {
@@ -158,6 +161,10 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                         continueMigration(openSheet = true, extraSearchQuery = null)
                     },
                     expanded = lazyListState.shouldExpandFAB(),
+                    // FORK -->
+                    shape = fabPressMorph.shape,
+                    interactionSource = fabPressMorph.interactionSource,
+                    // FORK <--
                 )
             },
         ) { contentPadding ->
@@ -189,7 +196,9 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
                                     .padding(MaterialTheme.padding.medium)
-                                    .animateItem(),
+                                    // FORK -->
+                                    .then(haruka.motion.listItemMotion(this)),
+                                // FORK <--
                             )
                         }
                     }
@@ -250,7 +259,9 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                 shape = shape,
                 modifier = Modifier
                     .padding(horizontal = MaterialTheme.padding.medium)
-                    .animateItem(),
+                    // FORK -->
+                    .then(haruka.motion.listItemMotion(this@SourceItemContainer)),
+                // FORK <--
             ) {
                 SourceItem(
                     source = source,

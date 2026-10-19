@@ -91,8 +91,10 @@ fun AppBar(
     AppBar(
         modifier = modifier,
         backgroundColor = backgroundColor,
-        titleContent = {
-            if (isActionMode) {
+        // FORK -->
+        titleContent = haruka.motion.appBarSwap(actionModeCounter, contentKey = { it > 0 }) { actionModeCounter ->
+            if (actionModeCounter > 0) {
+                // FORK <--
                 AppBarTitle(actionModeCounter.toString())
             } else {
                 AppBarTitle(title, subtitle = subtitle)
@@ -100,8 +102,10 @@ fun AppBar(
         },
         navigateUp = navigateUp,
         navigationIcon = navigationIcon,
-        actions = {
-            if (isActionMode) {
+        // FORK -->
+        actions = haruka.motion.appBarActionsSwap(actionModeCounter, contentKey = { it > 0 }) { actionModeCounter ->
+            if (actionModeCounter > 0) {
+                // FORK <--
                 actionModeActions()
             } else {
                 actions()
@@ -208,9 +212,16 @@ fun AppBarActions(
             state = rememberTooltipState(),
             focusable = false,
         ) {
+            // FORK -->
+            val pressMorph = haruka.motion.rememberIconButtonPressMorph()
+            // FORK <--
             IconButton(
                 onClick = it.onClick,
                 enabled = it.enabled,
+                // FORK -->
+                shape = pressMorph.shape,
+                interactionSource = pressMorph.interactionSource,
+                // FORK <--
             ) {
                 Icon(
                     imageVector = it.icon,
@@ -233,8 +244,15 @@ fun AppBarActions(
             state = rememberTooltipState(),
             focusable = false,
         ) {
+            // FORK -->
+            val pressMorph = haruka.motion.rememberIconButtonPressMorph()
+            // FORK <--
             IconButton(
                 onClick = { showMenu = !showMenu },
+                // FORK -->
+                shape = pressMorph.shape,
+                interactionSource = pressMorph.interactionSource,
+                // FORK <--
             ) {
                 Icon(
                     MaterialSymbols.Rounded.MoreVert,
@@ -301,8 +319,10 @@ fun SearchToolbar(
 
     AppBar(
         modifier = modifier,
-        titleContent = {
-            if (searchQuery == null) return@AppBar titleContent()
+        // FORK -->
+        titleContent = haruka.motion.appBarSwap(searchQuery, contentKey = { it != null }) { searchQuery ->
+            if (searchQuery == null) return@appBarSwap titleContent()
+            // FORK <--
 
             val keyboardController = LocalSoftwareKeyboardController.current
             val focusManager = LocalFocusManager.current

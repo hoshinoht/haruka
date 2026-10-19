@@ -107,7 +107,7 @@ class UpdateErrorsScreen : Screen() {
                                     group.message ?: stringResource(MR.strings.unknown_error),
                                     group.entries.size,
                                 ),
-                                modifier = Modifier.animateItem(),
+                                modifier = haruka.motion.listItemMotion(this),
                             )
                         }
                         items(group.entries, key = { it.manga.id }, contentType = { "entry" }) { entry ->
@@ -124,7 +124,7 @@ class UpdateErrorsScreen : Screen() {
                                 },
                                 onLongClick = { viewModel.selectRange(entry.manga) },
                                 onClickCover = { navigator.push(MangaScreen(entry.manga.id)) },
-                                modifier = Modifier.animateItem(),
+                                modifier = haruka.motion.listItemMotion(this),
                             )
                         }
                     }

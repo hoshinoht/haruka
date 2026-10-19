@@ -65,6 +65,8 @@ fun MangaChapterListItem(
     modifier: Modifier = Modifier,
     // FORK -->
     trailingContent: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+    /** Applied to the row's outermost layout, where lazy item animations must sit. */
+    itemModifier: Modifier = Modifier,
     // FORK <--
 ) {
     val start = getSwipeAction(
@@ -92,7 +94,7 @@ fun MangaChapterListItem(
         bookmark = bookmark,
         downloadState = downloadStateProvider(),
         onChapterSwipe = onChapterSwipe,
-        modifier = Modifier.clipToBounds(),
+        modifier = itemModifier.clipToBounds(),
         startActions = listOfNotNull(start),
         endActions = listOfNotNull(end),
         swipeThreshold = swipeActionThreshold,

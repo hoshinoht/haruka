@@ -47,7 +47,9 @@ fun ExtensionStoresContent(
         repos.forEach {
             item {
                 ExtensionStoresListItem(
-                    modifier = Modifier.animateItem(),
+                    // FORK -->
+                    modifier = haruka.motion.listItemMotion(this),
+                    // FORK <--
                     store = it,
                     onOpenWebsite = { onOpenWebsite(it) },
                     onOpenDiscord = { onOpenDiscord(it) },

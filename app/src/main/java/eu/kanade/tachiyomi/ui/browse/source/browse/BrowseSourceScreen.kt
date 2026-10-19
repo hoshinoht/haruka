@@ -151,6 +151,9 @@ data class BrowseSourceScreen(
                             .padding(horizontal = MaterialTheme.padding.small),
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
                     ) {
+                        // FORK -->
+                        val popularMorph = haruka.motion.rememberFilterChipPressMorph(state.listing == Listing.Popular)
+                        // FORK <--
                         FilterChip(
                             selected = state.listing == Listing.Popular,
                             onClick = {
@@ -168,8 +171,16 @@ data class BrowseSourceScreen(
                             label = {
                                 Text(text = stringResource(MR.strings.popular))
                             },
+                            // FORK -->
+                            shape = popularMorph.shape,
+                            interactionSource = popularMorph.interactionSource,
+                            // FORK <--
                         )
                         if (source.supportsLatest) {
+                            // FORK -->
+                            val latestMorph =
+                                haruka.motion.rememberFilterChipPressMorph(state.listing == Listing.Latest)
+                            // FORK <--
                             FilterChip(
                                 selected = state.listing == Listing.Latest,
                                 onClick = {
@@ -187,9 +198,17 @@ data class BrowseSourceScreen(
                                 label = {
                                     Text(text = stringResource(MR.strings.latest))
                                 },
+                                // FORK -->
+                                shape = latestMorph.shape,
+                                interactionSource = latestMorph.interactionSource,
+                                // FORK <--
                             )
                         }
                         if (state.filters.isNotEmpty()) {
+                            // FORK -->
+                            val filterMorph =
+                                haruka.motion.rememberFilterChipPressMorph(state.listing is Listing.Search)
+                            // FORK <--
                             FilterChip(
                                 selected = state.listing is Listing.Search,
                                 onClick = viewModel::openFilterSheet,
@@ -204,6 +223,10 @@ data class BrowseSourceScreen(
                                 label = {
                                     Text(text = stringResource(MR.strings.action_filter))
                                 },
+                                // FORK -->
+                                shape = filterMorph.shape,
+                                interactionSource = filterMorph.interactionSource,
+                                // FORK <--
                             )
                         }
                     }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
-import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -59,6 +58,14 @@ fun AdaptiveSheet(
 ) {
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
+    // FORK -->
+    val sheetAnimationSpec = haruka.motion.sheetAnimationSpec(
+        tachiyomi.presentation.core.components.sheetAnimationSpec,
+        isTabletUi,
+    )
+    val sheetOpenSpec = haruka.motion.sheetOpenSpec()
+    val sheetDismissSpec = haruka.motion.sheetDismissSpec()
+    // FORK <--
     if (isTabletUi) {
         var targetAlpha by remember { mutableFloatStateOf(0f) }
         val alpha by animateFloatAsState(
@@ -121,7 +128,9 @@ fun AdaptiveSheet(
         )
         val internalOnDismissRequest = {
             if (anchoredDraggableState.settledValue == 0) {
-                scope.launch { anchoredDraggableState.animateTo(1) }
+                // FORK -->
+                scope.launch { haruka.motion.animateSheetTo(anchoredDraggableState, 1, sheetDismissSpec) }
+                // FORK <--
             }
         }
         Box(
@@ -163,6 +172,9 @@ fun AdaptiveSheet(
                         },
                     )
                     .then(modifier)
+                    // FORK -->
+                    .then(haruka.motion.sheetFadeModifier(visible = anchoredDraggableState.targetValue == 0))
+                    // FORK <--
                     .offset {
                         IntOffset(
                             0,
@@ -192,7 +204,9 @@ fun AdaptiveSheet(
             )
 
             LaunchedEffect(anchoredDraggableState) {
-                scope.launch { anchoredDraggableState.animateTo(0) }
+                // FORK -->
+                scope.launch { haruka.motion.animateSheetTo(anchoredDraggableState, 0, sheetOpenSpec) }
+                // FORK <--
                 snapshotFlow { anchoredDraggableState.settledValue }
                     .drop(1)
                     .filter { it == 1 }

@@ -324,6 +324,9 @@ private fun MangaScreenSmallImpl(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             val isFABVisible = state.hasUnreadChapters && !isAnySelected
+            // FORK -->
+            val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
+            // FORK <--
             SmallExtendedFloatingActionButton(
                 text = {
                     Text(
@@ -339,6 +342,10 @@ private fun MangaScreenSmallImpl(
                     visible = isFABVisible,
                     alignment = Alignment.BottomEnd,
                 ),
+                // FORK -->
+                shape = fabPressMorph.shape,
+                interactionSource = fabPressMorph.interactionSource,
+                // FORK <--
             )
         },
     ) { contentPadding ->
@@ -560,6 +567,9 @@ fun MangaScreenLargeImpl(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             val isFABVisible = state.hasUnreadChapters && !isAnySelected
+            // FORK -->
+            val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
+            // FORK <--
             SmallExtendedFloatingActionButton(
                 text = {
                     Text(
@@ -575,6 +585,10 @@ fun MangaScreenLargeImpl(
                     visible = isFABVisible,
                     alignment = Alignment.BottomEnd,
                 ),
+                // FORK -->
+                shape = fabPressMorph.shape,
+                interactionSource = fabPressMorph.interactionSource,
+                // FORK <--
             )
         },
     ) { contentPadding ->
@@ -747,7 +761,12 @@ private fun LazyListScope.sharedChapterItems(
 
         when (item) {
             is ChapterList.MissingCount -> {
-                MissingChapterCountListItem(count = item.count)
+                MissingChapterCountListItem(
+                    count = item.count,
+                    // FORK -->
+                    modifier = haruka.motion.listItemMotion(this, animateInStandard = false),
+                    // FORK <--
+                )
             }
             is ChapterList.Item -> {
                 MangaChapterListItem(
@@ -799,6 +818,8 @@ private fun LazyListScope.sharedChapterItems(
                     },
                     // FORK -->
                     modifier = haruka.chapter.ui.chapterGroupIndent(item.harukaRow),
+                    // Expanding a group inserts its rows as list items; this animates them in (not in STANDARD).
+                    itemModifier = haruka.motion.listItemMotion(this, animateInStandard = false),
                     trailingContent = {
                         haruka.chapter.ui.ChapterGroupChip(item.harukaRow, Modifier.align(Alignment.CenterVertically))
                     },

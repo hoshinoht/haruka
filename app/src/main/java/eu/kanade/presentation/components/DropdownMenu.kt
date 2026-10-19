@@ -39,15 +39,21 @@ fun DropdownMenu(
     properties: PopupProperties = PopupProperties(focusable = true),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    ComposeDropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest,
-        modifier = modifier.sizeIn(minWidth = 196.dp, maxWidth = 196.dp),
-        offset = offset,
-        scrollState = scrollState,
-        properties = properties,
-        content = content,
-    )
+    // FORK -->
+    haruka.motion.MenuMotion(expanded) {
+        // FORK <--
+        ComposeDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest,
+            modifier = modifier.sizeIn(minWidth = 196.dp, maxWidth = 196.dp),
+            offset = offset,
+            scrollState = scrollState,
+            properties = properties,
+            content = content,
+        )
+        // FORK -->
+    }
+    // FORK <--
 }
 
 @Composable

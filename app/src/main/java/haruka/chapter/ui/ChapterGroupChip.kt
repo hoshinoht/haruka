@@ -2,6 +2,7 @@ package haruka.chapter.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -30,6 +32,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import haruka.i18n.HR
+import haruka.motion.listEffectsSpec
+import haruka.motion.listSpatialSpec
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.ContentCopy
 import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
@@ -56,15 +60,22 @@ fun ChapterGroupChip(row: ChapterGroupRow?, modifier: Modifier = Modifier) {
         if (row.expanded) HR.strings.chapter_group_collapse else HR.strings.chapter_group_expand,
     )
     val colors = MaterialTheme.colorScheme
+    val tintSpec = listEffectsSpec<Color>(spring())
     val container by animateColorAsState(
         if (row.expanded) colors.secondaryContainer else colors.surfaceContainerHighest,
+        animationSpec = tintSpec,
         label = "chapterGroupChipContainer",
     )
     val content by animateColorAsState(
         if (row.expanded) colors.onSecondaryContainer else colors.onSurfaceVariant,
+        animationSpec = tintSpec,
         label = "chapterGroupChipContent",
     )
-    val chevronRotation by animateFloatAsState(if (row.expanded) 180f else 0f, label = "chapterGroupChipChevron")
+    val chevronRotation by animateFloatAsState(
+        if (row.expanded) 180f else 0f,
+        animationSpec = listSpatialSpec(spring()),
+        label = "chapterGroupChipChevron",
+    )
 
     Row(
         modifier = modifier

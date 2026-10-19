@@ -43,8 +43,9 @@ android {
         // (99 for a stable release), so every beta sorts below its stable release.
         versionCode = 10001
         versionName = "0.1.0-beta.1"
-        // Upstream Mihon release this build is based on; bump on each upstream sync.
-        buildConfigField("String", "MIHON_VERSION", "\"0.21.2\"")
+        // Upstream Mihon this build is based on: Haruka follows mihonapp/mihon main, which runs ahead of the
+        // last release tag. Update on each upstream sync merge.
+        buildConfigField("String", "MIHON_VERSION", "\"main after 0.21.2 (deeb9b2)\"")
         // FORK <--
 
         buildConfigField("boolean", "TELEMETRY_INCLUDED", "${Config.includeTelemetry}")
