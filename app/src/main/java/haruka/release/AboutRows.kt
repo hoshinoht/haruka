@@ -7,15 +7,15 @@ import androidx.compose.ui.platform.LocalContext
 import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.BuildConfig
+import haruka.di.harukaGraph
 import haruka.i18n.HR
-import mihon.app.di.appGraph
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
 @Composable
 fun BetaUpdatesSwitch() {
     val context = LocalContext.current
-    val preference = remember { context.appGraph.harukaPreferences.betaUpdates }
+    val preference = remember { context.harukaGraph.harukaPreferences.betaUpdates }
     val enabled by preference.collectAsState()
     SwitchPreferenceWidget(
         title = stringResource(HR.strings.pref_beta_updates),

@@ -106,6 +106,8 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
     // FORK -->
 
     @Inject private lateinit var harukaDedup: haruka.chapter.dedup.DedupSurfaces
+
+    @Inject private lateinit var harukaUpdateErrors: haruka.updateerrors.UpdateErrorStore
     // FORK <--
 
     private var mangaToUpdate: List<LibraryManga> = mutableListOf()
@@ -262,7 +264,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
         val timeZone = TimeZone.currentSystemDefault()
         val fetchWindow = fetchInterval.getWindow(Clock.System.now().toLocalDateTime(timeZone).date, timeZone)
         // FORK -->
-        graph.updateErrorStore.replace(emptyList())
+        harukaUpdateErrors.replace(emptyList())
         // FORK <--
 
         coroutineScope {
@@ -338,7 +340,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
         }
 
         // FORK -->
-        graph.updateErrorStore.replace(
+        harukaUpdateErrors.replace(
             failedUpdates.map { (manga, error) ->
                 haruka.updateerrors.UpdateError(manga.id, manga.title, manga.source, error)
             },

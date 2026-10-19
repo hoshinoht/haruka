@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import haruka.di.harukaGraph
 import haruka.i18n.HR
-import mihon.app.di.appGraph
 import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.components.material.DISABLED_ALPHA
 import tachiyomi.presentation.core.i18n.stringResource
@@ -28,8 +28,8 @@ import tachiyomi.presentation.core.util.collectAsState
 @Composable
 fun UpdatesGroupingSwitch() {
     val context = LocalContext.current
-    val groupPreference = remember { context.appGraph.harukaPreferences.groupUpdates }
-    val conversationsPreference = remember { context.appGraph.harukaPreferences.momotalkUpdates }
+    val groupPreference = remember { context.harukaGraph.harukaPreferences.groupUpdates }
+    val conversationsPreference = remember { context.harukaGraph.harukaPreferences.momotalkUpdates }
     val grouped by groupPreference.collectAsState()
     val conversations by conversationsPreference.collectAsState()
 

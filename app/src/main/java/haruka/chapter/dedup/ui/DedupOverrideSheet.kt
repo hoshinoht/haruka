@@ -29,8 +29,8 @@ import androidx.compose.ui.semantics.semantics
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AdaptiveSheet
 import haruka.chapter.dedup.MangaDedupOverride
+import haruka.di.harukaGraph
 import haruka.i18n.HR
-import mihon.app.di.appGraph
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.HeadingItem
 import tachiyomi.presentation.core.components.SettingsItemsPaddings
@@ -60,8 +60,8 @@ fun DedupOverrideButton(mangaId: Long, scanlators: Set<String>) {
 @Composable
 fun DedupOverrideSheet(mangaId: Long, scanlators: Set<String>, onDismissRequest: () -> Unit) {
     val context = LocalContext.current
-    val settings = remember { context.appGraph.dedupSettings }
-    val catalog = remember { context.appGraph.officialCatalogLoader.catalog }
+    val settings = remember { context.harukaGraph.dedupSettings }
+    val catalog = remember { context.harukaGraph.officialCatalogLoader.catalog }
     val globalGroup by settings.groupChapters.collectAsState()
     val globalMerge by settings.mergeSplitChapters.collectAsState()
     val globalRanking by settings.rankedScanlators.collectAsState()

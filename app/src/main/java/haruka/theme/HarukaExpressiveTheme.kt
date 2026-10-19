@@ -8,10 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.domain.ui.model.AppTheme
+import haruka.di.harukaGraph
 import haruka.motion.LocalAnimationProfile
 import haruka.motion.effectiveAnimationProfile
 import haruka.motion.motionScheme
-import mihon.app.di.appGraph
 import tachiyomi.presentation.core.util.collectAsState
 
 /**
@@ -27,7 +27,7 @@ fun HarukaExpressiveTheme(
 ) {
     val context = LocalContext.current
     val accents = themeAccents(appTheme)
-    val harukaPreferences = remember { context.appGraph.harukaPreferences }
+    val harukaPreferences = remember { context.harukaGraph.harukaPreferences }
     val chosenProfile by harukaPreferences.animationProfile.collectAsState()
     val profile = effectiveAnimationProfile(chosenProfile)
     MaterialExpressiveTheme(

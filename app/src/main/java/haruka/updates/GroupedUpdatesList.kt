@@ -24,10 +24,10 @@ import eu.kanade.presentation.manga.components.ChapterDownloadAction
 import eu.kanade.presentation.updates.UpdatesUiItem
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import eu.kanade.tachiyomi.util.lang.toLocalDate
+import haruka.di.harukaGraph
 import haruka.i18n.HR
 import haruka.motion.ExpandableRows
 import haruka.motion.listItemMotion
-import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
 import mihon.icons.materialsymbols.rounded.KeyboardArrowUp
@@ -51,8 +51,8 @@ class UpdatesGroupingState(
 @Composable
 fun rememberUpdatesGroupingState(): UpdatesGroupingState {
     val context = LocalContext.current
-    val groupPreference = remember { context.appGraph.harukaPreferences.groupUpdates }
-    val conversationsPreference = remember { context.appGraph.harukaPreferences.momotalkUpdates }
+    val groupPreference = remember { context.harukaGraph.harukaPreferences.groupUpdates }
+    val conversationsPreference = remember { context.harukaGraph.harukaPreferences.momotalkUpdates }
     val grouped by groupPreference.collectAsState()
     val conversations by conversationsPreference.collectAsState()
     val expanded = remember { mutableStateMapOf<GroupKey, Boolean>() }

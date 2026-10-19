@@ -16,7 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import coil3.compose.AsyncImage
-import mihon.app.di.appGraph
+import haruka.di.harukaGraph
 import tachiyomi.presentation.core.util.collectAsState
 
 /** Covers with height / width at or below this are shown in full (same threshold as Komikku). */
@@ -31,7 +31,7 @@ internal fun isWideCover(heightOverWidth: Float): Boolean = heightOverWidth <= W
 @Composable
 fun rememberPanoramaCoversEnabled(): Boolean {
     val context = LocalContext.current
-    val preference = remember { context.appGraph.harukaPreferences.panoramaCovers }
+    val preference = remember { context.harukaGraph.harukaPreferences.panoramaCovers }
     val enabled by preference.collectAsState()
     return enabled
 }

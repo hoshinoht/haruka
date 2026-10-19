@@ -21,8 +21,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import eu.kanade.presentation.more.settings.Preference
+import haruka.di.harukaGraph
 import haruka.i18n.HR
-import mihon.app.di.appGraph
 import tachiyomi.presentation.core.components.HeadingItem
 import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.i18n.stringResource
@@ -41,7 +41,7 @@ fun animationProfilePreference(): Preference.PreferenceItem.CustomPreference {
 @Composable
 private fun AnimationProfileButtons(title: String) {
     val context = LocalContext.current
-    val preference = remember { context.appGraph.harukaPreferences.animationProfile }
+    val preference = remember { context.harukaGraph.harukaPreferences.animationProfile }
     val selected by preference.collectAsState()
     val options = listOf(
         AnimationProfile.STANDARD to stringResource(HR.strings.animation_profile_standard),

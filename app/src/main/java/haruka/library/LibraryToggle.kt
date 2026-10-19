@@ -24,9 +24,9 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.ui.category.CategoryScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.util.removeCovers
+import haruka.di.harukaGraph
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import mihon.app.di.appGraph
 import mihon.core.metro.AppCoroutineScope
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import tachiyomi.core.common.preference.CheckboxState
@@ -137,7 +137,7 @@ class LibraryToggleHandle internal constructor(
 @Composable
 fun rememberLibraryToggle(screen: Screen): LibraryToggleHandle {
     val context = LocalContext.current
-    val toggle = remember { context.appGraph.libraryToggle }
+    val toggle = remember { context.harukaGraph.libraryToggle }
     val navigator = LocalNavigator.currentOrThrow
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()

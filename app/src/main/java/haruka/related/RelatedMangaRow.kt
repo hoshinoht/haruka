@@ -18,9 +18,9 @@ import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
+import haruka.di.harukaGraph
 import haruka.i18n.HR
 import haruka.library.rememberLibraryToggle
-import mihon.app.di.appGraph
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
@@ -61,7 +61,7 @@ fun RelatedMangaRow(manga: Manga, source: Source) {
 fun relatedMangaPreference(): Preference.PreferenceItem.SwitchPreference {
     val context = LocalContext.current
     return Preference.PreferenceItem.SwitchPreference(
-        preference = remember { context.appGraph.harukaPreferences.relatedManga },
+        preference = remember { context.harukaGraph.harukaPreferences.relatedManga },
         title = stringResource(HR.strings.pref_related_titles),
         subtitle = stringResource(HR.strings.pref_related_titles_summary),
     )

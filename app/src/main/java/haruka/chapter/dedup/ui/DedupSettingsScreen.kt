@@ -37,8 +37,8 @@ import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.util.Screen
 import haruka.chapter.dedup.OfficialCatalog
 import haruka.chapter.dedup.ScanlatorNames
+import haruka.di.harukaGraph
 import haruka.i18n.HR
-import mihon.app.di.appGraph
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.TextButton
@@ -65,8 +65,8 @@ class DedupSettingsScreen : Screen() {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val context = LocalContext.current
-        val settings = remember { context.appGraph.dedupSettings }
-        val catalog = remember { context.appGraph.officialCatalogLoader.catalog }
+        val settings = remember { context.harukaGraph.dedupSettings }
+        val catalog = remember { context.harukaGraph.officialCatalogLoader.catalog }
         val viewModel = metroViewModel<DedupSettingsViewModel>()
         val suggestions by viewModel.suggestions.collectAsStateWithLifecycle()
         val rules by settings.rules.collectAsState()

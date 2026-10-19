@@ -83,15 +83,6 @@ interface AppGraph : ViewModelGraph {
 
     val basePreferences: BasePreferences
     val uiPreferences: UiPreferences
-
-    // FORK -->
-    val harukaPreferences: haruka.preference.HarukaPreferences
-    val libraryToggle: haruka.library.LibraryToggle
-    val updateErrorStore: haruka.updateerrors.UpdateErrorStore
-    val dedupSettings: haruka.chapter.dedup.DedupSettings
-    val officialCatalogLoader: haruka.chapter.dedup.OfficialCatalogLoader
-
-    // FORK <--
     val readerPreferences: ReaderPreferences
     val networkPreferences: NetworkPreferences
     val libraryPreferences: LibraryPreferences
