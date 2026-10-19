@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import haruka.chapter.dedup.DedupRule
 import haruka.chapter.dedup.OfficialStatus
 import haruka.i18n.HR
@@ -23,7 +25,10 @@ import mihon.icons.materialsymbols.rounded.Close
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
-/** One entry of an ordered list, with up/down buttons and an optional remove button. [startInset] aligns the text. */
+/**
+ * One entry of an ordered list: its 1-based position, then up/down buttons (disabled at the ends) and an optional
+ * remove button. [startInset] aligns the position with the section header.
+ */
 @Composable
 internal fun ReorderRow(
     title: String,
@@ -42,6 +47,12 @@ internal fun ReorderRow(
             .padding(start = startInset),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Text(
+            text = (index + 1).toString(),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.widthIn(min = PositionWidth),
+        )
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
@@ -79,6 +90,8 @@ internal fun ReorderRow(
         }
     }
 }
+
+private val PositionWidth = 28.dp
 
 /** How the official catalog classifies [status], or null for an unofficial group. */
 @Composable
