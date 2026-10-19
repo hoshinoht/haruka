@@ -27,6 +27,7 @@ val SYNCED_PREF_KEYS: Set<String> = setOf(
     "haruka_dedup_skip_downloaded_duplicates",
     "haruka_dedup_rules",
     "haruka_dedup_ranking",
+    "haruka_migration_source_presets",
 )
 
 /** What to write to the local preferences so they match the merge. */

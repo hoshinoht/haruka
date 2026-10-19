@@ -4,6 +4,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import eu.kanade.tachiyomi.BuildConfig
+import haruka.migration.SourcePreset
+import haruka.migration.SourcePresets
 import haruka.motion.AnimationProfile
 import haruka.release.SemVer
 import tachiyomi.core.common.preference.Preference
@@ -41,6 +43,14 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
     /** Motion across the app; pill swipe actions are part of [AnimationProfile.EXPRESSIVE]. */
     val animationProfile: Preference<AnimationProfile> =
         preferenceStore.getEnum("haruka_animation_profile", AnimationProfile.EXPRESSIVE)
+
+    /** Named, ordered target-source lists for migration; synced like other fork settings. */
+    val migrationSourcePresets: Preference<List<SourcePreset>> = preferenceStore.getObjectFromString(
+        key = "haruka_migration_source_presets",
+        defaultValue = emptyList(),
+        serializer = SourcePresets::encode,
+        deserializer = SourcePresets::decode,
+    )
 
     // Beta installs stay on the beta channel by default; stable installs only get stable releases.
     val betaUpdates: Preference<Boolean> = preferenceStore.getBoolean(

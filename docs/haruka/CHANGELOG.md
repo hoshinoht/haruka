@@ -16,6 +16,7 @@ Planned for 0.1.0-beta.4.
 
 ### Migration
 - Bulk migration rates each match High, Check or Low with a coloured chip and a short reason under the target ("Read to Ch. 120 · match has 98", "Title differs", "Different author"), from title similarity, the author and whether the match reaches your furthest read chapter. Before Migrate all or Copy all, Check and Low matches open a review sheet where you accept, search manually or skip each one; with nothing to review, the usual dialog opens straight away.
+- Source presets on the migration source screen (list icon in the toolbar): save the current selection and order under a name, tap a preset to select exactly its sources in its order, and rename or delete presets. Sources that aren't installed are shown as "N not installed" and the rest still apply. Presets sync with your other Haruka settings.
 
 ## [0.1.0-beta.3]
 

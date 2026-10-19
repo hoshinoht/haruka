@@ -19,7 +19,7 @@ Sync needs Google Play services on the device. Debug builds (`app.haruka.dev`) s
 | Tracker links and progress | |
 | Notes, reader settings per series, excluded scanlators | |
 | Duplicate-chapter rules, overrides and scanlator ranking | |
-| Haruka settings such as the animation profile | |
+| Haruka settings such as the animation profile and migration source presets | |
 
 ## How changes combine
 

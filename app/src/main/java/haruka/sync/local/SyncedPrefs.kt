@@ -29,6 +29,7 @@ internal val SYNCED_PREF_STORAGE: Map<String, PrefStorage> = mapOf(
     "haruka_dedup_skip_downloaded_duplicates" to PrefStorage.BOOLEAN,
     "haruka_dedup_rules" to PrefStorage.STRING,
     "haruka_dedup_ranking" to PrefStorage.STRING,
+    "haruka_migration_source_presets" to PrefStorage.STRING,
 )
 
 /** The typed preference behind synced [key]. */

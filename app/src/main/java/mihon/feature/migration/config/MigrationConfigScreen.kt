@@ -124,6 +124,12 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                     actions = {
                         AppBarActions(
                             listOf(
+                                // FORK --> source presets, applied through the screen's own selection
+                                haruka.migration.sourcePresetsAction(state.sources) { ids ->
+                                    viewModel.toggleSelection(Model.SelectionConfig.None)
+                                    ids.forEach { viewModel.toggleSelection(it) }
+                                },
+                                // FORK <--
                                 AppBar.Action(
                                     title = stringResource(MR.strings.migrationConfigScreen_selectAllLabel),
                                     icon = MaterialSymbols.Rounded.SelectAll,

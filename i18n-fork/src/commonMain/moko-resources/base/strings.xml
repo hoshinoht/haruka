@@ -169,4 +169,16 @@
     <string name="migration_review_accepted">Accepted</string>
     <string name="migration_review_accept_all">Accept all &amp; continue</string>
     <string name="migration_review_continue">Continue with accepted</string>
+    <string name="migration_presets">Source presets</string>
+    <string name="migration_presets_empty">No presets yet. Select and order sources, then save them here.</string>
+    <string name="migration_presets_save">Save current as preset…</string>
+    <string name="migration_presets_name">Preset name</string>
+    <string name="migration_presets_rename">Rename preset</string>
+    <string name="migration_presets_rename_action">Rename</string>
+    <string name="migration_presets_name_taken">Another preset has this name</string>
+    <string name="migration_presets_replace_title">Replace preset?</string>
+    <string name="migration_presets_replace">A preset named \"%1$s\" already exists. Replace its sources with the current selection?</string>
+    <string name="migration_presets_replace_action">Replace</string>
+    <string name="migration_presets_delete">Delete preset \"%1$s\"?</string>
+    <string name="migration_presets_not_installed">%1$d not installed</string>
 </resources>
