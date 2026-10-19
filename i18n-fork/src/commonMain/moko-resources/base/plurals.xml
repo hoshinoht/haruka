@@ -56,4 +56,8 @@
         <item quantity="one">%d series</item>
         <item quantity="other">%d series</item>
     </plurals>
+    <plurals name="library_shelf_unread">
+        <item quantity="one">%d unread chapter</item>
+        <item quantity="other">%d unread chapters</item>
+    </plurals>
 </resources>

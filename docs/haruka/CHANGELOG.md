@@ -8,7 +8,8 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 Planned for 0.1.0-beta.4.
 
 ### Library
-- Library shelves (Settings › Appearance, off by default): the library becomes one scroll with an "All series" header that stays pinned under the toolbar, showing the count and current sort. Dividers split the grid by the active sort (Today / This week / This month for dates, A–Z for titles, unread and chapter-count ranges). Category chips in the header replace the tabs when you use categories. Your display mode, columns and badges are unchanged. The setting syncs across devices.
+- Library shelves (Settings › Appearance, off by default): the library becomes one scroll. At the top, a Continue reading carousel shows up to 10 series you've started that have unread chapters, newest read first, with where you stopped ("Ch. 12 · page 5") and a resume button that opens the reader. Below it, New chapters (unread chapters fetched in the last 7 days) and Not started (newest added first) show up to 15 covers each, with titles under the covers and a "See all" tile that jumps to the full library. A series appears on one shelf at most. Shelves cover every category, hide while searching, and hide when the library has fewer than 20 series or nothing to show. Long-press a shelf cover to select it.
+- Under the shelves, an "All series" header stays pinned under the toolbar with the count and current sort. Dividers split the grid by the active sort (Today / This week / This month for dates, A–Z for titles, unread and chapter-count ranges). Category chips in the header replace the tabs when you use categories. Your display mode, columns and badges are unchanged. The setting syncs across devices.
 
 ## [0.1.0-beta.3]
 

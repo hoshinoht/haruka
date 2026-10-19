@@ -17,8 +17,9 @@ enum class SectionSort {
     None,
 }
 
-/** What the dividers read from a library entry. Dates are epoch milliseconds; null when unknown. */
+/** What the dividers and shelves read from a library entry. Dates are epoch milliseconds; null when unknown. */
 class ShelfInput(
+    val id: Long,
     val title: String,
     val lastRead: Long?,
     val lastUpdate: Long?,
@@ -27,6 +28,8 @@ class ShelfInput(
     val favoriteAt: Long?,
     val unreadCount: Long,
     val totalChapters: Long,
+    /** At least one chapter is read. */
+    val hasStarted: Boolean,
 )
 
 /** The group an entry falls in. [id] is unique among the keys of one sort. */

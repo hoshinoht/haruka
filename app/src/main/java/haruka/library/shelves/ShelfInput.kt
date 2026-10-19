@@ -26,6 +26,7 @@ internal fun LibraryItem.toShelfInput(): ShelfInput {
     val libraryManga = libraryManga
     val manga = libraryManga.manga
     return ShelfInput(
+        id = id,
         title = manga.title,
         lastRead = libraryManga.lastRead?.toEpochMilliseconds(),
         lastUpdate = manga.lastUpdate?.toEpochMilliseconds(),
@@ -34,6 +35,7 @@ internal fun LibraryItem.toShelfInput(): ShelfInput {
         favoriteAt = manga.favoriteAt?.toEpochMilliseconds(),
         unreadCount = libraryManga.unreadCount,
         totalChapters = libraryManga.totalChapters,
+        hasStarted = libraryManga.hasStarted,
     )
 }
 

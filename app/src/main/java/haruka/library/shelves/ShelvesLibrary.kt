@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.preference.PreferenceMutableState
 import eu.kanade.presentation.library.components.CommonMangaItemDefaults
 import eu.kanade.presentation.library.components.DownloadsBadge
@@ -37,8 +38,11 @@ import eu.kanade.presentation.library.components.MangaCompactGridItem
 import eu.kanade.presentation.library.components.MangaListItem
 import eu.kanade.presentation.library.components.UnreadBadge
 import eu.kanade.tachiyomi.ui.library.LibraryItem
+import haruka.i18n.HR
 import haruka.library.Section
 import haruka.library.SortSections
+import haruka.motion.AnimationProfile
+import haruka.motion.LocalAnimationProfile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tachiyomi.core.common.util.lang.compareToWithCollator
@@ -50,6 +54,7 @@ import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.FastScrollLazyVerticalGrid
 import tachiyomi.presentation.core.components.material.PullRefresh
+import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.plus
 import java.time.Instant
@@ -132,6 +137,11 @@ fun ShelvesLibrary(
             )
         }
 
+        // Shelves are library-wide, so they read every category's items, not just the current page's
+        val lists = categories.map(getItemsForCategory)
+        val shelfData by rememberShelfData(categories, lists)
+        val isSearching = !searchQuery.isNullOrEmpty()
+
         if (items.isEmpty()) {
             EmptyCollection(
                 searchQuery = searchQuery,
@@ -151,18 +161,51 @@ fun ShelvesLibrary(
         val monthFormatter = rememberMonthFormatter()
 
         val gridState = rememberSaveable(currentPage, saver = LazyGridState.Saver) { LazyGridState() }
-        val headerIndex = if (searchQuery.isNullOrEmpty()) 0 else 1
+        val shelves = shelfData?.shelves?.takeUnless { isSearching }
+        val shelfItems = shelfData?.items.orEmpty()
+        val continueReading = shelves?.continueReading.orEmpty().mapNotNull(shelfItems::get)
+        val newChapters = shelves?.newChapters?.ids.orEmpty().mapNotNull(shelfItems::get)
+        val notStarted = shelves?.notStarted?.ids.orEmpty().mapNotNull(shelfItems::get)
+        // Index of the Collection header: after the global search row or the shelves above it
+        val headerIndex = if (isSearching) {
+            1
+        } else {
+            listOf(continueReading, newChapters, notStarted).count { it.isNotEmpty() }
+        }
         val pinned by remember(headerIndex) {
             derivedStateOf {
                 gridState.firstVisibleItemIndex > headerIndex ||
                     (gridState.firstVisibleItemIndex == headerIndex && gridState.firstVisibleItemScrollOffset > 0)
             }
         }
+        val reducedMotion = LocalAnimationProfile.current == AnimationProfile.REDUCED
+        val onSeeAll: () -> Unit = {
+            scope.launch {
+                if (reducedMotion) gridState.scrollToItem(headerIndex) else gridState.animateScrollToItem(headerIndex)
+            }
+        }
+        val readingPoints by rememberReadingPoints(continueReading)
+        val shelfActions = ShelfActions(
+            selection = selection,
+            onClick = {
+                val owner = shelfData?.categories?.get(it.id) ?: category
+                if (selection.isNotEmpty()) {
+                    onToggleSelection(owner, it.libraryManga)
+                } else {
+                    onClickManga(it.id)
+                }
+            },
+            // Range selection stays in the Collection: a shelf's order isn't the list's
+            onLongClick = { onToggleSelection(shelfData?.categories?.get(it.id) ?: category, it.libraryManga) },
+        )
 
         val onClick: (LibraryManga) -> Unit = {
             if (selection.isNotEmpty()) onToggleSelection(category, it) else onClickManga(it.manga.id)
         }
         val onLongClick: (LibraryManga) -> Unit = { onToggleRangeSelection(category, it) }
+
+        // Only on the very first display: wait for the shelves so the grid doesn't open past where they appear
+        if (!isSearching && shelfData == null) return@PullRefresh
 
         FastScrollLazyVerticalGrid(
             columns = when {
@@ -195,6 +238,42 @@ fun ShelvesLibrary(
                 }
             }
 
+            if (continueReading.isNotEmpty()) {
+                item(key = "shelf-continue", span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_carousel") {
+                    Column(Modifier.horizontalBleed(bleed)) {
+                        ShelfTitle(stringResource(HR.strings.library_shelf_continue_reading), null, null)
+                        ContinueReadingCarousel(
+                            items = continueReading,
+                            readingPoints = readingPoints,
+                            actions = shelfActions,
+                            onResume = onContinueReadingClicked?.let { resume -> { resume(it.libraryManga) } },
+                        )
+                    }
+                }
+            }
+            shelves?.newChapters?.let {
+                shelfRow(
+                    "shelf-new",
+                    HR.strings.library_shelf_new_chapters,
+                    newChapters,
+                    it.total,
+                    bleed,
+                    shelfActions,
+                    onSeeAll,
+                )
+            }
+            shelves?.notStarted?.let {
+                shelfRow(
+                    "shelf-not-started",
+                    HR.strings.library_shelf_not_started,
+                    notStarted,
+                    it.total,
+                    bleed,
+                    shelfActions,
+                    onSeeAll,
+                )
+            }
+
             stickyHeader(key = "collection", contentType = "collection_header") { header(pinned, bleed) }
 
             val item: @Composable (LibraryItem) -> Unit = { libraryItem ->
@@ -215,6 +294,25 @@ fun ShelvesLibrary(
                     entries(items, section.start, section.count, item)
                 }
             }
+        }
+    }
+}
+
+// A shelf as one full-span grid item, so nothing scrolls vertically inside the grid. Empty shelves hide.
+private fun LazyGridScope.shelfRow(
+    key: String,
+    title: StringResource,
+    items: List<LibraryItem>,
+    total: Int,
+    bleed: Dp,
+    actions: ShelfActions,
+    onSeeAll: () -> Unit,
+) {
+    if (items.isEmpty()) return
+    item(key = key, span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_row") {
+        Column(Modifier.horizontalBleed(bleed)) {
+            ShelfTitle(stringResource(title), total, onSeeAll)
+            ShelfRow(items, total, actions, onSeeAll)
         }
     }
 }

@@ -41,6 +41,14 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 
+/** Widens a full-span grid item over [bleed] of horizontal grid padding on each side, to reach the screen edges. */
+internal fun Modifier.horizontalBleed(bleed: Dp): Modifier = layout { measurable, constraints ->
+    val extra = (bleed * 2).roundToPx()
+    val width = constraints.maxWidth + extra
+    val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+    layout(constraints.maxWidth, placeable.height) { placeable.place(-extra / 2, 0) }
+}
+
 /**
  * The pinned "All series" header: count, the active sort and, when the library has categories, a chip per
  * category in place of upstream's tabs.
@@ -61,12 +69,7 @@ internal fun CollectionHeader(
 ) {
     Column(
         modifier = modifier
-            .layout { measurable, constraints ->
-                val extra = (bleed * 2).roundToPx()
-                val width = constraints.maxWidth + extra
-                val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
-                layout(constraints.maxWidth, placeable.height) { placeable.place(-extra / 2, 0) }
-            }
+            .horizontalBleed(bleed)
             .background(MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Row(

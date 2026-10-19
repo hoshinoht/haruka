@@ -35,7 +35,18 @@ class SortSectionsTest {
         favoriteAt: Long? = null,
         unreadCount: Long = 0,
         totalChapters: Long = 0,
-    ) = ShelfInput(title, lastRead, lastUpdate, latestUpload, chapterFetchedAt, favoriteAt, unreadCount, totalChapters)
+    ) = ShelfInput(
+        id = 0,
+        title = title,
+        lastRead = lastRead,
+        lastUpdate = lastUpdate,
+        latestUpload = latestUpload,
+        chapterFetchedAt = chapterFetchedAt,
+        favoriteAt = favoriteAt,
+        unreadCount = unreadCount,
+        totalChapters = totalChapters,
+        hasStarted = false,
+    )
 
     private fun dated(sort: SectionSort, time: Long?) = when (sort) {
         SectionSort.LastRead -> entry(lastRead = time)

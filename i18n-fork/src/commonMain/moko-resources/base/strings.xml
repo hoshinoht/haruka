@@ -126,7 +126,7 @@
     <string name="sync_banner_applying">Syncing · Updating library</string>
     <string name="sync_notification_stopped">Sync stopped</string>
     <string name="pref_library_shelves">Library shelves</string>
-    <string name="pref_library_shelves_summary">Pin an \"All series\" header over the library and divide it into groups that follow the sort</string>
+    <string name="pref_library_shelves_summary">Show Continue reading and shelves above the library, then every series under a pinned header with dividers that follow the sort</string>
     <string name="library_all_series">All series</string>
     <string name="library_sort_description">Sort: %1$s, %2$s</string>
     <string name="library_section_today">Today</string>
@@ -144,4 +144,11 @@
     <string name="library_section_chapters_fifty_to_ninety_nine">50–99</string>
     <string name="library_section_chapters_ten_to_forty_nine">10–49</string>
     <string name="library_section_chapters_under_ten">Under 10</string>
+    <string name="library_shelf_continue_reading">Continue reading</string>
+    <string name="library_shelf_new_chapters">New chapters</string>
+    <string name="library_shelf_not_started">Not started</string>
+    <string name="library_shelf_see_all">See all</string>
+    <string name="library_shelf_chapter">Ch. %1$s</string>
+    <string name="library_shelf_chapter_page">Ch. %1$s · page %2$d</string>
+    <string name="library_shelf_resume">Resume %1$s</string>
 </resources>
