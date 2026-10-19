@@ -192,7 +192,9 @@ fun VerticalFastScroller(
                     .offset { IntOffset(0, thumbOffsetY.roundToInt()) }
                     .then(
                         // Recompose opts
-                        if (isThumbVisible && !listState.isScrollInProgress) {
+                        // FORK --> Keep the thumb draggable mid-fling; the drag's scrollToItem cancels the fling.
+                        if (isThumbVisible) {
+                            // FORK <--
                             Modifier.draggable(
                                 interactionSource = dragInteractionSource,
                                 orientation = Orientation.Vertical,
@@ -210,7 +212,9 @@ fun VerticalFastScroller(
                     )
                     .then(
                         // Exclude thumb from gesture area only when needed
-                        if (isThumbVisible && !isThumbDragged && !listState.isScrollInProgress) {
+                        // FORK -->
+                        if (isThumbVisible && !isThumbDragged) {
+                            // FORK <--
                             Modifier.systemGestureExclusion()
                         } else {
                             Modifier
@@ -382,7 +386,9 @@ fun VerticalGridFastScroller(
                     .offset { IntOffset(0, thumbOffsetY.roundToInt()) }
                     .then(
                         // Recompose opts
-                        if (isThumbVisible && !state.isScrollInProgress) {
+                        // FORK --> Keep the thumb draggable mid-fling; the drag's scrollToItem cancels the fling.
+                        if (isThumbVisible) {
+                            // FORK <--
                             Modifier.draggable(
                                 interactionSource = dragInteractionSource,
                                 orientation = Orientation.Vertical,
@@ -400,7 +406,9 @@ fun VerticalGridFastScroller(
                     )
                     .then(
                         // Exclude thumb from gesture area only when needed
-                        if (isThumbVisible && !isThumbDragged && !state.isScrollInProgress) {
+                        // FORK -->
+                        if (isThumbVisible && !isThumbDragged) {
+                            // FORK <--
                             Modifier.systemGestureExclusion()
                         } else {
                             Modifier
