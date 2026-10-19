@@ -8,10 +8,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -24,18 +22,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.CircularProgressIndicator as M3CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator as M3LinearProgressIndicator
 
 /**
- * Indeterminate loading for a whole screen or list. EXPRESSIVE uses the M3E shape-morphing
- * [LoadingIndicator]; STANDARD keeps Mihon's spinner, and REDUCED keeps it too because a non-morphing
- * spinner is the least motion that still shows the app is working.
+ * Drop-in for an indeterminate M3 `CircularProgressIndicator()` loading a whole screen or list: upstream files swap
+ * the androidx import for this one. EXPRESSIVE uses the M3E shape-morphing [LoadingIndicator]; STANDARD keeps
+ * Mihon's spinner, and REDUCED keeps it too because a non-morphing spinner is the least motion that still shows
+ * the app is working.
  */
 @Composable
-fun ScreenLoadingIndicator(modifier: Modifier = Modifier) {
+fun CircularProgressIndicator(modifier: Modifier = Modifier) {
     if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
         LoadingIndicator(modifier = modifier)
     } else {
-        CircularProgressIndicator(modifier = modifier)
+        M3CircularProgressIndicator(modifier = modifier)
     }
 }
 
@@ -51,9 +52,9 @@ fun ProfileCombinedProgressIndicator(progress: () -> Float, modifier: Modifier =
     if (LocalAnimationProfile.current == AnimationProfile.REDUCED) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             if (indeterminate) {
-                CircularProgressIndicator()
+                M3CircularProgressIndicator()
             } else {
-                CircularProgressIndicator(progress = progress)
+                M3CircularProgressIndicator(progress = progress)
             }
         }
         return
@@ -78,23 +79,23 @@ fun ProfileCombinedProgressIndicator(progress: () -> Float, modifier: Modifier =
     }
 }
 
-/** Indeterminate bar: wavy for EXPRESSIVE, Mihon's flat bar otherwise. */
+/** Drop-in for an indeterminate M3 `LinearProgressIndicator`: wavy for EXPRESSIVE, Mihon's flat bar otherwise. */
 @Composable
-fun ProfileLinearProgressIndicator(modifier: Modifier = Modifier) {
+fun LinearProgressIndicator(modifier: Modifier = Modifier) {
     if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
         LinearWavyProgressIndicator(modifier = modifier)
     } else {
-        LinearProgressIndicator(modifier = modifier)
+        M3LinearProgressIndicator(modifier = modifier)
     }
 }
 
-/** Determinate bar: wavy for EXPRESSIVE, Mihon's flat bar otherwise. */
+/** Drop-in for a determinate M3 `LinearProgressIndicator`: wavy for EXPRESSIVE, Mihon's flat bar otherwise. */
 @Composable
-fun ProfileLinearProgressIndicator(progress: () -> Float, modifier: Modifier = Modifier) {
+fun LinearProgressIndicator(progress: () -> Float, modifier: Modifier = Modifier) {
     if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
         LinearWavyProgressIndicator(progress = progress, modifier = modifier)
     } else {
-        LinearProgressIndicator(progress = progress, modifier = modifier)
+        M3LinearProgressIndicator(progress = progress, modifier = modifier)
     }
 }
 

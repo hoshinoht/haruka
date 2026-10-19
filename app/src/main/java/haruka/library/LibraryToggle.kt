@@ -135,8 +135,7 @@ class LibraryToggleHandle internal constructor(
 )
 
 @Composable
-fun Screen.rememberLibraryToggle(): LibraryToggleHandle {
-    val screen = this
+fun rememberLibraryToggle(screen: Screen): LibraryToggleHandle {
     val context = LocalContext.current
     val toggle = remember { context.appGraph.libraryToggle }
     val navigator = LocalNavigator.currentOrThrow

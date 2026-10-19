@@ -74,16 +74,12 @@ fun SourcesScreen(
                     when (model) {
                         is SourceUiModel.Header -> {
                             SourceHeader(
-                                // FORK -->
-                                modifier = haruka.motion.listItemMotion(this),
-                                // FORK <--
+                                modifier = Modifier.animateItem(),
                                 language = model.language,
                             )
                         }
                         is SourceUiModel.Item -> SourceItem(
-                            // FORK -->
-                            modifier = haruka.motion.listItemMotion(this),
-                            // FORK <--
+                            modifier = Modifier.animateItem(),
                             source = model.source,
                             onClickItem = onClickItem,
                             onLongClickItem = onLongClickItem,

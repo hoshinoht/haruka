@@ -26,7 +26,6 @@ import eu.kanade.presentation.manga.components.MangaBottomActionMenu
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import eu.kanade.tachiyomi.ui.updates.UpdatesViewModel
-import haruka.updates.groupedUpdatesUiItems
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -142,7 +141,8 @@ fun UpdateScreen(
 
                             // FORK -->
                             if (grouping.enabled) {
-                                groupedUpdatesUiItems(
+                                haruka.updates.groupedUpdatesUiItems(
+                                    scope = this,
                                     items = state.items,
                                     grouping = grouping,
                                     selectionMode = state.selectionMode,

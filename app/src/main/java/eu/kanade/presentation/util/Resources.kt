@@ -4,7 +4,6 @@ import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
@@ -36,8 +35,9 @@ fun rememberResourceBitmapPainter(@DrawableRes id: Int): BitmapPainter {
     }
     // FORK <--
 }
+// FORK -->
 
-// FORK --> Only touched from composition, which runs on the main thread.
+// Only touched from composition, which runs on the main thread.
 private data class ResourceBitmapKey(val id: Int, val uiMode: Int, val densityDpi: Int)
-private val resourceBitmaps = HashMap<ResourceBitmapKey, ImageBitmap>()
+private val resourceBitmaps = HashMap<ResourceBitmapKey, androidx.compose.ui.graphics.ImageBitmap>()
 // FORK <--

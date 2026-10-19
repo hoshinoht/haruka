@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +23,7 @@ import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.util.lang.toTimestampString
+import haruka.motion.IconButton
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Delete
 import mihon.icons.materialsymbols.rounded.Favorite
@@ -92,14 +92,7 @@ fun HistoryItem(
         }
 
         if (!history.coverData.isMangaFavorite) {
-            // FORK -->
-            val favoritePressMorph = haruka.motion.rememberIconButtonPressMorph()
-            IconButton(
-                onClick = onClickFavorite,
-                shape = favoritePressMorph.shape,
-                interactionSource = favoritePressMorph.interactionSource,
-            ) {
-                // FORK <--
+            IconButton(onClick = onClickFavorite) {
                 Icon(
                     imageVector = MaterialSymbols.Rounded.Favorite,
                     contentDescription = stringResource(MR.strings.add_to_library),
@@ -108,14 +101,7 @@ fun HistoryItem(
             }
         }
 
-        // FORK -->
-        val deletePressMorph = haruka.motion.rememberIconButtonPressMorph()
-        IconButton(
-            onClick = onClickDelete,
-            shape = deletePressMorph.shape,
-            interactionSource = deletePressMorph.interactionSource,
-        ) {
-            // FORK <--
+        IconButton(onClick = onClickDelete) {
             Icon(
                 imageVector = MaterialSymbols.Rounded.Delete,
                 contentDescription = stringResource(MR.strings.action_delete),

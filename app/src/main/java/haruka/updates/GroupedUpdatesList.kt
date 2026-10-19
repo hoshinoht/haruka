@@ -65,7 +65,8 @@ fun rememberUpdatesGroupingState(): UpdatesGroupingState {
  *
  * While a group is collapsed, actions on its leader row apply to every chapter in the group.
  */
-fun LazyListScope.groupedUpdatesUiItems(
+fun groupedUpdatesUiItems(
+    scope: LazyListScope,
     items: List<UpdatesItem>,
     grouping: UpdatesGroupingState,
     selectionMode: Boolean,
@@ -80,7 +81,7 @@ fun LazyListScope.groupedUpdatesUiItems(
         mangaId = { it.update.mangaId },
     )
 
-    items(
+    scope.items(
         items = rows,
         contentType = {
             when (it) {

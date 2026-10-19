@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
+import haruka.motion.animateContentSize
 
 private val FADE_TIME = tween<Float>(500)
 
@@ -55,9 +56,7 @@ fun MangaNotesDisplay(
         RichText(
             modifier = modifier
                 // Only animate size if the notes changes
-                // FORK -->
-                .then(if (contentUpdatedOnce) haruka.motion.contentSizeMotion() else Modifier)
-                // FORK <--
+                .then(if (contentUpdatedOnce) Modifier.animateContentSize() else Modifier)
                 .alpha(alpha.value),
             style = MaterialTheme.typography.bodyMedium,
             state = richTextState,

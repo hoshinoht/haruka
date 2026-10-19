@@ -131,18 +131,14 @@ private fun HistoryScreenContent(
             when (item) {
                 is HistoryUiModel.Header -> {
                     ListGroupHeader(
-                        // FORK -->
-                        modifier = haruka.motion.listItemMotion(this),
-                        // FORK <--
+                        modifier = Modifier.animateItem(),
                         text = relativeDateText(item.date),
                     )
                 }
                 is HistoryUiModel.Item -> {
                     val value = item.item
                     HistoryItem(
-                        // FORK -->
-                        modifier = haruka.motion.listItemMotion(this),
-                        // FORK <--
+                        modifier = Modifier.animateItem(),
                         history = value,
                         timeFormatter = timeFormatter,
                         onClickCover = { onClickCover(value) },

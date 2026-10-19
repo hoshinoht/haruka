@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import eu.kanade.presentation.components.SearchToolbar
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SourceFilter
+import haruka.motion.FilterChip
+import haruka.motion.LinearProgressIndicator
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.DoneAll
 import mihon.icons.materialsymbols.rounded.FilterList
@@ -58,14 +59,12 @@ fun GlobalSearchToolbar(
                 scrollBehavior = scrollBehavior,
             )
             if (progress in 1..<total) {
-                // FORK -->
-                haruka.motion.ProfileLinearProgressIndicator(
+                LinearProgressIndicator(
                     progress = { progress / total.toFloat() },
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth(),
                 )
-                // FORK <--
             }
         }
 
@@ -78,10 +77,6 @@ fun GlobalSearchToolbar(
         ) {
             // TODO: make this UX better; it only applies when triggering a new search
             if (!hideSourceFilter) {
-                // FORK -->
-                val pinnedMorph = haruka.motion.rememberFilterChipPressMorph(sourceFilter == SourceFilter.PinnedOnly)
-                val allMorph = haruka.motion.rememberFilterChipPressMorph(sourceFilter == SourceFilter.All)
-                // FORK <--
                 FilterChip(
                     selected = sourceFilter == SourceFilter.PinnedOnly,
                     onClick = { onChangeSearchFilter(SourceFilter.PinnedOnly) },
@@ -96,10 +91,6 @@ fun GlobalSearchToolbar(
                     label = {
                         Text(text = stringResource(MR.strings.pinned_sources))
                     },
-                    // FORK -->
-                    shape = pinnedMorph.shape,
-                    interactionSource = pinnedMorph.interactionSource,
-                    // FORK <--
                 )
                 FilterChip(
                     selected = sourceFilter == SourceFilter.All,
@@ -115,18 +106,11 @@ fun GlobalSearchToolbar(
                     label = {
                         Text(text = stringResource(MR.strings.all))
                     },
-                    // FORK -->
-                    shape = allMorph.shape,
-                    interactionSource = allMorph.interactionSource,
-                    // FORK <--
                 )
 
                 VerticalDivider(modifier = Modifier.height(FilterChipDefaults.Height))
             }
 
-            // FORK -->
-            val hasResultsMorph = haruka.motion.rememberFilterChipPressMorph(onlyShowHasResults)
-            // FORK <--
             FilterChip(
                 selected = onlyShowHasResults,
                 onClick = { onToggleResults() },
@@ -141,10 +125,6 @@ fun GlobalSearchToolbar(
                 label = {
                     Text(text = stringResource(MR.strings.has_results))
                 },
-                // FORK -->
-                shape = hasResultsMorph.shape,
-                interactionSource = hasResultsMorph.interactionSource,
-                // FORK <--
             )
         }
 

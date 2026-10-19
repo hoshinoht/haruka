@@ -48,6 +48,7 @@ import eu.kanade.tachiyomi.util.system.getHtml
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.setUserAgent
 import eu.kanade.tachiyomi.util.system.toast
+import haruka.motion.LinearProgressIndicator
 import kotlinx.coroutines.launch
 import logcat.LogPriority
 import mihon.icons.materialsymbols.MaterialSymbols
@@ -325,19 +326,17 @@ fun WebViewScreenContent(
                     }
                 }
                 when (val loadingState = currentWindow.state.loadingState) {
-                    // FORK -->
-                    is LoadingState.Initializing -> haruka.motion.ProfileLinearProgressIndicator(
+                    is LoadingState.Initializing -> LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter),
                     )
-                    is LoadingState.Loading -> haruka.motion.ProfileLinearProgressIndicator(
+                    is LoadingState.Loading -> LinearProgressIndicator(
                         progress = { loadingState.progress },
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter),
                     )
-                    // FORK <--
                     else -> {}
                 }
             }

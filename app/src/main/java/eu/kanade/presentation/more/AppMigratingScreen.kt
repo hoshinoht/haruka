@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import haruka.motion.CircularProgressIndicator
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
@@ -30,9 +31,7 @@ fun AppMigratingScreen() {
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // FORK -->
-            haruka.motion.ScreenLoadingIndicator()
-            // FORK <--
+            CircularProgressIndicator()
             Text(
                 text = stringResource(MR.strings.app_migrating_title),
                 style = MaterialTheme.typography.titleLarge,

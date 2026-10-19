@@ -75,6 +75,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getNameForMangaInfo
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.copyToClipboard
+import haruka.motion.animateContentSize
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import mihon.app.di.appGraph
@@ -279,9 +280,7 @@ fun ExpandableMangaDescription(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .padding(vertical = 12.dp)
-                    // FORK -->
-                    .then(haruka.motion.contentSizeMotion(spring()))
-                    // FORK <--
+                    .animateContentSize(animationSpec = spring())
                     .fillMaxWidth(),
             ) {
                 var showMenu by remember { mutableStateOf(false) }

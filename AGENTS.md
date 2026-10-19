@@ -12,12 +12,21 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 
 ## Where code goes
 
-- New code lives under the `haruka.*` package (`app/src/main/java/haruka/**`) or in new fork modules.
+- New code lives under the `haruka.*` package (`app/src/main/java/haruka/**`, `presentation-core/src/main/java/haruka/**`) or in new fork modules.
 - Edits to upstream files are thin hooks wrapped in markers:
   - Kotlin/KTS/SQL: `// FORK -->` … `// FORK <--`
   - XML: `<!-- FORK -->` … `<!-- /FORK -->`
-  - Imports are never wrapped: ktlint rejects comments in the import list. Prefer fully qualified calls for one-off hooks.
-- Strings: new strings only in the fork i18n module (`i18n-fork`, created with the first feature that needs strings). Never add or edit strings in `i18n/` except the rebrand `app_name`.
+  - Imports are never wrapped: ktlint rejects comments in the import list. Never add imports to upstream files; use fully qualified calls (`haruka.foo.bar(...)`) inside the FORK block.
+  - One exception, shadow imports: when every use of a symbol in an upstream file is already hooked, swap that file's import (e.g. `androidx.compose.material3.FilterChip`) for the same-named drop-in in `haruka.motion` and drop the per-call FORK blocks. The `import haruka.…` line is the marker; the drop-in keeps the upstream signature, and its STANDARD path must equal the upstream component. `scripts/haruka/patch-surface.sh` lists these as import hooks.
+- Motion hooks: the STANDARD animation profile must behave exactly like upstream; only EXPRESSIVE and REDUCED may differ.
+- Build changes go in `haruka.gradle.configureHarukaApp` (`gradle/build-logic/src/main/kotlin/haruka/gradle/HarukaApp.kt`), called from the single FORK block in `app/build.gradle.kts`. It sets the application id, version, `MIHON_VERSION`, fork source dirs and fork module dependencies.
+- Version: `app/src/haruka/version.properties` (`versionCode`, `versionName`, `mihonBase`) is the only place to bump it; the build, `scripts/haruka/build-release.sh` and the release workflow read it. Update `mihonBase` on each upstream sync merge.
+- Branding and fork resources live in variant overlays under `app/src/haruka/`, never in upstream `res/` folders. Overlays take priority over `src/main` and build-type folders, so they replace upstream resources without touching them:
+  - `res/`: every variant (Hoshino theme and colours, font, `ic_mihon`, monochrome icon, splash colour).
+  - `res-release/`: release and foss (`app_name`, launcher icon). `res-debug/`: debug and nightly (`app_name`, debug launcher icon).
+  - `assets/`: every variant. Benchmark builds use `app/src/benchmark/res` instead of the release/debug overlays.
+- Strings: new strings only in the fork i18n module (`i18n-fork`). Never add or edit strings in `i18n/`; the rebrand `app_name` lives in `app/src/haruka/res-release` and `res-debug`.
+- Fork-owned paths outside `haruka.*` packages: `app/src/haruka/`, `app/src/benchmark/`, `gradle/build-logic/src/main/kotlin/haruka/`, `i18n-fork/`, `scripts/haruka/`, `docs/haruka/`, `.github/workflows/haruka-*`, `.github/assets/haruka-*`, `.github/README.md`, `NOTICE`, this file. `patch-surface.sh` keeps the same list.
 
 ## Hard rules
 
@@ -38,7 +47,7 @@ scripts/haruka/patch-surface.sh   # upstream files touched outside fork-owned pa
 
 Keep the patch surface trending down.
 
-`README.md` is Haruka's own page, not a hooked upstream file. On an upstream sync conflict keep Haruka's version (`git checkout --ours README.md`) and carry over only facts that changed upstream (supported Android version, licence).
+Haruka's project page is `.github/README.md`, which GitHub shows in place of the root `README.md`. The root `README.md` stays byte-identical to upstream.
 
 ## Baseline profiles
 

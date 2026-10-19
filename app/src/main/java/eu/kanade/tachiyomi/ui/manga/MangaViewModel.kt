@@ -1151,8 +1151,8 @@ class MangaViewModel(
             val processedChapters by lazy {
                 chapters.applyFilters(manga).toList()
             }
-
             // FORK -->
+
             val harukaGroupedList by lazy { harukaGroups?.build(processedChapters) }
 
             /** The rows shown: one per logical chapter while grouping, else [processedChapters]. */

@@ -192,18 +192,14 @@ private fun ExtensionContent(
                             }
                         ExtensionHeader(
                             textRes = header.textRes,
-                            // FORK -->
-                            modifier = haruka.motion.listItemMotion(this),
-                            // FORK <--
+                            modifier = Modifier.animateItem(),
                             action = action,
                         )
                     }
                     is ExtensionUiModel.Header.Text -> {
                         ExtensionHeader(
                             text = header.text,
-                            // FORK -->
-                            modifier = haruka.motion.listItemMotion(this),
-                            // FORK <--
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
@@ -221,9 +217,7 @@ private fun ExtensionContent(
                 },
             ) { item ->
                 ExtensionItem(
-                    // FORK -->
-                    modifier = haruka.motion.listItemMotion(this),
-                    // FORK <--
+                    modifier = Modifier.animateItem(),
                     item = item,
                     onClickItem = {
                         when (it) {

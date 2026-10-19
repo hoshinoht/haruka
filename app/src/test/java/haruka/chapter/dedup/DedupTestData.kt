@@ -4,7 +4,7 @@ import java.io.File
 
 /** The bundled catalog, read straight from the asset file (unit tests run with the module as working dir). */
 val testCatalog: OfficialCatalog by lazy {
-    OfficialCatalog.parse(File("src/main/assets/${OfficialCatalogLoader.ASSET_PATH}").readText())
+    OfficialCatalog.parse(File("src/haruka/assets/${OfficialCatalogLoader.ASSET_PATH}").readText())
 }
 
 fun chapter(

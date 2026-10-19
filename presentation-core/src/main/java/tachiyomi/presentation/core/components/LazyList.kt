@@ -49,7 +49,9 @@ fun ScrollbarLazyColumn(
         verticalArrangement = verticalArrangement,
         horizontalAlignment = horizontalAlignment,
         userScrollEnabled = userScrollEnabled,
-        content = content,
+        // FORK -->
+        content = haruka.motion.profiledListContent(content),
+        // FORK <--
     )
 }
 
@@ -81,7 +83,9 @@ fun FastScrollLazyColumn(
             verticalArrangement = verticalArrangement,
             horizontalAlignment = horizontalAlignment,
             userScrollEnabled = userScrollEnabled,
-            content = content,
+            // FORK -->
+            content = haruka.motion.profiledListContent(content),
+            // FORK <--
         )
     }
 }

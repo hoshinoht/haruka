@@ -55,6 +55,7 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.util.lang.toJavaLocalDate
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import eu.kanade.tachiyomi.util.system.copyToClipboard
+import haruka.motion.animateContentSize
 import kotlinx.datetime.toJavaLocalDate
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.MoreVert
@@ -80,9 +81,7 @@ fun TrackInfoDialogHome(
 ) {
     Column(
         modifier = Modifier
-            // FORK -->
-            .then(haruka.motion.contentSizeMotion())
-            // FORK <--
+            .animateContentSize()
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)

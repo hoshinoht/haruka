@@ -39,7 +39,7 @@ fun RelatedMangaRow(manga: Manga, source: Source) {
 
     val navigator = LocalNavigator.currentOrThrow
     // The manga screen's presentation layer has no Screen receiver; the screen on top is the one showing this row.
-    val libraryToggle = (navigator.lastItem as? Screen)?.rememberLibraryToggle()
+    val libraryToggle = (navigator.lastItem as? Screen)?.let { rememberLibraryToggle(it) }
     libraryToggle?.Dialogs?.invoke()
 
     Column(modifier = Modifier.padding(top = MaterialTheme.padding.small)) {

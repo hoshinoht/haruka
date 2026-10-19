@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.ui.library.LibrarySettingsViewModel
 import eu.kanade.tachiyomi.util.system.isReleaseBuildType
+import haruka.motion.FilterChip
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.core.common.preference.TriState
@@ -231,17 +231,10 @@ private fun ColumnScope.DisplayPage(
     val displayMode by viewModel.libraryPreferences.displayMode.collectAsState()
     SettingsChipRow(MR.strings.action_display_mode) {
         displayModes.map { (titleRes, mode) ->
-            // FORK -->
-            val pressMorph = haruka.motion.rememberFilterChipPressMorph(displayMode == mode)
-            // FORK <--
             FilterChip(
                 selected = displayMode == mode,
                 onClick = { viewModel.setDisplayMode(mode) },
                 label = { Text(stringResource(titleRes)) },
-                // FORK -->
-                shape = pressMorph.shape,
-                interactionSource = pressMorph.interactionSource,
-                // FORK <--
             )
         }
     }

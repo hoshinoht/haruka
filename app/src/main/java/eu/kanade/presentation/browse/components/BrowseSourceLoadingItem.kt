@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import haruka.motion.CircularProgressIndicator
 
 @Composable
 internal fun BrowseSourceLoadingItem() {
@@ -16,8 +17,6 @@ internal fun BrowseSourceLoadingItem() {
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.Center,
     ) {
-        // FORK -->
-        haruka.motion.ScreenLoadingIndicator()
-        // FORK <--
+        CircularProgressIndicator()
     }
 }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import haruka.motion.FilledIconToggleButton
 
 @Composable
 fun IconToggleButton(
@@ -24,18 +24,11 @@ fun IconToggleButton(
     title: String,
     modifier: Modifier = Modifier,
 ) {
-    // FORK -->
-    val pressMorph = haruka.motion.rememberFilledIconToggleButtonPressMorph(checked)
-    // FORK <--
     FilledIconToggleButton(
         checked = checked,
         onCheckedChange = onCheckedChange,
         modifier = modifier
             .height(48.dp),
-        // FORK -->
-        shape = pressMorph.shape,
-        interactionSource = pressMorph.interactionSource,
-        // FORK <--
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),

@@ -45,6 +45,7 @@ import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.presentation.util.rememberResourceBitmapPainter
 import eu.kanade.tachiyomi.R
+import haruka.motion.CircularProgressIndicator
 import mihon.feature.migration.list.models.MigratingManga
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
@@ -124,9 +125,7 @@ fun MigrationListScreenContent(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        // FORK -->
-                        .then(haruka.motion.listItemMotion(this))
-                        // FORK <--
+                        .animateItem()
                         .padding(
                             start = MaterialTheme.padding.medium,
                             end = MaterialTheme.padding.small,
@@ -273,9 +272,7 @@ fun MigrationListItemResult(
                         .aspectRatio(MangaCover.Book.ratio),
                     contentAlignment = Alignment.Center,
                 ) {
-                    // FORK -->
-                    haruka.motion.ScreenLoadingIndicator()
-                    // FORK <--
+                    CircularProgressIndicator()
                 }
             }
             MigratingManga.SearchResult.NotFound -> {

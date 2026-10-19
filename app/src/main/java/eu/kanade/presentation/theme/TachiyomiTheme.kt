@@ -3,9 +3,7 @@ package eu.kanade.presentation.theme
 import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.domain.ui.model.AppTheme
@@ -25,9 +23,7 @@ import eu.kanade.presentation.theme.colorscheme.TidalWaveColorScheme
 import eu.kanade.presentation.theme.colorscheme.TokyoNightColorScheme
 import eu.kanade.presentation.theme.colorscheme.YinYangColorScheme
 import eu.kanade.presentation.theme.colorscheme.YotsubaColorScheme
-import haruka.motion.motionScheme
 import mihon.app.di.appGraph
-import tachiyomi.presentation.core.util.collectAsState
 
 @Composable
 fun TachiyomiTheme(
@@ -60,12 +56,9 @@ private fun BaseTachiyomiTheme(
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
     // FORK -->
-    val accents = haruka.theme.themeAccents(appTheme)
-    val harukaPreferences = remember { context.appGraph.harukaPreferences }
-    val chosenProfile by harukaPreferences.animationProfile.collectAsState()
-    val profile = haruka.motion.effectiveAnimationProfile(chosenProfile)
-    // FORK <--
-    MaterialExpressiveTheme(
+    haruka.theme.HarukaExpressiveTheme(
+        appTheme = appTheme,
+        // FORK <--
         colorScheme = remember(appTheme, isDark, isAmoled) {
             getThemeColorScheme(
                 context = context,
@@ -74,19 +67,7 @@ private fun BaseTachiyomiTheme(
                 isAmoled = isAmoled,
             )
         },
-        // FORK -->
-        motionScheme = profile.motionScheme(),
-        shapes = accents.shapes,
-        typography = accents.typography,
-        // FORK <--
-        content = {
-            // FORK -->
-            androidx.compose.runtime.CompositionLocalProvider(
-                haruka.motion.LocalAnimationProfile provides profile,
-                content = content,
-            )
-            // FORK <--
-        },
+        content = content,
     )
 }
 

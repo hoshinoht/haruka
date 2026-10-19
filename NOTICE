@@ -1,8 +1,8 @@
 Haruka includes third-party assets under their own licences.
 
 Zen Maru Gothic Bold
-  File:      app/src/main/res/font/haruka_zen_maru_gothic_bold.ttf (unmodified)
+  File:      app/src/haruka/res/font/haruka_zen_maru_gothic_bold.ttf (unmodified)
   Source:    https://github.com/google/fonts/tree/main/ofl/zenmarugothic
   Copyright: 2021 The Zen Maru Gothic Project Authors (https://github.com/googlefonts/zen-marugothic)
-  Licence:   SIL Open Font License 1.1, full text in app/src/main/res/raw/haruka_zen_maru_gothic_ofl.txt
+  Licence:   SIL Open Font License 1.1, full text in app/src/haruka/res/raw/haruka_zen_maru_gothic_ofl.txt
              (shipped inside the APK)

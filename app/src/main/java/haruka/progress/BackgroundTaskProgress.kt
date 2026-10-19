@@ -1,7 +1,9 @@
 package haruka.progress
 
+import android.content.Context
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import eu.kanade.tachiyomi.util.system.workManager
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,16 +52,19 @@ object BackgroundTaskProgress {
     }
 
     /** Tasks to show, top to bottom. */
-    fun visibleTasks(workManager: WorkManager): Flow<List<Task>> = combine(
-        libraryUpdate,
-        restore,
-        workManager.isRunningFlow(LIBRARY_UPDATE_TAG),
-        workManager.isRunningFlow(RESTORE_TAG),
-    ) { update, restore, updateRunning, restoreRunning ->
-        listOfNotNull(
-            update?.takeIf { updateRunning },
-            restore?.takeIf { restoreRunning },
-        )
+    fun visibleTasks(context: Context): Flow<List<Task>> {
+        val workManager = context.workManager
+        return combine(
+            libraryUpdate,
+            restore,
+            workManager.isRunningFlow(LIBRARY_UPDATE_TAG),
+            workManager.isRunningFlow(RESTORE_TAG),
+        ) { update, restore, updateRunning, restoreRunning ->
+            listOfNotNull(
+                update?.takeIf { updateRunning },
+                restore?.takeIf { restoreRunning },
+            )
+        }
     }
 
     @OptIn(FlowPreview::class)

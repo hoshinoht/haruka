@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import haruka.motion.CircularProgressIndicator
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
@@ -12,8 +13,6 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        // FORK -->
-        haruka.motion.ScreenLoadingIndicator()
-        // FORK <--
+        CircularProgressIndicator()
     }
 }

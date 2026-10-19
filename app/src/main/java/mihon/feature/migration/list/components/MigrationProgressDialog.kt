@@ -8,6 +8,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.DialogProperties
+import haruka.motion.LinearProgressIndicator
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
@@ -30,11 +31,9 @@ fun MigrationProgressDialog(
                     animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                     label = "migration_progress",
                 )
-                // FORK -->
-                haruka.motion.ProfileLinearProgressIndicator(
+                LinearProgressIndicator(
                     progress = { progressAnimated },
                 )
-                // FORK <--
             }
         },
         properties = DialogProperties(

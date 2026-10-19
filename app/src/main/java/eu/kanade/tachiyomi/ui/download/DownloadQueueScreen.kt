@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.animateFloatingActionButton
@@ -47,6 +46,7 @@ import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.presentation.components.NestedMenuItem
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.databinding.DownloadListBinding
+import haruka.motion.SmallExtendedFloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mihon.icons.materialsymbols.MaterialSymbols
@@ -200,9 +200,6 @@ object DownloadQueueScreen : Screen() {
             },
             floatingActionButton = {
                 val isRunning by viewModel.isDownloaderRunning.collectAsStateWithLifecycle()
-                // FORK -->
-                val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
-                // FORK <--
                 SmallExtendedFloatingActionButton(
                     text = {
                         val id = if (isRunning) {
@@ -232,10 +229,6 @@ object DownloadQueueScreen : Screen() {
                         visible = downloadList.isNotEmpty(),
                         alignment = Alignment.BottomEnd,
                     ),
-                    // FORK -->
-                    shape = fabPressMorph.shape,
-                    interactionSource = fabPressMorph.interactionSource,
-                    // FORK <--
                 )
             },
         ) { contentPadding ->

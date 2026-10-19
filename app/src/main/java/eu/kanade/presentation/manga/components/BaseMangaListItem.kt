@@ -1,7 +1,6 @@
 package eu.kanade.presentation.manga.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -34,7 +33,7 @@ fun BaseMangaListItem(
     Row(
         modifier = modifier
             // FORK -->
-            .combinedClickable(onClick = onClickItem, onLongClick = onLongClickItem)
+            .then(haruka.selection.itemClickModifier(onClick = onClickItem, onLongClick = onLongClickItem))
             // FORK <--
             .height(56.dp)
             .padding(horizontal = MaterialTheme.padding.medium),

@@ -103,8 +103,8 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
     @Inject private lateinit var updateMangaFromRemote: UpdateMangaFromRemote
 
     @Inject private lateinit var notifier: LibraryUpdateNotifier
-
     // FORK -->
+
     @Inject private lateinit var harukaDedup: haruka.chapter.dedup.DedupSurfaces
     // FORK <--
 
@@ -344,7 +344,6 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
             },
         )
         // FORK <--
-
         if (failedUpdates.isNotEmpty()) {
             val errorFile = writeErrorFile(failedUpdates)
             notifier.showUpdateErrorNotification(

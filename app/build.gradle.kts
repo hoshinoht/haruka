@@ -29,24 +29,20 @@ if (Config.includeTelemetry) {
     }
 }
 
+// FORK --> Haruka's id, version, overlays and fork modules (gradle/build-logic/src/main/kotlin/haruka/gradle)
+haruka.gradle.configureHarukaApp(project)
+// FORK <--
+
 val keystorePropertiesFile = layout.settingsDirectory.file("keystore.properties").asFile
 
 android {
     namespace = "eu.kanade.tachiyomi"
 
     defaultConfig {
-        // FORK -->
-        applicationId = "app.haruka"
-        // FORK <--
+        applicationId = "app.mihon"
 
-        // FORK --> Haruka's own SemVer; versionCode = major*1_000_000 + minor*10_000 + patch*100 + beta number
-        // (99 for a stable release), so every beta sorts below its stable release.
-        versionCode = 10002
-        versionName = "0.1.0-beta.2"
-        // Upstream Mihon this build is based on: Haruka follows mihonapp/mihon main, which runs ahead of the
-        // last release tag. Update on each upstream sync merge.
-        buildConfigField("String", "MIHON_VERSION", "\"main after 0.21.2 (deeb9b2)\"")
-        // FORK <--
+        versionCode = 38
+        versionName = "0.21.2"
 
         buildConfigField("boolean", "TELEMETRY_INCLUDED", "${Config.includeTelemetry}")
         buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
@@ -128,12 +124,7 @@ android {
 
     sourceSets {
         getByName("nightly").res.directories.add("src/debug/res")
-        // FORK --> benchmark uses its own src/benchmark/res (aqua icon, "Haruka Bench" label)
-        // getByName("benchmark").res.directories.add("src/debug/res")
-        // FORK <--
-        // FORK --> fork rules live outside the generated baselineProfiles dir so regenerating never drops them
-        getByName("main").baselineProfiles.directories.add("src/haruka/baselineProfiles")
-        // FORK <--
+        getByName("benchmark").res.directories.add("src/debug/res")
     }
 
     splits {
@@ -218,9 +209,6 @@ dependencies {
     baselineProfile(projects.baselineProfile)
 
     implementation(projects.i18n)
-    // FORK -->
-    implementation(projects.i18nFork)
-    // FORK <--
     implementation(projects.icons.customMaterialSymbols)
     implementation(projects.icons.materialSymbols)
     implementation(projects.icons.simpleIcons)

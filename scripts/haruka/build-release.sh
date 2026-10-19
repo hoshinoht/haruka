@@ -9,7 +9,7 @@ props="${HARUKA_KEYSTORE_PROPERTIES:-$HOME/.haruka/keystore.properties}"
 [ -f "$props" ] || { echo "Missing $props" >&2; exit 1; }
 prop() { grep "^$1=" "$props" | cut -d= -f2-; }
 
-version="$(sed -n 's/^ *versionName = "\(.*\)"/\1/p' app/build.gradle.kts)"
+version="$(grep '^versionName=' app/src/haruka/version.properties | cut -d= -f2-)"
 tag="v$version"
 
 # Same signing path as CI: MIHON_GITHUB_RELEASE swaps the signing config to these variables.

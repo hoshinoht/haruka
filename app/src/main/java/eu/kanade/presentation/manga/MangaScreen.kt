@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -61,6 +60,7 @@ import eu.kanade.tachiyomi.source.getNameForMangaInfo
 import eu.kanade.tachiyomi.ui.manga.ChapterList
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.util.system.copyToClipboard
+import haruka.motion.SmallExtendedFloatingActionButton
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.roundedfilled.PlayArrow
 import tachiyomi.domain.chapter.model.Chapter
@@ -324,9 +324,6 @@ private fun MangaScreenSmallImpl(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             val isFABVisible = state.hasUnreadChapters && !isAnySelected
-            // FORK -->
-            val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
-            // FORK <--
             SmallExtendedFloatingActionButton(
                 text = {
                     Text(
@@ -342,10 +339,6 @@ private fun MangaScreenSmallImpl(
                     visible = isFABVisible,
                     alignment = Alignment.BottomEnd,
                 ),
-                // FORK -->
-                shape = fabPressMorph.shape,
-                interactionSource = fabPressMorph.interactionSource,
-                // FORK <--
             )
         },
     ) { contentPadding ->
@@ -567,9 +560,6 @@ fun MangaScreenLargeImpl(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             val isFABVisible = state.hasUnreadChapters && !isAnySelected
-            // FORK -->
-            val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
-            // FORK <--
             SmallExtendedFloatingActionButton(
                 text = {
                     Text(
@@ -585,10 +575,6 @@ fun MangaScreenLargeImpl(
                     visible = isFABVisible,
                     alignment = Alignment.BottomEnd,
                 ),
-                // FORK -->
-                shape = fabPressMorph.shape,
-                interactionSource = fabPressMorph.interactionSource,
-                // FORK <--
             )
         },
     ) { contentPadding ->

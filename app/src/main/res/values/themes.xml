@@ -565,48 +565,6 @@
         <item name="colorSurfaceContainerHighest">@color/monochrome_surfaceContainerHighest</item>
     </style>
 
-    <!-- FORK -->
-    <!--== Hoshino Theme ==-->
-    <style name="Theme.Tachiyomi.Hoshino">
-        <!-- Theme Colors -->
-        <item name="colorPrimary">@color/hoshino_primary</item>
-        <item name="colorOnPrimary">@color/hoshino_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/hoshino_primaryContainer</item>
-        <item name="colorOnPrimaryContainer">@color/hoshino_onPrimaryContainer</item>
-        <item name="colorPrimaryInverse">@color/hoshino_inversePrimary</item>
-        <item name="colorSecondary">@color/hoshino_secondary</item>
-        <item name="colorOnSecondary">@color/hoshino_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/hoshino_secondaryContainer</item>
-        <item name="colorOnSecondaryContainer">@color/hoshino_onSecondaryContainer</item>
-        <item name="colorTertiary">@color/hoshino_tertiary</item>
-        <item name="colorOnTertiary">@color/hoshino_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/hoshino_tertiaryContainer</item>
-        <item name="colorOnTertiaryContainer">@color/hoshino_onTertiaryContainer</item>
-        <item name="android:colorBackground">@color/hoshino_background</item>
-        <item name="colorOnBackground">@color/hoshino_onBackground</item>
-        <item name="colorSurface">@color/hoshino_surface</item>
-        <item name="colorOnSurface">@color/hoshino_onSurface</item>
-        <item name="colorSurfaceVariant">@color/hoshino_surfaceVariant</item>
-        <item name="colorOnSurfaceVariant">@color/hoshino_onSurfaceVariant</item>
-        <item name="colorSurfaceInverse">@color/hoshino_inverseSurface</item>
-        <item name="colorOnSurfaceInverse">@color/hoshino_inverseOnSurface</item>
-        <item name="colorError">@color/hoshino_error</item>
-        <item name="colorOnError">@color/hoshino_onError</item>
-        <item name="colorErrorContainer">@color/hoshino_errorContainer</item>
-        <item name="colorOnErrorContainer">@color/hoshino_onErrorContainer</item>
-        <item name="colorOutline">@color/hoshino_outline</item>
-        <item name="colorOutlineVariant">@color/hoshino_outlineVariant</item>
-        <item name="scrimBackground">@color/hoshino_scrim</item>
-        <item name="colorSurfaceBright">@color/hoshino_surfaceBright</item>
-        <item name="colorSurfaceDim">@color/hoshino_surfaceDim</item>
-        <item name="colorSurfaceContainer">@color/hoshino_surfaceContainer</item>
-        <item name="colorSurfaceContainerHigh">@color/hoshino_surfaceContainerHigh</item>
-        <item name="colorSurfaceContainerHighest">@color/hoshino_surfaceContainerHighest</item>
-        <item name="colorSurfaceContainerLow">@color/hoshino_surfaceContainerLow</item>
-        <item name="colorSurfaceContainerLowest">@color/hoshino_surfaceContainerLowest</item>
-    </style>
-    <!-- /FORK -->
-
     <!--== AMOLED Mode Overlay ==-->
     <style name="ThemeOverlay.Tachiyomi.Amoled" parent="" />
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Overrides i18n's app_name. Not in the shared res overlay, which would also replace "Haruka Bench". -->
+<resources>
+    <string name="app_name" translatable="false">Haruka</string>
+</resources>

@@ -82,8 +82,8 @@ class MigrateSourceViewModel(
             }
         }
     }
-
     // FORK -->
+
     suspend fun unavailableFavoriteIds(): List<Long> {
         val state = state.value
         return staleSources.favoriteIds(state.items.map { it.first.id }.filter { it in state.unavailable })

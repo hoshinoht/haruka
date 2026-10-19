@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import haruka.motion.animateContentSize
 import kotlinx.coroutines.launch
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.MoreVert
@@ -76,9 +77,7 @@ fun TabbedDialog(
             }
 
             HorizontalPager(
-                // FORK -->
-                modifier = haruka.motion.contentSizeMotion(),
-                // FORK <--
+                modifier = Modifier.animateContentSize(),
                 state = pagerState,
                 verticalAlignment = Alignment.Top,
                 pageContent = { page -> content(page) },

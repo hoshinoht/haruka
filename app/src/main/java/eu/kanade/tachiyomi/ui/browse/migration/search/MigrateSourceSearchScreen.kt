@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.browse.migration.search
 
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -27,6 +26,7 @@ import eu.kanade.tachiyomi.ui.browse.source.browse.SourceFilterDialog
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.webview.WebViewScreen
+import haruka.motion.SmallExtendedFloatingActionButton
 import kotlinx.coroutines.launch
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import mihon.feature.migration.list.MigrationListScreen
@@ -78,9 +78,6 @@ data class MigrateSourceSearchScreen(
                 )
             },
             floatingActionButton = {
-                // FORK -->
-                val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
-                // FORK <--
                 SmallExtendedFloatingActionButton(
                     text = { Text(text = stringResource(MR.strings.action_filter)) },
                     icon = { Icon(MaterialSymbols.Rounded.FilterList, contentDescription = null) },
@@ -89,10 +86,6 @@ data class MigrateSourceSearchScreen(
                         visible = state.filters.isNotEmpty(),
                         alignment = Alignment.BottomEnd,
                     ),
-                    // FORK -->
-                    shape = fabPressMorph.shape,
-                    interactionSource = fabPressMorph.interactionSource,
-                    // FORK <--
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

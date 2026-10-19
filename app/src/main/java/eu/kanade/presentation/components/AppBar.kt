@@ -213,15 +213,10 @@ fun AppBarActions(
             focusable = false,
         ) {
             // FORK -->
-            val pressMorph = haruka.motion.rememberIconButtonPressMorph()
-            // FORK <--
-            IconButton(
+            haruka.motion.IconButton(
+                // FORK <--
                 onClick = it.onClick,
                 enabled = it.enabled,
-                // FORK -->
-                shape = pressMorph.shape,
-                interactionSource = pressMorph.interactionSource,
-                // FORK <--
             ) {
                 Icon(
                     imageVector = it.icon,
@@ -245,14 +240,9 @@ fun AppBarActions(
             focusable = false,
         ) {
             // FORK -->
-            val pressMorph = haruka.motion.rememberIconButtonPressMorph()
-            // FORK <--
-            IconButton(
-                onClick = { showMenu = !showMenu },
-                // FORK -->
-                shape = pressMorph.shape,
-                interactionSource = pressMorph.interactionSource,
+            haruka.motion.IconButton(
                 // FORK <--
+                onClick = { showMenu = !showMenu },
             ) {
                 Icon(
                     MaterialSymbols.Rounded.MoreVert,

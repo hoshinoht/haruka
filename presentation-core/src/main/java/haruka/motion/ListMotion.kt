@@ -3,9 +3,11 @@ package haruka.motion
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -15,14 +17,18 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.animation.animateContentSize as foundationAnimateContentSize
 
 /** REDUCED fades: long enough to read as a state change, short enough not to read as motion. */
 private const val REDUCED_FADE_MILLIS = 150
@@ -37,14 +43,162 @@ private fun <T> reducedFade() = ReducedFade as FiniteAnimationSpec<T>
 @Suppress("UNCHECKED_CAST")
 private fun <T> instant() = Instant as FiniteAnimationSpec<T>
 
+// What `LazyItemScope.animateItem()` passes for an omitted argument (foundation 1.13). SpringSpec compares by value, so
+// an argument equal to these was left at its default by the caller.
+private val DefaultItemFade = spring<Float>(stiffness = Spring.StiffnessMediumLow)
+private val DefaultItemPlacement = spring(
+    stiffness = Spring.StiffnessMediumLow,
+    visibilityThreshold = IntOffset.VisibilityThreshold,
+)
+
 /**
- * Profile-aware replacement for `Modifier.animateItem()` on a lazy list item, as a plain function so upstream files
- * hook it fully qualified: `modifier = haruka.motion.listItemMotion(this)` or `.then(haruka.motion.listItemMotion(this))`
- * in place of `.animateItem()`. Pass the item's [scope] (`this` in `item {}`).
+ * The specs a profile gives `Modifier.animateItem()`. An argument equal to the library default maps to the profile's
+ * spec, null stays null (the caller turned that part off) and any other spec passes through (the caller chose it).
+ */
+@Immutable
+class ListItemSpecs internal constructor(
+    private val fadeIn: FiniteAnimationSpec<Float>?,
+    private val placement: FiniteAnimationSpec<IntOffset>?,
+    private val fadeOut: FiniteAnimationSpec<Float>?,
+) {
+    fun fadeIn(requested: FiniteAnimationSpec<Float>?): FiniteAnimationSpec<Float>? =
+        if (requested == DefaultItemFade) fadeIn else requested
+
+    fun placement(requested: FiniteAnimationSpec<IntOffset>?): FiniteAnimationSpec<IntOffset>? =
+        if (requested == DefaultItemPlacement) placement else requested
+
+    fun fadeOut(requested: FiniteAnimationSpec<Float>?): FiniteAnimationSpec<Float>? =
+        if (requested == DefaultItemFade) fadeOut else requested
+}
+
+/**
+ * Item specs for [profile], or null for STANDARD, whose items keep exactly what upstream asks for. EXPRESSIVE uses
+ * [motionScheme]'s springs; REDUCED drops placement motion and keeps only short fades.
+ */
+fun listItemSpecs(profile: AnimationProfile, motionScheme: MotionScheme): ListItemSpecs? = when (profile) {
+    AnimationProfile.STANDARD -> null
+    AnimationProfile.EXPRESSIVE -> ListItemSpecs(
+        fadeIn = motionScheme.defaultEffectsSpec(),
+        placement = motionScheme.defaultSpatialSpec(),
+        fadeOut = motionScheme.fastEffectsSpec(),
+    )
+    AnimationProfile.REDUCED -> ListItemSpecs(
+        fadeIn = reducedFade(),
+        placement = null,
+        fadeOut = reducedFade(),
+    )
+}
+
+/**
+ * Runs a lazy list's [content] so every `Modifier.animateItem()` inside it follows the animation profile, hooked as
+ * `content = haruka.motion.profiledListContent(content)` in the list wrappers. STANDARD returns [content] itself, so
+ * the list behaves exactly like upstream.
+ */
+@Composable
+fun profiledListContent(content: LazyListScope.() -> Unit): LazyListScope.() -> Unit {
+    val profile = LocalAnimationProfile.current
+    if (profile == AnimationProfile.STANDARD) return content
+    val motionScheme = MaterialTheme.motionScheme
+    val itemScopes = remember(profile, motionScheme) {
+        ProfiledItemScopes(listItemSpecs(profile, motionScheme)!!)
+    }
+    return remember<LazyListScope.() -> Unit>(content, itemScopes) {
+        { ProfiledListScope(this, itemScopes).content() }
+    }
+}
+
+/** Hands item content a [ProfiledItemScope], reusing it while the list keeps the same item scope (one per list). */
+private class ProfiledItemScopes(private val specs: ListItemSpecs) {
+    private var cached: ProfiledItemScope? = null
+
+    fun wrap(scope: LazyItemScope): LazyItemScope {
+        cached?.let { if (it.delegate === scope) return it }
+        return ProfiledItemScope(scope, specs).also { cached = it }
+    }
+}
+
+private class ProfiledItemScope(
+    val delegate: LazyItemScope,
+    private val specs: ListItemSpecs,
+) : LazyItemScope by delegate {
+    override fun Modifier.animateItem(
+        fadeInSpec: FiniteAnimationSpec<Float>?,
+        placementSpec: FiniteAnimationSpec<IntOffset>?,
+        fadeOutSpec: FiniteAnimationSpec<Float>?,
+    ): Modifier {
+        val specs = specs
+        return with(delegate) {
+            this@animateItem.animateItem(
+                fadeInSpec = specs.fadeIn(fadeInSpec),
+                placementSpec = specs.placement(placementSpec),
+                fadeOutSpec = specs.fadeOut(fadeOutSpec),
+            )
+        }
+    }
+}
+
+/**
+ * Forwards every item to [delegate] with its content running on a profiled item scope. The hidden deprecated
+ * overloads are overridden too, so binaries compiled against older foundation versions are wrapped as well instead
+ * of reaching [delegate] through `by`.
+ */
+private class ProfiledListScope(
+    private val delegate: LazyListScope,
+    private val itemScopes: ProfiledItemScopes,
+) : LazyListScope by delegate {
+    override fun item(key: Any?, contentType: Any?, content: @Composable LazyItemScope.() -> Unit) {
+        val itemScopes = itemScopes
+        delegate.item(key, contentType) { itemScopes.wrap(this).content() }
+    }
+
+    override fun items(
+        count: Int,
+        key: ((index: Int) -> Any)?,
+        contentType: (index: Int) -> Any?,
+        itemContent: @Composable LazyItemScope.(index: Int) -> Unit,
+    ) {
+        val itemScopes = itemScopes
+        delegate.items(count, key, contentType) { index -> itemScopes.wrap(this).itemContent(index) }
+    }
+
+    override fun stickyHeader(
+        key: Any?,
+        contentType: Any?,
+        content: @Composable LazyItemScope.(stickyHeaderIndex: Int) -> Unit,
+    ) {
+        val itemScopes = itemScopes
+        delegate.stickyHeader(key, contentType) { index -> itemScopes.wrap(this).content(index) }
+    }
+
+    @Deprecated("Binary compatibility only", level = DeprecationLevel.HIDDEN)
+    override fun item(key: Any?, content: @Composable LazyItemScope.() -> Unit) {
+        item(key, null, content)
+    }
+
+    @Deprecated("Binary compatibility only", level = DeprecationLevel.HIDDEN)
+    override fun items(
+        count: Int,
+        key: ((index: Int) -> Any)?,
+        itemContent: @Composable LazyItemScope.(index: Int) -> Unit,
+    ) {
+        items(count, key, { null }, itemContent)
+    }
+
+    @Deprecated("Binary compatibility only", level = DeprecationLevel.HIDDEN)
+    override fun stickyHeader(key: Any?, contentType: Any?, content: @Composable LazyItemScope.() -> Unit) {
+        stickyHeader(key, contentType) { _ -> content() }
+    }
+}
+
+/**
+ * Profile-aware `Modifier.animateItem()` for lists that are not run through [profiledListContent] (plain
+ * `LazyColumn`s), as a plain function so upstream files hook it fully qualified:
+ * `modifier = haruka.motion.listItemMotion(this)` in place of `Modifier.animateItem()`. Pass the item's [scope]
+ * (`this` in `item {}`).
  *
  * STANDARD makes upstream's exact call: `animateItem()`, or `animateItem(fadeInSpec = null, fadeOutSpec = null)` when
  * [fade] is false. With [animateInStandard] false the item stays static in STANDARD, for lists Mihon does not animate.
- * EXPRESSIVE uses the theme's M3 Expressive springs; REDUCED drops placement motion and keeps only short fades.
+ * Other profiles map those same calls through [listItemSpecs].
  */
 @Composable
 fun listItemMotion(
@@ -52,25 +206,19 @@ fun listItemMotion(
     fade: Boolean = true,
     animateInStandard: Boolean = true,
 ): Modifier = with(scope) {
-    when (LocalAnimationProfile.current) {
-        AnimationProfile.STANDARD -> when {
-            !animateInStandard -> Modifier
-            fade -> Modifier.animateItem()
-            else -> Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
-        }
-        AnimationProfile.EXPRESSIVE -> {
-            val motion = MaterialTheme.motionScheme
-            Modifier.animateItem(
-                fadeInSpec = if (fade) motion.defaultEffectsSpec<Float>() else null,
-                placementSpec = motion.defaultSpatialSpec<IntOffset>(),
-                fadeOutSpec = if (fade) motion.fastEffectsSpec<Float>() else null,
-            )
-        }
-        AnimationProfile.REDUCED -> Modifier.animateItem(
-            fadeInSpec = if (fade) reducedFade<Float>() else null,
-            placementSpec = null,
-            fadeOutSpec = if (fade) reducedFade<Float>() else null,
+    val profile = LocalAnimationProfile.current
+    val motionScheme = MaterialTheme.motionScheme
+    val specs = remember(profile, motionScheme) { listItemSpecs(profile, motionScheme) }
+    val fadeSpec = if (fade) DefaultItemFade else null
+    when {
+        specs != null -> Modifier.animateItem(
+            fadeInSpec = specs.fadeIn(fadeSpec),
+            placementSpec = specs.placement(DefaultItemPlacement),
+            fadeOutSpec = specs.fadeOut(fadeSpec),
         )
+        !animateInStandard -> Modifier
+        fade -> Modifier.animateItem()
+        else -> Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
     }
 }
 
@@ -99,22 +247,25 @@ fun <T> listEffectsSpec(standard: FiniteAnimationSpec<T>): FiniteAnimationSpec<T
     }
 
 /**
- * Profile-aware replacement for `Modifier.animateContentSize()`, hooked as `.then(haruka.motion.contentSizeMotion())`.
- * STANDARD makes upstream's call: with [standardSpec] when given, else the library default. EXPRESSIVE springs with
- * the theme's default spatial spec; REDUCED resizes instantly.
+ * Profile-aware drop-in for `androidx.compose.animation.animateContentSize`: upstream files swap that import for this
+ * one and keep their calls. STANDARD makes upstream's call with the same arguments. EXPRESSIVE springs with the
+ * theme's default spatial spec; REDUCED resizes instantly.
  */
 @Composable
-fun contentSizeMotion(standardSpec: FiniteAnimationSpec<IntSize>? = null): Modifier =
+fun Modifier.animateContentSize(
+    animationSpec: FiniteAnimationSpec<IntSize> = spring(
+        stiffness = Spring.StiffnessMediumLow,
+        visibilityThreshold = IntSize.VisibilityThreshold,
+    ),
+    finishedListener: ((initialValue: IntSize, targetValue: IntSize) -> Unit)? = null,
+): Modifier =
     when (LocalAnimationProfile.current) {
-        AnimationProfile.STANDARD -> if (standardSpec != null) {
-            Modifier.animateContentSize(animationSpec = standardSpec)
-        } else {
-            Modifier.animateContentSize()
-        }
-        AnimationProfile.EXPRESSIVE -> Modifier.animateContentSize(
-            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+        AnimationProfile.STANDARD -> foundationAnimateContentSize(animationSpec, finishedListener)
+        AnimationProfile.EXPRESSIVE -> foundationAnimateContentSize(
+            MaterialTheme.motionScheme.defaultSpatialSpec(),
+            finishedListener,
         )
-        AnimationProfile.REDUCED -> Modifier
+        AnimationProfile.REDUCED -> this
     }
 
 /** Rows revealed by [ExpandableRows]. */

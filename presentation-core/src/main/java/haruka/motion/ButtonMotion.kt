@@ -3,38 +3,46 @@
 package haruka.motion
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconToggleButtonColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SelectableChipColors
+import androidx.compose.material3.SelectableChipElevation
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.lerp
+import androidx.compose.material3.FilledIconToggleButton as M3FilledIconToggleButton
+import androidx.compose.material3.FilterChip as M3FilterChip
+import androidx.compose.material3.IconButton as M3IconButton
+import androidx.compose.material3.SmallExtendedFloatingActionButton as M3SmallExtendedFloatingActionButton
 
-/**
- * A shape plus the interaction source that drives it. Pass both to the same component so its presses
- * reach the shape. Outside EXPRESSIVE [shape] is exactly the component's upstream default.
- */
-@Immutable
-class PressMorph internal constructor(
-    val shape: Shape,
-    val interactionSource: MutableInteractionSource,
-)
+// Drop-ins for M3 components whose press squeezes their shape under EXPRESSIVE. Upstream files swap the androidx
+// import for these and keep their calls. Each takes the M3 parameters with M3's defaults except `shape` and
+// `interactionSource`, which belong to the morph; outside EXPRESSIVE the shape is exactly M3's default.
 
 /**
  * [shape] squeezing towards the M3E `ButtonDefaults.shapes()` pressed shape while [interactionSource] is
@@ -46,9 +54,15 @@ fun pressMorphShape(shape: Shape, interactionSource: InteractionSource): Shape {
     return morphShape(shape, shape, ButtonDefaults.shapes().pressedShape, selected = false, interactionSource)
 }
 
-/** Press morph for an `IconButton` using M3E `IconButtonDefaults.shapes()`. */
+/** M3 `IconButton` pressing towards M3E `IconButtonDefaults.shapes()`'s pressed shape. */
 @Composable
-fun rememberIconButtonPressMorph(): PressMorph {
+fun IconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    content: @Composable () -> Unit,
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val shape = if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
         val shapes = IconButtonDefaults.shapes()
@@ -56,15 +70,27 @@ fun rememberIconButtonPressMorph(): PressMorph {
     } else {
         IconButtonDefaults.standardShape
     }
-    return remember(shape, interactionSource) { PressMorph(shape, interactionSource) }
+    M3IconButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        colors = colors,
+        interactionSource = interactionSource,
+        shape = shape,
+        content = content,
+    )
 }
 
-/**
- * Press and checked morph for a filled icon toggle button using M3E `IconButtonDefaults.toggleableShapes()`.
- * Outside EXPRESSIVE the shape is `IconButtonDefaults.filledShape`, upstream's default.
- */
+/** M3 `FilledIconToggleButton` pressing and checking towards M3E `IconButtonDefaults.toggleableShapes()`. */
 @Composable
-fun rememberFilledIconToggleButtonPressMorph(checked: Boolean): PressMorph {
+fun FilledIconToggleButton(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: IconToggleButtonColors = IconButtonDefaults.filledIconToggleButtonColors(),
+    content: @Composable () -> Unit,
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val shape = if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
         val shapes = IconButtonDefaults.toggleableShapes()
@@ -72,16 +98,33 @@ fun rememberFilledIconToggleButtonPressMorph(checked: Boolean): PressMorph {
     } else {
         IconButtonDefaults.filledShape
     }
-    return remember(shape, interactionSource) { PressMorph(shape, interactionSource) }
+    M3FilledIconToggleButton(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        colors = colors,
+        interactionSource = interactionSource,
+        content = content,
+    )
 }
 
 /**
- * Press morph for a small extended FAB. M3 FABs take no `shapes`, so this borrows the pressed shape M3E
- * gives a button of the same 56 dp height (`ButtonDefaults.mediumPressedShape`).
- * Outside EXPRESSIVE the shape is `FloatingActionButtonDefaults.smallExtendedFabShape`, upstream's default.
+ * M3 `SmallExtendedFloatingActionButton` with a press squeeze. M3 FABs take no `shapes`, so this borrows the pressed
+ * shape M3E gives a button of the same 56 dp height (`ButtonDefaults.mediumPressedShape`).
  */
 @Composable
-fun rememberSmallExtendedFabPressMorph(): PressMorph {
+fun SmallExtendedFloatingActionButton(
+    text: @Composable () -> Unit,
+    icon: @Composable () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    expanded: Boolean = true,
+    containerColor: Color = FloatingActionButtonDefaults.containerColor,
+    contentColor: Color = contentColorFor(containerColor),
+    elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(),
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val restShape = FloatingActionButtonDefaults.smallExtendedFabShape
     val shape = if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
@@ -89,15 +132,36 @@ fun rememberSmallExtendedFabPressMorph(): PressMorph {
     } else {
         restShape
     }
-    return remember(shape, interactionSource) { PressMorph(shape, interactionSource) }
+    M3SmallExtendedFloatingActionButton(
+        text = text,
+        icon = icon,
+        onClick = onClick,
+        modifier = modifier,
+        expanded = expanded,
+        shape = shape,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        elevation = elevation,
+        interactionSource = interactionSource,
+    )
 }
 
-/**
- * Press and selection morph for a `FilterChip` using M3E `FilterChipDefaults.shapes()`.
- * Outside EXPRESSIVE the shape is `FilterChipDefaults.shape`, upstream's default.
- */
+/** M3 `FilterChip` pressing and selecting towards M3E `FilterChipDefaults.shapes()`. */
 @Composable
-fun rememberFilterChipPressMorph(selected: Boolean): PressMorph {
+fun FilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    colors: SelectableChipColors = FilterChipDefaults.filterChipColors(),
+    elevation: SelectableChipElevation? = FilterChipDefaults.filterChipElevation(),
+    border: BorderStroke? = FilterChipDefaults.filterChipBorder(enabled, selected),
+    horizontalArrangement: Arrangement.Horizontal = FilterChipDefaults.horizontalArrangement(),
+    contentPadding: PaddingValues = FilterChipDefaults.ContentPadding,
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val shape = if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
         val shapes = FilterChipDefaults.shapes()
@@ -105,7 +169,22 @@ fun rememberFilterChipPressMorph(selected: Boolean): PressMorph {
     } else {
         FilterChipDefaults.shape
     }
-    return remember(shape, interactionSource) { PressMorph(shape, interactionSource) }
+    M3FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = label,
+        modifier = modifier,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        shape = shape,
+        colors = colors,
+        elevation = elevation,
+        border = border,
+        horizontalArrangement = horizontalArrangement,
+        contentPadding = contentPadding,
+        interactionSource = interactionSource,
+    )
 }
 
 /**

@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +48,7 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.browse.migration.search.MigrateSearchScreen
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import haruka.motion.SmallExtendedFloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -148,9 +148,6 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                 )
             },
             floatingActionButton = {
-                // FORK -->
-                val fabPressMorph = haruka.motion.rememberSmallExtendedFabPressMorph()
-                // FORK <--
                 SmallExtendedFloatingActionButton(
                     text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
                     icon = {
@@ -161,10 +158,6 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                         continueMigration(openSheet = true, extraSearchQuery = null)
                     },
                     expanded = lazyListState.shouldExpandFAB(),
-                    // FORK -->
-                    shape = fabPressMorph.shape,
-                    interactionSource = fabPressMorph.interactionSource,
-                    // FORK <--
                 )
             },
         ) { contentPadding ->
@@ -196,9 +189,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
                                     .padding(MaterialTheme.padding.medium)
-                                    // FORK -->
-                                    .then(haruka.motion.listItemMotion(this)),
-                                // FORK <--
+                                    .animateItem(),
                             )
                         }
                     }
@@ -259,9 +250,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                 shape = shape,
                 modifier = Modifier
                     .padding(horizontal = MaterialTheme.padding.medium)
-                    // FORK -->
-                    .then(haruka.motion.listItemMotion(this@SourceItemContainer)),
-                // FORK <--
+                    .animateItem(),
             ) {
                 SourceItem(
                     source = source,

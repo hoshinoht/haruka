@@ -96,11 +96,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
 import eu.kanade.tachiyomi.util.system.updaterEnabled
-import eu.kanade.tachiyomi.util.system.workManager
 import eu.kanade.tachiyomi.util.view.setComposeContent
-import haruka.progress.BackgroundTaskProgress
-import haruka.progress.HarukaAppStateBanners
-import haruka.progress.TaskProgressBannerBackgroundColor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -220,7 +216,7 @@ class MainActivity : BaseActivity() {
             val downloadOnly by preferences.downloadedOnly.collectAsState()
             val indexing by downloadCache.isInitializing.collectAsState()
             // FORK -->
-            val backgroundTasks by remember { BackgroundTaskProgress.visibleTasks(context.workManager) }
+            val backgroundTasks by remember { haruka.progress.BackgroundTaskProgress.visibleTasks(context) }
                 .collectAsState(emptyList())
             // FORK <--
 
@@ -230,7 +226,7 @@ class MainActivity : BaseActivity() {
                 downloadOnly -> DownloadedOnlyBannerBackgroundColor
                 incognito -> IncognitoModeBannerBackgroundColor
                 // FORK -->
-                backgroundTasks.isNotEmpty() -> TaskProgressBannerBackgroundColor
+                backgroundTasks.isNotEmpty() -> haruka.progress.TaskProgressBannerBackgroundColor
                 // FORK <--
                 else -> MaterialTheme.colorScheme.surface
             }
@@ -269,7 +265,7 @@ class MainActivity : BaseActivity() {
                 Scaffold(
                     topBar = {
                         // FORK -->
-                        HarukaAppStateBanners(
+                        haruka.progress.HarukaAppStateBanners(
                             downloadedOnlyMode = downloadOnly,
                             incognitoMode = incognito,
                             indexing = indexing,
