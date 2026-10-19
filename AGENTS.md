@@ -35,6 +35,7 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 3. Backups must stay restorable by stock Mihon. Fork protobuf fields, if ever needed, use numbers ≥ 1000.
 4. When Mihon ships an equivalent of a fork feature, delete the fork version, migrate its preferences to Mihon's, and keep only still-wanted deltas on top of Mihon's design.
 5. Telemetry is off unless `-Pinclude-telemetry` is passed with Haruka's own Firebase config. The updater points at `hoshinoht/haruka`.
+6. Haruka's code stays in this repository. Never open pull requests, issues or patches against `mihonapp/mihon` (or other upstreams) with fork code, even for fixes that would shrink the hook surface.
 
 ## Checks before a PR
 
