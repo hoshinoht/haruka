@@ -131,7 +131,9 @@ private fun BoxScope.CoverTextOverlay(
             .background(
                 Brush.verticalGradient(
                     0f to Color.Transparent,
-                    1f to Color(0xAA000000),
+                    // FORK -->
+                    1f to haruka.theme.coverScrimColor(),
+                    // FORK <--
                 ),
             )
             .fillMaxHeight(0.33f)

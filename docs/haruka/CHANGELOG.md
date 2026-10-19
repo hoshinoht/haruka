@@ -11,6 +11,10 @@ In progress.
 - Grouped Updates rows are roomier, in Komikku's style: larger book covers (with panorama covers on, wide covers are fitted inside the same frame so every row lines up), a bigger series title and chapter name, and a "+N" button on the row to show a series' other chapters instead of a separate row.
 - Each day in Updates shows how many chapters arrived; the scanlator or note after a chapter name is shown dimmer so the chapter number reads first.
 
+### Look and feel
+- The Hoshino theme uses Zen Maru Gothic for all text, not just headings, with body text in Medium weight so it doesn't read thin. The body weights download through Google Fonts on first use; until then body text uses the system font.
+- In the Hoshino theme, titles on compact-grid library covers fade into the theme's navy instead of black.
+
 ## [0.1.0-beta.2]
 
 Library sync across your devices through your own Google Drive, plus chapter-list fixes and a leaner fork.
