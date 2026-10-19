@@ -12,7 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -103,6 +104,7 @@ private fun TaskProgressBanner(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TaskProgressRow(task: Task) {
     val contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -122,18 +124,20 @@ private fun TaskProgressRow(task: Task) {
                 )
             }
         }
+        // Both states use the wavy indicator so the banner keeps one height when the real count arrives.
+        val trackColor = contentColor.copy(alpha = 0.24f)
         if (task.current > 0 && task.total > 0) {
-            LinearProgressIndicator(
+            LinearWavyProgressIndicator(
                 progress = { task.current.toFloat() / task.total },
                 modifier = Modifier.fillMaxWidth(),
                 color = contentColor,
-                trackColor = contentColor.copy(alpha = 0.24f),
+                trackColor = trackColor,
             )
         } else {
-            LinearProgressIndicator(
+            LinearWavyProgressIndicator(
                 modifier = Modifier.fillMaxWidth(),
                 color = contentColor,
-                trackColor = contentColor.copy(alpha = 0.24f),
+                trackColor = trackColor,
             )
         }
     }

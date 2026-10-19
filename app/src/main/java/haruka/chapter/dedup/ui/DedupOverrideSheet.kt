@@ -6,11 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +23,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AdaptiveSheet
 import haruka.chapter.dedup.MangaDedupOverride
@@ -27,7 +33,6 @@ import haruka.i18n.HR
 import mihon.app.di.appGraph
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.HeadingItem
-import tachiyomi.presentation.core.components.SettingsChipRow
 import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.components.material.padding
@@ -84,13 +89,13 @@ fun DedupOverrideSheet(mangaId: Long, scanlators: Set<String>, onDismissRequest:
                     style = MaterialTheme.typography.header,
                     modifier = Modifier.padding(horizontal = SettingsItemsPaddings.Horizontal),
                 )
-                TriStateChips(
+                TriStateButtons(
                     label = HR.strings.dedup_group,
                     value = groupChapters,
                     globalValue = globalGroup,
                     onChange = { groupChapters = it },
                 )
-                TriStateChips(
+                TriStateButtons(
                     label = HR.strings.dedup_merge_split,
                     value = mergeSplitChapters,
                     globalValue = globalMerge,
@@ -173,9 +178,10 @@ fun DedupOverrideSheet(mangaId: Long, scanlators: Set<String>, onDismissRequest:
     }
 }
 
-/** Default (follows [globalValue]) / On / Off, where null means default. */
+/** Default (follows [globalValue]) / On / Off as a connected single-select button group, where null means default. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun TriStateChips(
+private fun TriStateButtons(
     label: StringResource,
     value: Boolean?,
     globalValue: Boolean,
@@ -183,21 +189,37 @@ private fun TriStateChips(
 ) {
     val on = stringResource(MR.strings.on)
     val off = stringResource(MR.strings.off)
-    SettingsChipRow(label) {
-        FilterChip(
-            selected = value == null,
-            onClick = { onChange(null) },
-            label = { Text(text = stringResource(HR.strings.dedup_default_value, if (globalValue) on else off)) },
-        )
-        FilterChip(
-            selected = value == true,
-            onClick = { onChange(true) },
-            label = { Text(text = on) },
-        )
-        FilterChip(
-            selected = value == false,
-            onClick = { onChange(false) },
-            label = { Text(text = off) },
-        )
+    val options = listOf(
+        null to stringResource(HR.strings.dedup_default_value, if (globalValue) on else off),
+        true to on,
+        false to off,
+    )
+    Column {
+        HeadingItem(label)
+        Row(
+            modifier = Modifier
+                .padding(
+                    start = SettingsItemsPaddings.Horizontal,
+                    end = SettingsItemsPaddings.Horizontal,
+                    bottom = SettingsItemsPaddings.Vertical,
+                )
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+        ) {
+            options.forEachIndexed { index, (option, text) ->
+                ToggleButton(
+                    checked = value == option,
+                    onCheckedChange = { onChange(option) },
+                    shapes = when (index) {
+                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    },
+                    modifier = Modifier.semantics { role = Role.RadioButton },
+                ) {
+                    Text(text = text, maxLines = 1)
+                }
+            }
+        }
     }
 }

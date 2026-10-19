@@ -22,6 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -192,19 +194,23 @@ private fun SwitchItem(
     )
 }
 
+/** [PreferenceGroupHeader][eu.kanade.presentation.more.settings.widget.PreferenceGroupHeader] with trailing actions. */
 @Composable
 private fun SectionHeader(title: String, actions: @Composable () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = PrefsHorizontalPadding, end = 8.dp, top = 8.dp),
+            // The 48dp action buttons centre the title 14dp from the top, matching Mihon's group header inset.
+            .padding(start = PrefsHorizontalPadding, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = title,
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() },
         )
         actions()
     }

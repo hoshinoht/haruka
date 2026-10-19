@@ -41,6 +41,7 @@ import mihon.icons.materialsymbols.roundedfilled.Bookmark
 import mihon.icons.materialsymbols.roundedfilled.Circle
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.DISABLED_ALPHA
+import tachiyomi.presentation.core.components.material.IconButtonTokens
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
@@ -187,14 +188,23 @@ private fun ConversationRow(
                 UnreadBadge(count = unreadCount, modifier = Modifier.padding(top = 6.dp))
             }
         }
-        // The conversation stands for its whole group, so starting a download fetches every chapter in it.
-        ChapterDownloadIndicator(
-            enabled = !selectionMode,
-            modifier = Modifier.padding(start = 4.dp),
-            downloadStateProvider = leader.downloadStateProvider,
-            downloadProgressProvider = leader.downloadProgressProvider,
-            onClick = { action -> downloadTargets(leader, group.items, action, onDownloadChapter) },
-        )
+        if (expanded) {
+            // Each bubble now has its own download button in this column; keep the slot so the row doesn't shift.
+            Spacer(
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .size(IconButtonTokens.StateLayerSize),
+            )
+        } else {
+            // The conversation stands for its whole group, so starting a download fetches every chapter in it.
+            ChapterDownloadIndicator(
+                enabled = !selectionMode,
+                modifier = Modifier.padding(start = 4.dp),
+                downloadStateProvider = leader.downloadStateProvider,
+                downloadProgressProvider = leader.downloadProgressProvider,
+                onClick = { action -> downloadTargets(leader, group.items, action, onDownloadChapter) },
+            )
+        }
     }
 }
 
