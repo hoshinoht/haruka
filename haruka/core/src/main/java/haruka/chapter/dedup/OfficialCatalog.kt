@@ -1,9 +1,5 @@
 package haruka.chapter.dedup
 
-import android.content.Context
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.SingleIn
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -55,6 +51,9 @@ class OfficialCatalog(
     fun isAggregatorSource(sourceName: String): Boolean = ScanlatorNames.normalize(sourceName) in aggregatorSources
 
     companion object {
+        /** The catalog bundled in this module's assets, merged into the app at the same path. */
+        const val ASSET_PATH = "haruka/official-scanlators.json"
+
         private val json = Json { ignoreUnknownKeys = true }
 
         fun parse(text: String): OfficialCatalog {
@@ -74,20 +73,6 @@ class OfficialCatalog(
             val aggregators = data.aggregatorSources.mapTo(HashSet()) { ScanlatorNames.normalize(it) }
             return OfficialCatalog(publishersByAlias, sources, aggregators)
         }
-    }
-}
-
-/** Reads the bundled catalog asset once, on first use. */
-@Inject
-@SingleIn(AppScope::class)
-class OfficialCatalogLoader(private val context: Context) {
-
-    val catalog: OfficialCatalog by lazy {
-        context.assets.open(ASSET_PATH).bufferedReader().use { OfficialCatalog.parse(it.readText()) }
-    }
-
-    companion object {
-        const val ASSET_PATH = "haruka/official-scanlators.json"
     }
 }
 

@@ -12,7 +12,11 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 
 ## Where code goes
 
-- New code lives under the `haruka.*` package (`app/src/main/java/haruka/**`, `presentation-core/src/main/java/haruka/**`) or in new fork modules.
+- New code lives in fork modules under `haruka/` or the `haruka.*` package in the app; packages stay `haruka.*` either way:
+  - `:haruka:core` (`haruka/core/`): pure logic with no app or upstream module dependencies (chapter dedup and grouping, release versions, titles, swipe geometry) plus the data it bundles (`src/main/assets/haruka/official-scanlators.json`). Its tests live in `haruka/core/src/test`.
+  - `:haruka:motion` (`haruka/motion/`): animation profiles and motion drop-ins, depending only on Compose. `presentation-core` re-exports it (`api`), so upstream code in `presentation-core` and the app can call `haruka.motion.*`.
+  - `app/src/main/java/haruka/**`: glue that needs app internals (screens, ViewModels, preferences, DI, adapters from domain models such as `Chapter.toDedupChapter()`).
+  - New fork modules are included in the existing FORK block of `settings.gradle.kts`; the app depends on them through `configureHarukaApp`.
 - Edits to upstream files are thin hooks wrapped in markers:
   - Kotlin/KTS/SQL: `// FORK -->` … `// FORK <--`
   - XML: `<!-- FORK -->` … `<!-- /FORK -->`
@@ -23,10 +27,10 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 - Version: `app/src/haruka/version.properties` (`versionCode`, `versionName`, `mihonBase`) is the only place to bump it; the build, `scripts/haruka/build-release.sh` and the release workflow read it. Update `mihonBase` on each upstream sync merge.
 - Branding and fork resources live in variant overlays under `app/src/haruka/`, never in upstream `res/` folders. Overlays take priority over `src/main` and build-type folders, so they replace upstream resources without touching them:
   - `res/`: every variant (Hoshino theme and colours, font, `ic_mihon`, monochrome icon, splash colour).
-  - `res-release/`: release and foss (`app_name`, launcher icon). `res-debug/`: debug and nightly (`app_name`, debug launcher icon).
-  - `assets/`: every variant. Benchmark builds use `app/src/benchmark/res` instead of the release/debug overlays.
+  - `res-release/`: release and foss (`app_name`, launcher icon). `res-debug/`: debug and nightly (`app_name`, debug launcher icon). Benchmark builds use `app/src/benchmark/res` instead of the release/debug overlays.
+  - Fork assets ship from the fork module that reads them (e.g. `haruka/core/src/main/assets/`); library assets merge into the app at the same path.
 - Strings: new strings only in the fork i18n module (`i18n-fork`). Never add or edit strings in `i18n/`; the rebrand `app_name` lives in `app/src/haruka/res-release` and `res-debug`.
-- Fork-owned paths outside `haruka.*` packages: `app/src/haruka/`, `app/src/benchmark/`, `gradle/build-logic/src/main/kotlin/haruka/`, `i18n-fork/`, `scripts/haruka/`, `docs/haruka/`, `.github/workflows/haruka-*`, `.github/assets/haruka-*`, `.github/README.md`, `NOTICE`, this file. `patch-surface.sh` keeps the same list.
+- Fork-owned paths outside `haruka.*` packages: `haruka/`, `app/src/haruka/`, `app/src/benchmark/`, `gradle/build-logic/src/main/kotlin/haruka/`, `i18n-fork/`, `scripts/haruka/`, `docs/haruka/`, `.github/workflows/haruka-*`, `.github/assets/haruka-*`, `.github/README.md`, `NOTICE`, this file. `patch-surface.sh` keeps the same list.
 
 ## Hard rules
 

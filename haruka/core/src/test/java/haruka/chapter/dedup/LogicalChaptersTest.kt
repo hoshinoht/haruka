@@ -2,7 +2,6 @@ package haruka.chapter.dedup
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import tachiyomi.domain.chapter.model.Chapter
 
 class LogicalChaptersTest {
 
@@ -37,9 +36,9 @@ class LogicalChaptersTest {
     @Test
     fun `chapter numbers widened from a backup float still merge and meet fresh copies`() {
         // Restore writes Float.toDouble(), so 6.1 arrives as 6.099999904632568; a later update writes a true 6.3.
-        fun restored(id: Long, number: Float, scanlator: String) = Chapter.create()
-            .copy(id = id, name = "Ch. $number", chapterNumber = number.toDouble(), scanlator = scanlator)
-            .toDedupChapter()
+        // Mirrors the app's Chapter.toDedupChapter(), which strips the noise from every domain chapter number.
+        fun restored(id: Long, number: Float, scanlator: String) =
+            chapter(id, number.toDouble().withoutFloatNoise(), scanlator, name = "Ch. $number")
         val result = group(
             restored(1, 6.1f, "A"),
             restored(2, 6.2f, "A"),
@@ -299,22 +298,5 @@ class LogicalChaptersTest {
             Triple(1.0, 0, listOf(listOf(4L, 2L))),
             Triple(2.0, 0, listOf(listOf(3L))),
         )
-    }
-
-    @Test
-    fun `adapter maps domain chapters and blanks scanlator`() {
-        val domain = tachiyomi.domain.chapter.model.Chapter.create().copy(
-            id = 7,
-            name = "Ch. 3",
-            chapterNumber = 3.0,
-            scanlator = " ",
-            dateUpload = kotlin.time.Instant.fromEpochMilliseconds(42),
-            sourceOrder = 5,
-        )
-        domain.toDedupChapter() shouldBe DedupChapter(7, "Ch. 3", 3.0, null, 42, 5)
-        domain.copy(dateUpload = null, scanlator = "A").toDedupChapter().let {
-            it.dateUpload shouldBe 0
-            it.scanlator shouldBe "A"
-        }
     }
 }

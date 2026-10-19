@@ -39,6 +39,8 @@ include(":data")
 include(":domain")
 include(":i18n")
 // FORK -->
+include(":haruka:core")
+include(":haruka:motion")
 include(":i18n-fork")
 // FORK <--
 include(":icons:custom-material-symbols")

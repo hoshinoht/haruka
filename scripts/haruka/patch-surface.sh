@@ -7,7 +7,7 @@ upstream_ref="${1:-upstream/main}"
 base="$(git merge-base HEAD "$upstream_ref")"
 
 # Paths owned by the fork; changes here are not upstream patch surface.
-fork_owned='^(app/src/main/java/haruka/|app/src/test/java/haruka/|app/src/haruka/|app/src/benchmark/|presentation-core/src/main/java/haruka/|presentation-core/src/test/java/haruka/|gradle/build-logic/src/main/kotlin/haruka/|docs/haruka/|i18n-fork/|scripts/haruka/|\.github/workflows/haruka-|\.github/assets/haruka-|\.github/README\.md$|AGENTS\.md$|NOTICE$)'
+fork_owned='^(haruka/|app/src/main/java/haruka/|app/src/test/java/haruka/|app/src/haruka/|app/src/benchmark/|gradle/build-logic/src/main/kotlin/haruka/|docs/haruka/|i18n-fork/|scripts/haruka/|\.github/workflows/haruka-|\.github/assets/haruka-|\.github/README\.md$|AGENTS\.md$|NOTICE$)'
 
 modified="$(git diff --name-only --diff-filter=MD "$base" | grep -Ev "$fork_owned" || true)"
 added_outside="$({ git diff --name-only --diff-filter=A "$base"; git ls-files --others --exclude-standard; } | grep -Ev "$fork_owned" | sort -u || true)"

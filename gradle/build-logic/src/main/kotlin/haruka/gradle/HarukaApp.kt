@@ -46,8 +46,8 @@ fun configureHarukaApp(project: Project) {
                 "debug", "nightly" -> addStaticSourceDirectory("src/haruka/res-debug")
             }
         }
-        variant.sources.assets?.addStaticSourceDirectory("src/haruka/assets")
     }
 
+    project.dependencies.add("implementation", project.project(":haruka:core"))
     project.dependencies.add("implementation", project.project(":i18n-fork"))
 }

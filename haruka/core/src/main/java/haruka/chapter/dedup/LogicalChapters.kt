@@ -1,7 +1,5 @@
 package haruka.chapter.dedup
 
-import tachiyomi.domain.chapter.model.Chapter
-
 /** The chapter fields dedup needs. [dateUpload] is epoch millis, 0 when unknown; a blank [scanlator] is null. */
 data class DedupChapter(
     val id: Long,
@@ -12,21 +10,12 @@ data class DedupChapter(
     val sourceOrder: Long,
 )
 
-fun Chapter.toDedupChapter(): DedupChapter = DedupChapter(
-    id = id,
-    name = name,
-    chapterNumber = chapterNumber.withoutFloatNoise(),
-    scanlator = scanlator?.ifBlank { null },
-    dateUpload = dateUpload?.toEpochMilliseconds() ?: 0L,
-    sourceOrder = sourceOrder,
-)
-
 /**
  * Backups store chapter numbers as Float and restore widens them, so a restored 6.1 reads 6.099999904632568 until the
  * next library update rewrites it. Such a value is recovered through the float's shortest decimal so split parts and
  * copies still meet; any other value is returned unchanged.
  */
-internal fun Double.withoutFloatNoise(): Double {
+fun Double.withoutFloatNoise(): Double {
     val float = toFloat()
     return if (float.toDouble() == this) float.toString().toDouble() else this
 }

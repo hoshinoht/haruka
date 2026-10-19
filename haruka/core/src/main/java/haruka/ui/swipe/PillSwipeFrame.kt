@@ -11,14 +11,14 @@ import kotlin.math.abs
  * @property armed Whether releasing now fires the action. Strictly past the threshold, matching
  * `me.saket.swipe.SwipeableActionsState.hasCrossedSwipeThreshold`.
  */
-internal data class PillSwipeFrame(
+data class PillSwipeFrame(
     val progress: Float,
     val pillWidth: Float,
     val rowCorner: Float,
     val armed: Boolean,
 )
 
-internal fun pillSwipeFrame(
+fun pillSwipeFrame(
     offset: Float,
     threshold: Float,
     pillMargin: Float,
