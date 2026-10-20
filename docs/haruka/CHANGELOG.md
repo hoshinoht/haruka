@@ -10,6 +10,9 @@ Library shelves and a pinned, sectioned library, plus safer bulk migration with 
 ### Performance
 - Measured on a Galaxy S25+ with about 950 series: cold start 577–596 ms; library jank 0.33% with shelves off and 0.53% with shelves on (0.40% before this release); Updates jank 0.50–0.88%.
 
+### Look and feel
+- Hoshino uses Zen Maru Gothic for headings and titles only again; body and label text are back on the system font, and nothing is downloaded from Google Fonts.
+
 ### Library
 - Library shelves (Settings › Appearance, off by default): the library becomes one scroll. At the top, a Continue reading carousel shows up to 10 series you've started that have unread chapters, newest read first, with where you stopped ("Ch. 12 · page 5") and a resume button that opens the reader. Below it, New chapters (unread chapters fetched in the last 7 days), Not started (newest added first) and Needs a new source (series whose source is not installed, not loaded or obsolete, each marked "Source unavailable") show up to 15 covers each, with titles under the covers. A series appears on one shelf at most. Shelves cover every category, hide while searching, and hide when the library has fewer than 20 series or nothing to show. Long-press a shelf cover to select it.
 - "See all" on a shelf jumps to the full library and shows only that shelf's series, with a chip in the header ("New chapters ×") to show everything again. The filter is temporary: searching or clearing the chip removes it, and it never changes your saved filters.

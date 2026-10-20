@@ -26,7 +26,7 @@ fun HarukaExpressiveTheme(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val accents = themeAccents(appTheme, zenMaruBody = appTheme == AppTheme.HOSHINO && rememberZenMaruBodyLoaded())
+    val accents = themeAccents(appTheme)
     val harukaPreferences = remember { context.harukaGraph.harukaPreferences }
     val chosenProfile by harukaPreferences.animationProfile.collectAsState()
     val profile = effectiveAnimationProfile(chosenProfile)

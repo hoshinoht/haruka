@@ -117,7 +117,7 @@ Haruka exists because of [Mihon](https://github.com/mihonapp/mihon) and everyone
   <img src="https://contrib.rocks/image?repo=mihonapp/mihon" alt="Mihon contributors" width="600"/>
 </a>
 
-Some features are adapted from [Komikku](https://github.com/komikku-app/komikku) and [TachiyomiSY](https://github.com/jobobby04/TachiyomiSY). The Hoshino theme uses Zen Maru Gothic under the SIL Open Font License (see [NOTICE](../NOTICE)).
+Some features are adapted from [Komikku](https://github.com/komikku-app/komikku) and [TachiyomiSY](https://github.com/jobobby04/TachiyomiSY). The rounded headings use Zen Maru Gothic under the SIL Open Font License (see [NOTICE](../NOTICE)).
 
 ### Disclaimer
 

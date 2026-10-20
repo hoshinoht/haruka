@@ -61,12 +61,7 @@ fun configureHarukaApp(project: Project) {
     project.dependencies.add("implementation", project.project(":i18n-fork"))
     // Google Identity AuthorizationClient for Drive sync (haruka.sync.auth).
     project.dependencies.add("implementation", "com.google.android.gms:play-services-auth:$PLAY_SERVICES_AUTH")
-    // Downloadable Zen Maru Gothic weights for the Hoshino theme (haruka.theme.ZenMaruGothic).
-    project.dependencies.add("implementation", "androidx.compose.ui:ui-text-google-fonts:$COMPOSE_GOOGLE_FONTS")
 }
 
 // Latest stable on Google Maven (play-services-auth maven-metadata.xml, checked 2026-10-19).
 private const val PLAY_SERVICES_AUTH = "22.0.0"
-
-// The version androidx.compose:compose-bom-beta (androidx-compose-bom in libs.versions.toml) pins; bump with the BOM.
-private const val COMPOSE_GOOGLE_FONTS = "1.13.0-beta01"
