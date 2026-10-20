@@ -3,9 +3,12 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
-## [Unreleased]
+## [0.1.0-beta.4]
 
-Planned for 0.1.0-beta.4.
+Library shelves and a pinned, sectioned library, plus safer bulk migration with match confidence, a review step and source presets.
+
+### Performance
+- Measured on a Galaxy S25+ with about 950 series: cold start 577–596 ms; library jank 0.33% with shelves off and 0.53% with shelves on (0.40% before this release); Updates jank 0.50–0.88%.
 
 ### Library
 - Library shelves (Settings › Appearance, off by default): the library becomes one scroll. At the top, a Continue reading carousel shows up to 10 series you've started that have unread chapters, newest read first, with where you stopped ("Ch. 12 · page 5") and a resume button that opens the reader. Below it, New chapters (unread chapters fetched in the last 7 days), Not started (newest added first) and Needs a new source (series whose source is not installed, not loaded or obsolete, each marked "Source unavailable") show up to 15 covers each, with titles under the covers. A series appears on one shelf at most. Shelves cover every category, hide while searching, and hide when the library has fewer than 20 series or nothing to show. Long-press a shelf cover to select it.
@@ -20,7 +23,7 @@ Planned for 0.1.0-beta.4.
 
 ## [0.1.0-beta.3]
 
-In progress.
+Roomier grouped Updates rows and Zen Maru Gothic throughout the Hoshino theme.
 
 ### Library and updates
 - Grouped Updates rows are roomier, in Komikku's style: larger book covers (with panorama covers on, wide covers are fitted inside the same frame so every row lines up), a bigger series title and chapter name, and a "+N" button on the row to show a series' other chapters instead of a separate row.
