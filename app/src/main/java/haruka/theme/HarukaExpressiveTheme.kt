@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.domain.ui.model.AppTheme
 import haruka.di.harukaGraph
@@ -13,6 +14,9 @@ import haruka.motion.LocalAnimationProfile
 import haruka.motion.effectiveAnimationProfile
 import haruka.motion.motionScheme
 import tachiyomi.presentation.core.util.collectAsState
+
+/** The app theme in effect, provided by [HarukaExpressiveTheme]; null outside it (previews keep upstream looks). */
+internal val LocalHarukaAppTheme = staticCompositionLocalOf<AppTheme?> { null }
 
 /**
  * `MaterialExpressiveTheme` plus Haruka's theme inputs, swapped in for it by `TachiyomiTheme`: motion follows the

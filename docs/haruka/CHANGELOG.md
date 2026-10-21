@@ -8,6 +8,7 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 ### Library
 - With shelves on, the "All series" bar under the toolbar is gone; the toolbar already shows the count. The bar only appears for category chips or a shelf's "See all" chip.
 - With shelves on, the toolbar slides away while you scroll down the library and comes back as soon as you scroll up. It stays put while selecting or searching.
+- In the Hoshino theme's compact grid, titles sit on a taller plate that fades into the theme's navy (white in light mode), with no text shadow, so they stay readable on pale and busy covers.
 
 ### Chapters
 - With duplicate chapters grouped, Start reading (on the series screen) and the library's continue-reading button now open the next chapter at its preferred copy, the one at the top of its group, instead of whichever upload came first in the list. A chapter read in any copy is skipped.

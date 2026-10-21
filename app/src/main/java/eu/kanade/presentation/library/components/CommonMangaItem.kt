@@ -125,15 +125,29 @@ private fun BoxScope.CoverTextOverlay(
     title: String,
     onClickContinueReading: (() -> Unit)? = null,
 ) {
+    // FORK -->
+    val continueReading: (@Composable () -> Unit)? = onClickContinueReading?.let { onClick ->
+        {
+            ContinueReadingButton(
+                size = ContinueReadingButtonSizeSmall,
+                iconSize = ContinueReadingButtonIconSizeSmall,
+                onClick = onClick,
+                modifier = Modifier.padding(
+                    end = ContinueReadingButtonGridPadding,
+                    bottom = ContinueReadingButtonGridPadding,
+                ),
+            )
+        }
+    }
+    if (haruka.library.hoshinoCoverTitle(this, title, continueReading)) return
+    // FORK <--
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
             .background(
                 Brush.verticalGradient(
                     0f to Color.Transparent,
-                    // FORK -->
-                    1f to haruka.theme.coverScrimColor(),
-                    // FORK <--
+                    1f to Color(0xAA000000),
                 ),
             )
             .fillMaxHeight(0.33f)
