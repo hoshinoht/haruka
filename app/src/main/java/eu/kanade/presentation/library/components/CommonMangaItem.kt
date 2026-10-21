@@ -265,7 +265,10 @@ private fun MangaGridCover(
             BadgeGroup(
                 modifier = Modifier
                     .padding(4.dp)
-                    .align(Alignment.TopStart),
+                    .align(Alignment.TopStart)
+                    // FORK --> Hoshino: one ringed pill for the downloaded and unread counts
+                    .then(haruka.library.hoshinoBadgeGroupRing()),
+                // FORK <--
                 content = badgesStart,
             )
         }
