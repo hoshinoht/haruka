@@ -11,7 +11,8 @@
 # For a Perfetto trace of a scroll: scripts/haruka/perf/trace.sh
 set -euo pipefail
 
-PKG=app.haruka.benchmark
+# PKG=app.haruka measures the installed release build instead (same R8 build as Bench, with the owner's library).
+PKG=${PKG:-app.haruka.benchmark}
 ACTIVITY=$PKG/eu.kanade.tachiyomi.ui.main.MainActivity
 LABEL=${1:?label}
 MANGA_ID=${2:-}
