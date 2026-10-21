@@ -248,8 +248,10 @@ fun <T> listEffectsSpec(standard: FiniteAnimationSpec<T>): FiniteAnimationSpec<T
 
 /**
  * Profile-aware drop-in for `androidx.compose.animation.animateContentSize`: upstream files swap that import for this
- * one and keep their calls. STANDARD makes upstream's call with the same arguments. EXPRESSIVE springs with the
- * theme's default spatial spec; REDUCED resizes instantly.
+ * one and keep their calls. STANDARD makes upstream's call with the same arguments. EXPRESSIVE resizes quickly and
+ * without a bounce: an overshooting height clips and re-exposes content, and a container whose content swaps first
+ * (the filter / sort / display pager) should reach its new height right after, not half a second later. REDUCED
+ * resizes instantly.
  */
 @Composable
 fun Modifier.animateContentSize(
@@ -261,12 +263,19 @@ fun Modifier.animateContentSize(
 ): Modifier =
     when (LocalAnimationProfile.current) {
         AnimationProfile.STANDARD -> foundationAnimateContentSize(animationSpec, finishedListener)
-        AnimationProfile.EXPRESSIVE -> foundationAnimateContentSize(
-            MaterialTheme.motionScheme.defaultSpatialSpec(),
-            finishedListener,
-        )
+        AnimationProfile.EXPRESSIVE -> foundationAnimateContentSize(ExpressiveSizeSpec, finishedListener)
         AnimationProfile.REDUCED -> this
     }
+
+// Medium stiffness, critically damped: settles in about 0.2 s, so the frame keeps up with content that already moved
+private val ExpressiveSizeSpec: FiniteAnimationSpec<IntSize> = spring(
+    dampingRatio = Spring.DampingRatioNoBouncy,
+    stiffness = Spring.StiffnessMedium,
+    visibilityThreshold = IntSize.VisibilityThreshold,
+)
+
+/** Material 3 Expressive's default spatial stiffness; used without its damping where a bounce would look broken. */
+internal const val EXPRESSIVE_SPATIAL_STIFFNESS = 380f
 
 /** Rows revealed by [ExpandableRows]. */
 @Stable

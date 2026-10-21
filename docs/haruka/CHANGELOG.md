@@ -18,6 +18,9 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 - With duplicate chapters grouped, Start reading (on the series screen) and the library's continue-reading button now open the next chapter at its preferred copy, the one at the top of its group, instead of whichever upload came first in the list. A chapter read in any copy is skipped.
 - Chapter numbers that are really ids, timestamps or years (a "Ch. 1482765166" in a series that ends at 69, or "2019: Grand Cleaning") no longer count in the series screen's missing-chapter total or the "Missing N chapters" dividers, so those show the real gaps instead of billions. The chapters themselves stay in the list as the source sent them.
 
+### Fixes
+- With the Expressive animations, switching between the library's Filter, Sort and Display tabs no longer pauses before the sheet resizes: the tabs slide in 0.2 s and the sheet follows straight away, without bouncing.
+
 ## [0.1.0-beta.4]
 
 Library shelves and a pinned, sectioned library, plus safer bulk migration with match confidence, a review step and source presets.

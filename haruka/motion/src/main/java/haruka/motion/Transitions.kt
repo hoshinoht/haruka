@@ -8,6 +8,7 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -173,25 +174,23 @@ fun sheetFadeModifier(visible: Boolean): Modifier {
 }
 
 /**
- * Pager scroll for a tab click. EXPRESSIVE scrolls on the spatial spring; REDUCED jumps to the page.
+ * Pager scroll for a tab click. A pager is as tall as the tallest page on screen, so a sheet like filter / sort /
+ * display can only shrink to the new tab once the old page has slid out: the slide's length is a pause before the
+ * height follows. EXPRESSIVE therefore slides in a short decelerating tween with no overshoot (an overshoot would
+ * also show a sliver of the next tab). REDUCED jumps to the page.
  */
 @Composable
 fun pagerTabScroll(): suspend (PagerState, Int) -> Unit = when (LocalAnimationProfile.current) {
     AnimationProfile.STANDARD -> StandardTabScroll
-    AnimationProfile.EXPRESSIVE -> {
-        val motionScheme = MaterialTheme.motionScheme
-        remember(motionScheme) {
-            val spec = motionScheme.defaultSpatialSpec<Float>()
-            val scroll: suspend (PagerState, Int) -> Unit = { state, page ->
-                state.animateScrollToPage(page, animationSpec = spec)
-            }
-            scroll
-        }
-    }
+    AnimationProfile.EXPRESSIVE -> ExpressiveTabScroll
     AnimationProfile.REDUCED -> ReducedTabScroll
 }
 
 private val StandardTabScroll: suspend (PagerState, Int) -> Unit = { state, page -> state.animateScrollToPage(page) }
+private val ExpressiveTabScroll: suspend (PagerState, Int) -> Unit = { state, page ->
+    state.animateScrollToPage(page, animationSpec = tween(TAB_SLIDE_MILLIS, easing = LinearOutSlowInEasing))
+}
+private const val TAB_SLIDE_MILLIS = 200
 private val ReducedTabScroll: suspend (PagerState, Int) -> Unit = { state, page -> state.scrollToPage(page) }
 
 /**
