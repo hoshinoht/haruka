@@ -3,7 +3,12 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
-## [Unreleased]
+## [0.1.0-beta.5]
+
+Library chapter counts that ignore duplicate copies, an Inflated counts shelf, Start reading at the preferred copy, sane missing-chapter counts, and a readability pass on the Hoshino library.
+
+### Performance
+- Measured on a Galaxy S25+ with about 950 series (release build): cold start 581–607 ms, library jank 0.26%, Updates jank 0.81%. Flinging the library while every series is recounted stays at 0.9–1.6% jank with the slowest frames at 9–10 ms, the same as with counts settled.
 
 ### Library
 - With shelves on, the "All series" bar under the toolbar is gone; the toolbar already shows the count. The bar only appears for category chips or a shelf's "See all" chip.
