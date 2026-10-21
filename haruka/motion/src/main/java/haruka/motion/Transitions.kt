@@ -8,7 +8,6 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -174,24 +173,19 @@ fun sheetFadeModifier(visible: Boolean): Modifier {
 }
 
 /**
- * Pager scroll for a tab click. A pager is as tall as the tallest page on screen, so a sheet like filter / sort /
- * display can only shrink to the new tab once the old page has slid out: the slide's length is a pause before the
- * height follows. EXPRESSIVE therefore slides in a short decelerating tween with no overshoot (an overshoot would
- * also show a sliver of the next tab). REDUCED jumps to the page.
+ * Pager scroll for a tab click. A pager is as tall as the tallest page on screen, so a sliding switch keeps a sheet
+ * like filter / sort / display at the old page's height until the old page has slid out, which reads as lag. A tab
+ * tap under EXPRESSIVE or REDUCED therefore switches pages at once and the sheet's height (animateContentSize)
+ * follows straight away; swiping between pages still slides. STANDARD keeps upstream's slide.
  */
 @Composable
 fun pagerTabScroll(): suspend (PagerState, Int) -> Unit = when (LocalAnimationProfile.current) {
     AnimationProfile.STANDARD -> StandardTabScroll
-    AnimationProfile.EXPRESSIVE -> ExpressiveTabScroll
-    AnimationProfile.REDUCED -> ReducedTabScroll
+    AnimationProfile.EXPRESSIVE, AnimationProfile.REDUCED -> InstantTabScroll
 }
 
 private val StandardTabScroll: suspend (PagerState, Int) -> Unit = { state, page -> state.animateScrollToPage(page) }
-private val ExpressiveTabScroll: suspend (PagerState, Int) -> Unit = { state, page ->
-    state.animateScrollToPage(page, animationSpec = tween(TAB_SLIDE_MILLIS, easing = LinearOutSlowInEasing))
-}
-private const val TAB_SLIDE_MILLIS = 200
-private val ReducedTabScroll: suspend (PagerState, Int) -> Unit = { state, page -> state.scrollToPage(page) }
+private val InstantTabScroll: suspend (PagerState, Int) -> Unit = { state, page -> state.scrollToPage(page) }
 
 /**
  * Wraps a dropdown menu. M3's menu already scales and fades on the theme's fast spatial/effects specs, so STANDARD

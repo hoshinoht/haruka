@@ -267,15 +267,18 @@ fun Modifier.animateContentSize(
         AnimationProfile.REDUCED -> this
     }
 
-// Medium stiffness, critically damped: settles in about 0.2 s, so the frame keeps up with content that already moved
+// Stiff and critically damped: settles in about 0.1 s, so the frame keeps up with content that already moved
 private val ExpressiveSizeSpec: FiniteAnimationSpec<IntSize> = spring(
     dampingRatio = Spring.DampingRatioNoBouncy,
-    stiffness = Spring.StiffnessMedium,
+    stiffness = EXPRESSIVE_SIZE_STIFFNESS,
     visibilityThreshold = IntSize.VisibilityThreshold,
 )
 
 /** Material 3 Expressive's default spatial stiffness; used without its damping where a bounce would look broken. */
 internal const val EXPRESSIVE_SPATIAL_STIFFNESS = 380f
+
+// Between Material's Medium (1500) and High (10,000)
+private const val EXPRESSIVE_SIZE_STIFFNESS = 4000f
 
 /** Rows revealed by [ExpandableRows]. */
 @Stable

@@ -19,7 +19,7 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 - Chapter numbers that are really ids, timestamps or years (a "Ch. 1482765166" in a series that ends at 69, or "2019: Grand Cleaning") no longer count in the series screen's missing-chapter total or the "Missing N chapters" dividers, so those show the real gaps instead of billions. The chapters themselves stay in the list as the source sent them.
 
 ### Fixes
-- With the Expressive animations, switching between the library's Filter, Sort and Display tabs no longer pauses before the sheet resizes: the tabs slide in 0.2 s and the sheet follows straight away, without bouncing.
+- With the Expressive animations, tapping between the library's Filter, Sort and Display tabs switches at once and the sheet resizes within about 0.1 s, without bouncing; before, the sheet held its old height for half a second. Swiping between the tabs still slides.
 
 ## [0.1.0-beta.4]
 
