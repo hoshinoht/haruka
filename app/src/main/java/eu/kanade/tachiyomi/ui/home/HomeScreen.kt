@@ -201,6 +201,9 @@ object HomeScreen : Screen() {
                 )
             },
             badge = tabBadge(tab),
+            // FORK --> Hoshino: solid pink selected tab
+            colors = haruka.theme.hoshinoNavigationItemColors(),
+            // FORK <--
         )
     }
 
