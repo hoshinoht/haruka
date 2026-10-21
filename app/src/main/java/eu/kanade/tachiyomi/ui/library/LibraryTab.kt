@@ -109,7 +109,16 @@ data object LibraryTab : Tab {
             started
         }
 
+        // FORK -->
+        val shelvesEnabled = haruka.library.shelves.rememberLibraryShelvesEnabled()
+        // FORK <--
         Scaffold(
+            // FORK -->
+            topBarScrollBehavior = haruka.library.shelves.rememberLibraryTopBarScrollBehavior(
+                shelvesEnabled = shelvesEnabled,
+                keepVisible = state.selectionMode || state.searchQuery != null,
+            ),
+            // FORK <--
             topBar = { scrollBehavior ->
                 val title = state.getToolbarTitle(
                     defaultTitle = stringResource(MR.strings.label_library),
@@ -141,7 +150,9 @@ data object LibraryTab : Tab {
                     searchQuery = state.searchQuery,
                     onSearchQueryChange = viewModel::search,
                     // For scroll overlay when no tab
-                    scrollBehavior = scrollBehavior.takeIf { !state.showCategoryTabs },
+                    // FORK --> shelves replace the tabs with chips, so always pass it
+                    scrollBehavior = scrollBehavior.takeIf { !state.showCategoryTabs || shelvesEnabled },
+                    // FORK <--
                 )
             },
             bottomBar = {

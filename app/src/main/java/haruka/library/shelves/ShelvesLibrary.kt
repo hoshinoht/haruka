@@ -145,10 +145,10 @@ fun ShelvesLibrary(
             }
         }
 
+        // Only when there are chips to show: the toolbar already carries the count
+        val hasHeader = chipCategories != null || filter != null
         val header: @Composable (Boolean, Dp) -> Unit = { isPinned, headerBleed ->
             CollectionHeader(
-                count = if (filter != null) shown.size else getItemCountForCategory(category) ?: items.size,
-                sort = sort,
                 categories = chipCategories,
                 currentPage = currentPage,
                 getItemCountForCategory = getItemCountForCategory,
@@ -166,7 +166,7 @@ fun ShelvesLibrary(
                 hasActiveFilters = hasActiveFilters,
                 contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
                 onGlobalSearchClicked = onGlobalSearchClicked,
-                header = { header(false, 0.dp) },
+                header = { if (hasHeader) header(false, 0.dp) },
             )
             return@PullRefresh
         }
@@ -280,7 +280,9 @@ fun ShelvesLibrary(
                 }
             }
 
-            stickyHeader(key = "collection", contentType = "collection_header") { header(pinned, bleed) }
+            if (hasHeader) {
+                stickyHeader(key = "collection", contentType = "collection_header") { header(pinned, bleed) }
+            }
 
             val item: @Composable (LibraryItem) -> Unit = { libraryItem ->
                 LibraryEntry(

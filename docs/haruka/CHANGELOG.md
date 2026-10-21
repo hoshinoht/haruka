@@ -3,6 +3,12 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
+## [Unreleased]
+
+### Library
+- With shelves on, the "All series" bar under the toolbar is gone; the toolbar already shows the count. The bar only appears for category chips or a shelf's "See all" chip.
+- With shelves on, the toolbar slides away while you scroll down the library and comes back as soon as you scroll up. It stays put while selecting or searching.
+
 ## [0.1.0-beta.4]
 
 Library shelves and a pinned, sectioned library, plus safer bulk migration with match confidence, a review step and source presets.
