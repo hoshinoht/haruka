@@ -26,6 +26,7 @@ internal fun HarukaPreferences.shelfPreference(kind: ShelfKind): PreferenceData<
     ShelfKind.NewChapters -> libraryShelfNewChapters
     ShelfKind.NotStarted -> libraryShelfNotStarted
     ShelfKind.NeedsNewSource -> libraryShelfNeedsNewSource
+    ShelfKind.InflatedCounts -> libraryShelfInflatedCounts
 }
 
 /** The shelves the user shows. */

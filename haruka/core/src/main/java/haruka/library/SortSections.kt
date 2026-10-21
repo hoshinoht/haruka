@@ -32,6 +32,8 @@ class ShelfInput(
     val hasStarted: Boolean,
     /** The series' source can't be used as-is: not installed, not loaded or obsolete. */
     val sourceUnavailable: Boolean = false,
+    /** The upload count is inflated by duplicate copies or a bogus chapter number (see [isCountInflated]). */
+    val countsInflated: Boolean = false,
 )
 
 /** The group an entry falls in. [id] is unique among the keys of one sort. */

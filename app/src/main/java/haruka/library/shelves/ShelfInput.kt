@@ -24,7 +24,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 // The fields LibraryViewModel.applySort reads, so the buckets follow the order the list is in.
-internal fun LibraryItem.toShelfInput(unavailableSources: Set<Long> = emptySet()): ShelfInput {
+internal fun LibraryItem.toShelfInput(
+    unavailableSources: Set<Long> = emptySet(),
+    inflated: Set<Long> = emptySet(),
+): ShelfInput {
     val libraryManga = libraryManga
     val manga = libraryManga.manga
     return ShelfInput(
@@ -39,6 +42,7 @@ internal fun LibraryItem.toShelfInput(unavailableSources: Set<Long> = emptySet()
         totalChapters = libraryManga.totalChapters,
         hasStarted = libraryManga.hasStarted,
         sourceUnavailable = manga.source in unavailableSources,
+        countsInflated = id in inflated,
     )
 }
 
@@ -48,6 +52,7 @@ internal val ShelfKind.title: StringResource
         ShelfKind.NewChapters -> HR.strings.library_shelf_new_chapters
         ShelfKind.NotStarted -> HR.strings.library_shelf_not_started
         ShelfKind.NeedsNewSource -> HR.strings.library_shelf_needs_new_source
+        ShelfKind.InflatedCounts -> HR.strings.library_shelf_inflated_counts
     }
 
 // Tracker scores never reach the library screen, so that sort has no dividers yet.

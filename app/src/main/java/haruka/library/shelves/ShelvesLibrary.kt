@@ -137,11 +137,14 @@ fun ShelvesLibrary(
         LaunchedEffect(isSearching) { if (isSearching) shelfFilter = null }
         val filter = shelfFilter.takeUnless { isSearching }
         val unavailableSources = shelfData?.unavailableSources.orEmpty()
-        val shown = remember(items, filter, unavailableSources) {
+        val inflated = shelfData?.inflated.orEmpty()
+        val shown = remember(items, filter, unavailableSources, inflated) {
             if (filter == null) {
                 items
             } else {
-                filterToShelf(items, filter, System.currentTimeMillis()) { it.toShelfInput(unavailableSources) }
+                filterToShelf(items, filter, System.currentTimeMillis()) {
+                    it.toShelfInput(unavailableSources, inflated)
+                }
             }
         }
 

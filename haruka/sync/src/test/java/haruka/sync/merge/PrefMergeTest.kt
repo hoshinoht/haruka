@@ -87,7 +87,7 @@ class PrefMergeTest {
 
     @Test
     fun `whitelist excludes device-local and per-manga keys`() {
-        SYNCED_PREF_KEYS.size shouldBe 18
+        SYNCED_PREF_KEYS.size shouldBe 19
         SYNCED_PREF_KEYS.any { it.startsWith("haruka_sync_") } shouldBe false
         ("haruka_beta_updates" in SYNCED_PREF_KEYS) shouldBe false
         ("haruka_dedup_manga_overrides" in SYNCED_PREF_KEYS) shouldBe false

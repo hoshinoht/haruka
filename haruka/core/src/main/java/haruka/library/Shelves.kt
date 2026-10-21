@@ -13,6 +13,9 @@ enum class ShelfKind {
 
     /** Series whose source is unavailable (not installed, not loaded or obsolete), in library order. */
     NeedsNewSource,
+
+    /** Series whose upload count is inflated by duplicate copies or a bogus chapter number, in library order. */
+    InflatedCounts,
     ;
 
     val cap: Int get() = if (this == ContinueReading) CONTINUE_READING_CAP else SHELF_CAP
@@ -25,6 +28,7 @@ enum class ShelfKind {
                 (entry.chapterFetchedAt ?: Long.MIN_VALUE) > nowMillis - NEW_CHAPTERS_WINDOW_MILLIS
         NotStarted -> !entry.hasStarted
         NeedsNewSource -> entry.sourceUnavailable
+        InflatedCounts -> entry.countsInflated
     }
 
     // Newest first; null keeps library order (and sorts after dated entries)
@@ -32,7 +36,7 @@ enum class ShelfKind {
         ContinueReading -> entry.lastRead
         NewChapters -> entry.chapterFetchedAt
         NotStarted -> entry.favoriteAt
-        NeedsNewSource -> null
+        NeedsNewSource, InflatedCounts -> null
     }
 }
 
@@ -79,3 +83,14 @@ fun buildShelves(
  */
 fun <T> filterToShelf(items: List<T>, kind: ShelfKind, nowMillis: Long, input: (T) -> ShelfInput): List<T> =
     items.filter { kind.includes(input(it), nowMillis) }
+
+/**
+ * Whether a series' upload count misleads: at least [INFLATION_FACTOR] times its logical chapters and at least
+ * [MIN_INFLATION_EXTRA] more (a 3-chapter series with one repost is not worth a shelf), or a chapter number that
+ * is really an id, timestamp or year ([hasOutlierNumber]).
+ */
+fun isCountInflated(uploads: Int, chapters: Int, hasOutlierNumber: Boolean): Boolean = hasOutlierNumber ||
+    (chapters > 0 && uploads >= INFLATION_FACTOR * chapters && uploads - chapters >= MIN_INFLATION_EXTRA)
+
+const val INFLATION_FACTOR = 1.5
+const val MIN_INFLATION_EXTRA = 10

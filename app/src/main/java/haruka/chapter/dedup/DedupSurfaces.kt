@@ -104,12 +104,26 @@ class DedupSurfaces(
             nextUnreadChapterId(deduped, manga.sortDescending()) { byId.getValue(it).read }?.let(byId::getValue)
         }
     }
+
+    /**
+     * Whether [manga]'s upload count is inflated: many more uploads than logical chapters under its dedup rules, or a
+     * chapter number that is really an id, timestamp or year. Counts the chapters the library counts (scanlator
+     * filter applied).
+     */
+    suspend fun isCountInflated(manga: Manga): Boolean = withContext(Dispatchers.IO) {
+        val chapters = getChaptersByMangaId.await(manga.id, applyScanlatorFilter = true)
+        if (chapters.isEmpty()) return@withContext false
+        val logical = deduper.dedupe(chapters.map { it.toDedupChapter() }, config(manga).options).size
+        val outlier = haruka.chapter.chapterNumberOutlierThreshold(chapters.map { it.chapterNumber }) != null
+        haruka.library.isCountInflated(chapters.size, logical, outlier)
+    }
 }
 
 /** Haruka graph entry for upstream screens that have a Context but no injected [DedupSurfaces]. */
 @ContributesTo(AppScope::class)
 interface DedupGraph {
     val dedupSurfaces: DedupSurfaces
+    val inflatedCountsStore: haruka.library.shelves.InflatedCountsStore
 }
 
 /** The library's continue-reading button: see [DedupSurfaces.nextUnread]. */

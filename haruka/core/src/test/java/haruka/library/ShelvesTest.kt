@@ -218,4 +218,32 @@ class ShelvesTest {
         filterToShelf(list, ShelfKind.ContinueReading, now) { it }.map { it.id } shouldContainExactly
             (40L downTo 21L).filter { it % 2 == 0L }
     }
+
+    @Test
+    fun `inflated counts need 1_5x the chapters and at least 10 extra uploads`() {
+        isCountInflated(uploads = 712, chapters = 101, hasOutlierNumber = false) shouldBe true
+        isCountInflated(uploads = 150, chapters = 100, hasOutlierNumber = false) shouldBe true
+        isCountInflated(uploads = 149, chapters = 100, hasOutlierNumber = false) shouldBe false
+        isCountInflated(uploads = 9, chapters = 3, hasOutlierNumber = false) shouldBe false
+        isCountInflated(uploads = 13, chapters = 3, hasOutlierNumber = false) shouldBe true
+        isCountInflated(uploads = 0, chapters = 0, hasOutlierNumber = false) shouldBe false
+    }
+
+    @Test
+    fun `a bogus chapter number alone makes the count inflated`() {
+        isCountInflated(uploads = 142, chapters = 140, hasOutlierNumber = true) shouldBe true
+    }
+
+    @Test
+    fun `the inflated shelf comes last and takes only what the shelves above left`() {
+        val library = (1L..25L).map { entry(it, unreadCount = 3, lastRead = it) } +
+            ShelfInput(
+                id = 99, title = "Big", lastRead = null, lastUpdate = null, latestUpload = null,
+                chapterFetchedAt = null, favoriteAt = null, unreadCount = 0, totalChapters = 700,
+                hasStarted = true, countsInflated = true,
+            )
+        val shelves = buildShelves(library, now)
+        shelves.last().kind shouldBe ShelfKind.InflatedCounts
+        shelves.last().ids shouldContainExactly listOf(99L)
+    }
 }

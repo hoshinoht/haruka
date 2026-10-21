@@ -39,6 +39,8 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
         preferenceStore.getBoolean("haruka_library_shelf_not_started", true)
     val libraryShelfNeedsNewSource: Preference<Boolean> =
         preferenceStore.getBoolean("haruka_library_shelf_needs_new_source", true)
+    val libraryShelfInflatedCounts: Preference<Boolean> =
+        preferenceStore.getBoolean("haruka_library_shelf_inflated_counts", true)
 
     /** Motion across the app; pill swipe actions are part of [AnimationProfile.EXPRESSIVE]. */
     val animationProfile: Preference<AnimationProfile> =

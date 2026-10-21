@@ -151,6 +151,7 @@
     <string name="library_shelf_resume">Resume %1$s</string>
     <string name="library_shelf_needs_new_source">Needs a new source</string>
     <string name="library_shelf_source_unavailable">Source unavailable</string>
+    <string name="library_shelf_inflated_counts">Inflated counts</string>
     <string name="library_shelf_filter_clear">Show all series again, without the %1$s filter</string>
     <string name="migration_confidence_high">High</string>
     <string name="migration_confidence_check">Check</string>

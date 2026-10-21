@@ -9,8 +9,9 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 - With shelves on, the "All series" bar under the toolbar is gone; the toolbar already shows the count. The bar only appears for category chips or a shelf's "See all" chip.
 - With shelves on, the toolbar slides away while you scroll down the library and comes back as soon as you scroll up. It stays put while selecting or searching.
 - In the Hoshino theme's compact grid, titles sit on a taller plate that fades into the theme's navy (white in light mode), with no text shadow, so they stay readable on pale and busy covers.
-- In the Hoshino theme, the unread count on library covers is a round coral badge with a navy ring, like the Updates conversation view, so it stays visible on pink covers.
+- In the Hoshino theme, the unread count on library covers is coral, like the Updates conversation view, and the badge strip (downloaded and unread) has a navy ring, so it stays visible on pink covers.
 - In the Hoshino theme, the selected tab in the bottom bar sits in a solid pink pill, so it's clear which tab you're on.
+- A new "Inflated counts" shelf (last, can be hidden like the others) lists series whose chapter count is padded: at least 1.5× as many uploads as chapters once duplicate copies are grouped, or a chapter number that is really an id or a year. "See all" filters the library to them, so you can tidy their scanlator ranking. Each series is checked once in the background and again when its chapters change.
 
 ### Chapters
 - With duplicate chapters grouped, Start reading (on the series screen) and the library's continue-reading button now open the next chapter at its preferred copy, the one at the top of its group, instead of whichever upload came first in the list. A chapter read in any copy is skipped.
