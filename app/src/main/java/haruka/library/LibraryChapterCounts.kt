@@ -1,8 +1,10 @@
 package haruka.library
 
+import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import haruka.chapter.dedup.DedupSettings
 import haruka.chapter.dedup.DedupSurfaces
 import haruka.chapter.dedup.SeriesCounts
 import kotlinx.coroutines.Dispatchers
@@ -15,26 +17,48 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import logcat.LogPriority
+import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.library.model.LibraryManga
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.File
 
 /**
  * Library chapter counts that match the chapter list: with duplicate copies grouped, a series with 405 uploads of
- * 101 chapters counts 101, and a chapter read in any copy counts as read. Each series is counted off the main thread
- * once, then again only when its uploads, read count, latest upload or last fetch change, so the library shows raw
- * counts for a moment only for a series that just changed. Changing a series' dedup rules takes effect the next time
- * its chapters change.
+ * 155 chapters counts 155, and a chapter read in any copy counts as read.
+ *
+ * Counting a series reads its chapters and dedupes them, so it only happens for a series whose fingerprint changed:
+ * its uploads, read count, latest upload, last fetch, or the dedup settings that apply to it. A library update or a
+ * finished chapter therefore recounts only the series it touched. The counts are kept in a fork-owned file, so app
+ * start reuses them instead of recounting the library; a series shows raw counts only until its first count.
  */
-@Inject
 @SingleIn(AppScope::class)
-class LibraryChapterCounts(private val dedup: DedupSurfaces) {
+class LibraryChapterCounts internal constructor(
+    private val dedup: DedupSurfaces,
+    private val settings: DedupSettings,
+    private val file: File,
+) {
 
-    private data class Stamp(val total: Long, val read: Long, val latestUpload: Long?, val fetchedAt: Long?)
+    @Inject
+    constructor(context: Context, dedup: DedupSurfaces, settings: DedupSettings) :
+        this(dedup, settings, File(context.filesDir, "haruka/chapter_counts.bin"))
 
-    private class Entry(val stamp: Stamp, val counts: SeriesCounts)
+    internal data class Stamp(
+        val total: Long,
+        val read: Long,
+        val latestUpload: Long,
+        val fetchedAt: Long,
+        val settingsKey: Int,
+    )
+
+    internal class Entry(val stamp: Stamp, val counts: SeriesCounts)
 
     private val mutex = Mutex()
-    private val entries = MutableStateFlow<Map<Long, Entry>>(emptyMap())
+    private var loaded = false
 
+    // Published entries; replaced as a whole, at most once per counting pass
+    private val entries = MutableStateFlow<Map<Long, Entry>>(emptyMap())
     private val inflatedIds = MutableStateFlow<Set<Long>>(emptySet())
 
     /** Series whose upload count is inflated, for the "Inflated counts" shelf. */
@@ -42,52 +66,121 @@ class LibraryChapterCounts(private val dedup: DedupSurfaces) {
 
     /**
      * [library] with each counted series' totals replaced, so filters, sorts, badges and shelves downstream see the
-     * logical counts. Counting runs while the result is collected; intermediate library emissions are skipped.
+     * logical counts. Counting runs while the result is collected; library states that arrive during a pass are
+     * folded into the next one.
      */
     fun apply(library: Flow<List<LibraryManga>>): Flow<List<LibraryManga>> = channelFlow {
-        val latest = MutableStateFlow<List<LibraryManga>?>(null)
-        launch(Dispatchers.IO) { latest.filterNotNull().collect { refresh(it) } }
-        combine(library, entries) { list, counted ->
-            latest.value = list
+        val pending = MutableStateFlow<Pair<List<LibraryManga>, (Long) -> Int>?>(null)
+        launch(Dispatchers.IO) {
+            pending.filterNotNull().collect { (list, keys) -> refresh(list, keys) }
+        }
+        combine(library, settings.countsKeys(), entries) { list, keys, counted ->
+            pending.value = list to keys
             list.map { manga ->
-                counted[manga.id]?.takeIf { it.stamp == manga.stamp() }?.let { manga.with(it.counts) } ?: manga
+                counted[manga.id]?.takeIf { it.stamp == manga.stamp(keys) }?.let { manga.with(it.counts) } ?: manga
             }
         }.collect { send(it) }
     }
 
-    private suspend fun refresh(library: List<LibraryManga>) = mutex.withLock {
-        val result = HashMap(entries.value)
-        result.keys.retainAll(library.mapTo(HashSet()) { it.id })
-        var pending = 0
-        for (manga in library) {
-            val stamp = manga.stamp()
-            if (result[manga.id]?.stamp == stamp) continue
-            result[manga.id] = Entry(stamp, dedup.seriesCounts(manga.manga))
-            // Publish in batches so a first full pass fills the library in as it goes
-            if (++pending == BATCH) {
-                publish(result)
-                pending = 0
-            }
+    private suspend fun refresh(library: List<LibraryManga>, keys: (Long) -> Int) = mutex.withLock {
+        if (!loaded) {
+            loaded = true
+            load()?.let { publish(it) }
         }
+        val current = entries.value
+        val result = HashMap<Long, Entry>(library.size * 2)
+        var changed = current.size != library.size
+        for (manga in library) {
+            val stamp = manga.stamp(keys)
+            val known = current[manga.id]
+            if (known?.stamp == stamp) {
+                result[manga.id] = known
+                continue
+            }
+            result[manga.id] = Entry(stamp, dedup.seriesCounts(manga.manga))
+            changed = true
+        }
+        if (!changed) return@withLock
         publish(result)
+        save(result)
     }
 
     private fun publish(result: Map<Long, Entry>) {
-        entries.value = HashMap(result)
+        entries.value = result
         inflatedIds.value = result.filterValues { it.counts.inflated }.keys
     }
 
-    private fun LibraryManga.stamp() = Stamp(
+    private fun LibraryManga.stamp(keys: (Long) -> Int) = Stamp(
         totalChapters,
         readCount,
-        latestUpload?.toEpochMilliseconds(),
-        chapterFetchedAt?.toEpochMilliseconds(),
+        latestUpload?.toEpochMilliseconds() ?: NONE,
+        chapterFetchedAt?.toEpochMilliseconds() ?: NONE,
+        keys(id),
     )
 
     private fun LibraryManga.with(counts: SeriesCounts): LibraryManga =
         if (!counts.grouped) this else copy(totalChapters = counts.total, readCount = counts.read)
 
-    private companion object {
-        const val BATCH = 50
+    private fun load(): Map<Long, Entry>? = try {
+        if (!file.exists()) {
+            null
+        } else {
+            DataInputStream(file.inputStream().buffered()).use { readEntries(it) }
+        }
+    } catch (e: Exception) {
+        logcat(LogPriority.WARN, e) { "Chapter counts cache unreadable; recounting" }
+        null
+    }
+
+    private fun save(result: Map<Long, Entry>) {
+        try {
+            file.parentFile?.mkdirs()
+            val temp = File(file.path + ".tmp")
+            DataOutputStream(temp.outputStream().buffered()).use { writeEntries(it, result) }
+            temp.renameTo(file)
+        } catch (e: Exception) {
+            // Only a cache: the next start recounts
+            logcat(LogPriority.WARN, e) { "Chapter counts cache not saved" }
+        }
+    }
+
+    internal companion object {
+        private const val NONE = Long.MIN_VALUE
+        private const val FORMAT = 1
+
+        internal fun writeEntries(out: DataOutputStream, entries: Map<Long, Entry>) {
+            out.writeInt(FORMAT)
+            out.writeInt(entries.size)
+            for ((id, entry) in entries) {
+                out.writeLong(id)
+                with(entry.stamp) {
+                    out.writeLong(total)
+                    out.writeLong(read)
+                    out.writeLong(latestUpload)
+                    out.writeLong(fetchedAt)
+                    out.writeInt(settingsKey)
+                }
+                with(entry.counts) {
+                    out.writeLong(total)
+                    out.writeLong(read)
+                    out.writeBoolean(grouped)
+                    out.writeBoolean(inflated)
+                }
+            }
+        }
+
+        internal fun readEntries(input: DataInputStream): Map<Long, Entry>? {
+            if (input.readInt() != FORMAT) return null
+            val size = input.readInt()
+            val result = HashMap<Long, Entry>(size * 2)
+            repeat(size) {
+                val id = input.readLong()
+                val stamp =
+                    Stamp(input.readLong(), input.readLong(), input.readLong(), input.readLong(), input.readInt())
+                val counts = SeriesCounts(input.readLong(), input.readLong(), input.readBoolean(), input.readBoolean())
+                result[id] = Entry(stamp, counts)
+            }
+            return result
+        }
     }
 }

@@ -112,4 +112,19 @@ class DedupSettings(preferenceStore: PreferenceStore, private val catalogLoader:
             ),
         )
     }
+
+    /**
+     * A key per manga id that changes whenever the settings that decide its chapter counts change (grouping, split
+     * merging, rules, ranking, its override), so cached counts can tell they are stale.
+     */
+    fun countsKeys(): Flow<(Long) -> Int> = combine(
+        combine(groupChapters.changes(), mergeSplitChapters.changes(), ::Pair),
+        rules.changes(),
+        rankedScanlators.changes(),
+        overrides.changes(),
+    ) { (group, merge), rules, ranking, overrides ->
+        // Names, not the enums: an enum's hashCode differs between runs, and the key is saved with cached counts
+        val global = listOf(group, merge, rules.map { it.name }, ranking).hashCode()
+        return@combine { mangaId: Long -> 31 * global + overrides[mangaId].hashCode() }
+    }
 }
