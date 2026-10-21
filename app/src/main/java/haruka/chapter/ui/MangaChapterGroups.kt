@@ -4,6 +4,7 @@ import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.ui.manga.ChapterList
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import haruka.chapter.dedup.ChapterDeduper
+import haruka.chapter.dedup.DedupChapter
 import haruka.chapter.dedup.DedupOptions
 import haruka.chapter.dedup.DedupSettings
 import haruka.chapter.dedup.DedupSurfaces
@@ -27,6 +28,7 @@ data class ChapterGroupsInput(
     val expanded: Set<Long>,
     val expansion: ChapterGroupExpansion,
     val deduper: ChapterDeduper,
+    val cache: ChapterGroupsCache,
 ) {
     /** Groups the filtered and sorted [chapters]; a copy counts as downloaded from its row's download state. */
     fun build(chapters: List<ChapterList.Item>): GroupedChapterList {
@@ -35,7 +37,10 @@ data class ChapterGroupsInput(
             items[item.id] = item
             item.chapter.toDedupChapter()
         }
-        val groups = buildChapterGroups(dedupChapters, deduper, options) { items.getValue(it.id).isDownloaded }
+        val downloaded = chapters.mapNotNullTo(HashSet()) { item -> item.id.takeIf { item.isDownloaded } }
+        val groups = cache.groups(dedupChapters, options, downloaded) {
+            buildChapterGroups(dedupChapters, deduper, options) { it.id in downloaded }
+        }
         val rows = groups.toRows(expanded, expansion) { id, row ->
             val item = items.getValue(id)
             if (row == null) item else item.copy(harukaRow = row)
@@ -47,6 +52,30 @@ data class ChapterGroupsInput(
             for (index in 1..<group.winner.size) selectable += items.getValue(group.winner[index])
         }
         return GroupedChapterList(groups, rows, selectable)
+    }
+}
+
+/**
+ * The last grouping of one manga screen. Expanding or collapsing a group, selecting, or a download finishing elsewhere
+ * makes a new state whose chapters, options and downloads are unchanged; reusing the groups then skips the dedup
+ * pass (about 1 ms per 1,000 uploads on a desktop JVM), leaving only the cheap row projection.
+ */
+class ChapterGroupsCache {
+    private var key: Triple<List<DedupChapter>, DedupOptions, Set<Long>>? = null
+    private var value: List<ChapterGroup> = emptyList()
+
+    @Synchronized
+    fun groups(
+        chapters: List<DedupChapter>,
+        options: DedupOptions,
+        downloaded: Set<Long>,
+        compute: () -> List<ChapterGroup>,
+    ): List<ChapterGroup> {
+        val newKey = Triple(chapters, options, downloaded)
+        if (newKey == key) return value
+        value = compute()
+        key = newKey
+        return value
     }
 }
 
@@ -73,6 +102,7 @@ class MangaChapterGroups(
 ) {
 
     private val expansion = ChapterGroupExpansion()
+    private val groupsCache = ChapterGroupsCache()
     private val deduper by lazy { ChapterDeduper(catalogLoader.catalog) }
 
     @Volatile
@@ -90,7 +120,7 @@ class MangaChapterGroups(
             .onEach { config = it }
         return combine(states, configs, expansion.expanded) { state, config, expanded ->
             if (!config.groupChapters) return@combine state
-            state.copy(harukaGroups = ChapterGroupsInput(config.options, expanded, expansion, deduper))
+            state.copy(harukaGroups = ChapterGroupsInput(config.options, expanded, expansion, deduper, groupsCache))
         }
     }
 

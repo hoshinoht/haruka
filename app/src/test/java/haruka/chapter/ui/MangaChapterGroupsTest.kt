@@ -21,7 +21,7 @@ class MangaChapterGroupsTest {
 
     @Test
     fun `list items group by their download state and keep hidden winner parts selectable`() {
-        val input = ChapterGroupsInput(DedupOptions(), emptySet(), expansion, deduper)
+        val input = ChapterGroupsInput(DedupOptions(), emptySet(), expansion, deduper, ChapterGroupsCache())
         val list = input.build(
             listOf(
                 item(1, 5.0, "VIZ"),
@@ -37,12 +37,19 @@ class MangaChapterGroupsTest {
     @Test
     fun `scale - grouped rows for 1,005 chapters x 4 groups build in under 20 ms`() {
         val items = benchmarkItems(1_005)
-        val input =
-            ChapterGroupsInput(DedupOptions(rankedScanlators = listOf("Lua Comic")), emptySet(), expansion, deduper)
-        repeat(WARMUP) { input.build(items) }
+
+        // A fresh cache per build, so the measurement covers the dedup pass rather than a cache hit
+        fun input() = ChapterGroupsInput(
+            DedupOptions(rankedScanlators = listOf("Lua Comic")),
+            emptySet(),
+            expansion,
+            deduper,
+            ChapterGroupsCache(),
+        )
+        repeat(WARMUP) { input().build(items) }
         val samples = DoubleArray(RUNS) {
             val start = System.nanoTime()
-            input.build(items)
+            input().build(items)
             (System.nanoTime() - start) / 1_000_000.0
         }
         samples.sort()
