@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Overrides i18n's app_name. Not in the shared res overlay, which would also replace "Haruka Bench". -->
+<!-- Overrides i18n's app_name. Not in the shared res overlay, which would also replace "Haruka Bench". "Dev" tells the
+     debug build (app.haruka.dev) apart from the release on a device that has both. -->
 <resources>
-    <string name="app_name" translatable="false">Haruka</string>
+    <string name="app_name" translatable="false">Haruka Dev</string>
 </resources>
