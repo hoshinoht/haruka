@@ -1,11 +1,16 @@
 package haruka.chapter.dedup
 
+import android.content.Context
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Inject
 import eu.kanade.domain.chapter.interactor.SetReadStatus
+import eu.kanade.domain.chapter.model.applyFilters
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import mihon.app.di.appGraph
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.Manga
@@ -82,7 +87,34 @@ class DedupSurfaces(
         val copies = copiesToMarkRead(config, chapters, setOf(chapter.id))
         if (copies.isNotEmpty()) setReadStatus.await(read = true, chapters = copies.toTypedArray())
     }
+
+    /**
+     * Continue reading from outside the manga screen: with duplicates grouped for [manga], the next logical chapter
+     * at its preferred copy, as the manga screen's Start reading picks it; otherwise [upstream]'s choice.
+     */
+    suspend fun nextUnread(manga: Manga, upstream: suspend () -> Chapter?): Chapter? {
+        val config = config(manga)
+        if (!config.groupChapters) return upstream()
+        return withContext(Dispatchers.IO) {
+            val chapters = getChaptersByMangaId.await(manga.id, applyScanlatorFilter = true)
+                .applyFilters(manga, downloadManager)
+            val downloaded = downloadManager.getDownloadedChapterIds(chapters, manga)
+            val deduped = deduper.dedupe(chapters.map { it.toDedupChapter() }, config.options) { it.id in downloaded }
+            val byId = chapters.associateBy { it.id }
+            nextUnreadChapterId(deduped, manga.sortDescending()) { byId.getValue(it).read }?.let(byId::getValue)
+        }
+    }
 }
+
+/** Haruka graph entry for upstream screens that have a Context but no injected [DedupSurfaces]. */
+@ContributesTo(AppScope::class)
+interface DedupGraph {
+    val dedupSurfaces: DedupSurfaces
+}
+
+/** The library's continue-reading button: see [DedupSurfaces.nextUnread]. */
+suspend fun nextUnreadForLibrary(context: Context, manga: Manga, upstream: suspend () -> Chapter?): Chapter? =
+    (context.appGraph as DedupGraph).dedupSurfaces.nextUnread(manga, upstream)
 
 /** [chapters] with each split winner's parts rearranged, within the slots they already hold, into part order. */
 internal fun inPartOrder(chapters: List<Chapter>, deduped: List<DedupedChapter>): List<Chapter> {

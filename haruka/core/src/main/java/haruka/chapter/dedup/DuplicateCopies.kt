@@ -78,6 +78,21 @@ fun readerChapterIds(deduped: List<DedupedChapter>, currentId: Long): Set<Long> 
     return result
 }
 
+/**
+ * The chapter id "continue reading" opens: the first logical chapter of [deduped] (in list order, or from the end when
+ * [fromEnd]) not read yet, opened at its winner's first unread part. A logical chapter counts as read once any one of
+ * its copies has every part read, so reading another scanlator's upload never sends you back to that chapter.
+ */
+fun nextUnreadChapterId(deduped: List<DedupedChapter>, fromEnd: Boolean, isRead: (Long) -> Boolean): Long? {
+    val ordered = if (fromEnd) deduped.asReversed() else deduped
+    for (chapter in ordered) {
+        if (chapter.logical.copies.any { copy -> copy.parts.all { isRead(it.id) } }) continue
+        val parts = chapter.winner.parts
+        return (parts.firstOrNull { !isRead(it.id) } ?: parts.first()).id
+    }
+    return null
+}
+
 /** Whether there is anything besides one copy's parts: another copy or a repeated part upload. */
 private fun LogicalChapter.hasDuplicates(): Boolean = copies.size > 1 || copies[0].duplicates.isNotEmpty()
 

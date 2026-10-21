@@ -95,4 +95,35 @@ class DuplicateCopiesTest {
         readerChapterIds(deduped, currentId = 11) shouldBe setOf(10L, 11L)
         readerChapterIds(deduped, currentId = 12) shouldBe setOf(10L, 12L)
     }
+
+    private fun nextUnread(chapters: List<DedupChapter>, read: Set<Long> = emptySet(), fromEnd: Boolean = false) =
+        nextUnreadChapterId(ChapterDeduper(testCatalog).dedupe(chapters), fromEnd) { it in read }
+
+    @Test
+    fun `continue reading opens the preferred copy, not the first upload`() {
+        nextUnread(chapters) shouldBe 2L
+    }
+
+    @Test
+    fun `a chapter read in any copy is skipped`() {
+        nextUnread(chapters, read = setOf(1)) shouldBe 5L
+        nextUnread(chapters, read = setOf(3, 4)) shouldBe 2L
+        nextUnread(chapters, read = setOf(1, 3, 4)) shouldBe 6L
+    }
+
+    @Test
+    fun `a descending list starts from its end`() {
+        nextUnread(chapters.asReversed(), fromEnd = true) shouldBe 2L
+        nextUnread(chapters.asReversed(), read = setOf(2), fromEnd = true) shouldBe 5L
+    }
+
+    @Test
+    fun `a split winner resumes at its first unread part`() {
+        nextUnread(repeated, read = setOf(10)) shouldBe 11L
+    }
+
+    @Test
+    fun `nothing left when every chapter is read`() {
+        nextUnread(chapters, read = setOf(1, 5, 6)) shouldBe null
+    }
 }

@@ -661,6 +661,9 @@ class MangaViewModel(
      */
     fun getNextUnreadChapter(): Chapter? {
         val successState = successState ?: return null
+        // FORK --> with duplicates grouped: the next logical chapter, at its preferred copy
+        successState.harukaGroups?.let { return haruka.chapter.ui.nextUnreadGrouped(successState, it) }
+        // FORK <--
         return successState.chapters.getNextUnread(successState.manga)
     }
 

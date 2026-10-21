@@ -204,7 +204,11 @@ data object LibraryTab : Tab {
                         onClickManga = { navigator.push(MangaScreen(it)) },
                         onContinueReadingClicked = { it: LibraryManga ->
                             scope.launch {
-                                val chapter = viewModel.getNextUnreadChapter(it.manga)
+                                // FORK --> with duplicates grouped: the next logical chapter, at its preferred copy
+                                val chapter = haruka.chapter.dedup.nextUnreadForLibrary(context, it.manga) {
+                                    viewModel.getNextUnreadChapter(it.manga)
+                                }
+                                // FORK <--
                                 if (chapter != null) {
                                     context.startActivity(
                                         ReaderActivity.newIntent(context, chapter.mangaId, chapter.id),

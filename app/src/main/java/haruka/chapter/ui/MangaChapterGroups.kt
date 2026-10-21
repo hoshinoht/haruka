@@ -9,6 +9,7 @@ import haruka.chapter.dedup.DedupSettings
 import haruka.chapter.dedup.DedupSurfaces
 import haruka.chapter.dedup.EffectiveDedupConfig
 import haruka.chapter.dedup.OfficialCatalogLoader
+import haruka.chapter.dedup.nextUnreadChapterId
 import haruka.chapter.dedup.toDedupChapter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -142,4 +143,18 @@ fun resumePart(state: MangaViewModel.State.Success, chapter: Chapter): Chapter {
     val byId = state.chapters.associateBy({ it.id }, { it.chapter })
     val parts = group.winner.mapNotNull(byId::get)
     return parts.firstOrNull { !it.read } ?: parts.firstOrNull() ?: chapter
+}
+
+/**
+ * The chapter Start reading opens while grouping is on: the next logical chapter not read in any copy, at its
+ * preferred copy (a split one at its first unread part), in the list's filters and order. Null when all are read.
+ */
+fun nextUnreadGrouped(state: MangaViewModel.State.Success, input: ChapterGroupsInput): Chapter? {
+    val items = state.processedChapters
+    val byId = items.associateBy { it.id }
+    val deduped = input.deduper.dedupe(items.map { it.chapter.toDedupChapter() }, input.options) {
+        byId.getValue(it.id).isDownloaded
+    }
+    val id = nextUnreadChapterId(deduped, state.manga.sortDescending()) { byId.getValue(it).chapter.read }
+    return id?.let { byId.getValue(it).chapter }
 }
