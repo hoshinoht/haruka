@@ -1182,7 +1182,14 @@ class MangaViewModel(
 
             val missingChapterCount by lazy {
                 if (hideMissingChapters) return@lazy 0
-                processedChapters.fastMap { it.chapter.chapterNumber }.missingChaptersCount()
+                // FORK --> numbers that look like ids or timestamps don't count as chapters
+                val harukaOutliers = haruka.chapter.chapterNumberOutlierThreshold(
+                    processedChapters.fastMap { it.chapter.chapterNumber },
+                )
+                processedChapters.fastMap { it.chapter.chapterNumber }
+                    .filterNot { haruka.chapter.isChapterNumberOutlier(it, harukaOutliers) }
+                    .missingChaptersCount()
+                // FORK <--
             }
 
             val chapterListItems by lazy {
@@ -1193,6 +1200,9 @@ class MangaViewModel(
                 }
 
                 // FORK -->
+                val harukaOutliers = haruka.chapter.chapterNumberOutlierThreshold(
+                    processedChapters.fastMap { it.chapter.chapterNumber },
+                )
                 harukaRows.insertSeparators { before, after ->
                     // FORK <--
                     val (lowerChapter, higherChapter) = if (manga.sortDescending()) {
@@ -1201,6 +1211,11 @@ class MangaViewModel(
                         before to after
                     }
                     if (higherChapter == null) return@insertSeparators null
+                    // FORK --> no gap counted up to an outlier number
+                    if (haruka.chapter.isChapterNumberOutlier(higherChapter.chapter.chapterNumber, harukaOutliers)) {
+                        return@insertSeparators null
+                    }
+                    // FORK <--
 
                     if (lowerChapter == null) {
                         floor(higherChapter.chapter.chapterNumber)
