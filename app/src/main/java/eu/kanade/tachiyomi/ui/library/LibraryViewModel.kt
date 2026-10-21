@@ -98,6 +98,9 @@ class LibraryViewModel(
     private val downloadManager: DownloadManager,
     private val downloadCache: DownloadCache,
     private val trackerManager: TrackerManager,
+    // FORK -->
+    private val harukaChapterCounts: haruka.library.LibraryChapterCounts,
+    // FORK <--
 ) : ViewModel() {
 
     private val subscriberGate = SubscriberGate()
@@ -416,7 +419,9 @@ class LibraryViewModel(
 
     private fun getFavoritesFlow(): Flow<List<LibraryItem>> {
         return combine(
-            getLibraryManga.subscribe(),
+            // FORK --> chapter counts as the chapter list shows them, duplicate copies counted once
+            harukaChapterCounts.apply(getLibraryManga.subscribe()),
+            // FORK <--
             getLibraryItemPreferencesFlow(),
             downloadCache.changes.pausedWhileUnsubscribed(),
         ) { libraryManga, preferences, _ ->

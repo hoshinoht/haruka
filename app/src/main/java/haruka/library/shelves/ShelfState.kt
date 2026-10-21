@@ -54,7 +54,7 @@ internal fun rememberShelfData(categories: List<Category>, lists: List<List<Libr
     // Seeded from the last result so a returning screen doesn't recompute (or flash) before availability arrives
     val unavailableFlow = remember(sourceIds) { context.unavailableSources(sourceIds).flowOn(Dispatchers.IO) }
     val unavailable by unavailableFlow.collectAsState(lastShelves?.first?.unavailableSources)
-    val inflated = rememberInflated(lists, ShelfKind.InflatedCounts in enabled)
+    val inflated = rememberInflated(ShelfKind.InflatedCounts in enabled)
     val key = unavailable?.let { ShelfKey(lists, enabled, it, inflated) }
     val cached = remember { lastShelves?.takeIf { it.first == key }?.second }
     return produceState(cached, key) {
@@ -84,21 +84,12 @@ internal fun rememberShelfData(categories: List<Category>, lists: List<List<Libr
     }
 }
 
-/**
- * Series with inflated upload counts, checked in the background whenever the library changes while the shelf is
- * shown. Starts from what earlier checks found, so the shelf doesn't wait on a full pass.
- */
+/** Series with inflated upload counts, as [haruka.library.LibraryChapterCounts] found them while counting the library. */
 @Composable
-private fun rememberInflated(lists: List<List<LibraryItem>>, shown: Boolean): Set<Long> {
+private fun rememberInflated(shown: Boolean): Set<Long> {
     val context = LocalContext.current
-    val store = remember { (context.appGraph as DedupGraph).inflatedCountsStore }
-    LaunchedEffect(lists, shown) {
-        if (!shown) return@LaunchedEffect
-        withContext(Dispatchers.IO) {
-            store.refresh(lists.flatten().distinctBy { it.id }.map { it.libraryManga })
-        }
-    }
-    val ids by store.ids.collectAsState()
+    val store = remember { (context.appGraph as DedupGraph).libraryChapterCounts }
+    val ids by store.inflated.collectAsState()
     return if (shown) ids else emptySet()
 }
 

@@ -106,24 +106,42 @@ class DedupSurfaces(
     }
 
     /**
-     * Whether [manga]'s upload count is inflated: many more uploads than logical chapters under its dedup rules, or a
-     * chapter number that is really an id, timestamp or year. Counts the chapters the library counts (scanlator
-     * filter applied).
+     * [manga]'s chapter counts as its chapter list shows them: with duplicates grouped, each logical chapter counts
+     * once and is read when any one of its copies is fully read. Counts the chapters the library counts (scanlator
+     * filter applied). [SeriesCounts.inflated] tells whether the raw upload count misleads (see
+     * [haruka.library.isCountInflated]) whether or not grouping is on.
      */
-    suspend fun isCountInflated(manga: Manga): Boolean = withContext(Dispatchers.IO) {
+    suspend fun seriesCounts(manga: Manga): SeriesCounts = withContext(Dispatchers.IO) {
         val chapters = getChaptersByMangaId.await(manga.id, applyScanlatorFilter = true)
-        if (chapters.isEmpty()) return@withContext false
-        val logical = deduper.dedupe(chapters.map { it.toDedupChapter() }, config(manga).options).size
+        if (chapters.isEmpty()) return@withContext SeriesCounts(0, 0, grouped = false, inflated = false)
+        val config = config(manga)
+        val deduped = deduper.dedupe(chapters.map { it.toDedupChapter() }, config.options)
         val outlier = haruka.chapter.chapterNumberOutlierThreshold(chapters.map { it.chapterNumber }) != null
-        haruka.library.isCountInflated(chapters.size, logical, outlier)
+        val inflated = haruka.library.isCountInflated(chapters.size, deduped.size, outlier)
+        if (!config.groupChapters) {
+            return@withContext SeriesCounts(
+                chapters.size.toLong(),
+                chapters.count { it.read }.toLong(),
+                grouped = false,
+                inflated = inflated,
+            )
+        }
+        val read = chapters.mapNotNullTo(HashSet()) { chapter -> chapter.id.takeIf { chapter.read } }
+        val logicalRead = deduped.count { chapter ->
+            chapter.logical.copies.any { copy -> copy.parts.all { it.id in read } }
+        }
+        SeriesCounts(deduped.size.toLong(), logicalRead.toLong(), grouped = true, inflated = inflated)
     }
 }
+
+/** One series' chapter counts (see [DedupSurfaces.seriesCounts]). */
+data class SeriesCounts(val total: Long, val read: Long, val grouped: Boolean, val inflated: Boolean)
 
 /** Haruka graph entry for upstream screens that have a Context but no injected [DedupSurfaces]. */
 @ContributesTo(AppScope::class)
 interface DedupGraph {
     val dedupSurfaces: DedupSurfaces
-    val inflatedCountsStore: haruka.library.shelves.InflatedCountsStore
+    val libraryChapterCounts: haruka.library.LibraryChapterCounts
 }
 
 /** The library's continue-reading button: see [DedupSurfaces.nextUnread]. */
