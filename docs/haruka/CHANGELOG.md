@@ -20,6 +20,7 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 
 ### Fixes
 - With the Expressive animations, tapping between the library's Filter, Sort and Display tabs switches at once and the sheet resizes within about 0.1 s, without bouncing; before, the sheet held its old height for half a second. Swiping between the tabs still slides.
+- Progress bars are flat again (the library update, restore and sync banners, sync settings, global search, web view and the migration progress dialog); the Expressive animations no longer swap in Material 3 Expressive's wavy bar.
 
 ## [0.1.0-beta.4]
 

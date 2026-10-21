@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,8 +30,6 @@ import androidx.compose.ui.util.fastMaxBy
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppStateBanners
 import haruka.i18n.HR
-import haruka.motion.AnimationProfile
-import haruka.motion.LocalAnimationProfile
 import haruka.progress.BackgroundTaskProgress.Kind
 import haruka.progress.BackgroundTaskProgress.Task
 import haruka.sync.engine.SyncPhase
@@ -110,7 +106,6 @@ private fun TaskProgressBanner(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TaskProgressRow(task: Task) {
     val contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -130,35 +125,17 @@ private fun TaskProgressRow(task: Task) {
                 )
             }
         }
-        // Both states share one indicator style so the banner keeps one height when the real count arrives;
-        // REDUCED uses flat bars because the travelling wave is decorative motion.
+        // Both states share one indicator style so the banner keeps one height when the real count arrives
         val trackColor = contentColor.copy(alpha = 0.24f)
-        val flat = LocalAnimationProfile.current == AnimationProfile.REDUCED
         if (task.current > 0 && task.total > 0) {
-            val progress = { task.current.toFloat() / task.total }
-            if (flat) {
-                LinearProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = contentColor,
-                    trackColor = trackColor,
-                )
-            } else {
-                LinearWavyProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = contentColor,
-                    trackColor = trackColor,
-                )
-            }
-        } else if (flat) {
             LinearProgressIndicator(
+                progress = { task.current.toFloat() / task.total },
                 modifier = Modifier.fillMaxWidth(),
                 color = contentColor,
                 trackColor = trackColor,
             )
         } else {
-            LinearWavyProgressIndicator(
+            LinearProgressIndicator(
                 modifier = Modifier.fillMaxWidth(),
                 color = contentColor,
                 trackColor = trackColor,

@@ -10,7 +10,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.WavyProgressIndicatorDefaults
@@ -23,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.CircularProgressIndicator as M3CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator as M3LinearProgressIndicator
 
 /**
  * Drop-in for an indeterminate M3 `CircularProgressIndicator()` loading a whole screen or list: upstream files swap
@@ -76,26 +74,6 @@ fun ProfileCombinedProgressIndicator(progress: () -> Float, modifier: Modifier =
             )
             CircularWavyProgressIndicator(progress = { animatedProgress })
         }
-    }
-}
-
-/** Drop-in for an indeterminate M3 `LinearProgressIndicator`: wavy for EXPRESSIVE, Mihon's flat bar otherwise. */
-@Composable
-fun LinearProgressIndicator(modifier: Modifier = Modifier) {
-    if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
-        LinearWavyProgressIndicator(modifier = modifier)
-    } else {
-        M3LinearProgressIndicator(modifier = modifier)
-    }
-}
-
-/** Drop-in for a determinate M3 `LinearProgressIndicator`: wavy for EXPRESSIVE, Mihon's flat bar otherwise. */
-@Composable
-fun LinearProgressIndicator(progress: () -> Float, modifier: Modifier = Modifier) {
-    if (LocalAnimationProfile.current == AnimationProfile.EXPRESSIVE) {
-        LinearWavyProgressIndicator(progress = progress, modifier = modifier)
-    } else {
-        M3LinearProgressIndicator(progress = progress, modifier = modifier)
     }
 }
 

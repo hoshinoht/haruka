@@ -26,7 +26,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedSecureTextField
@@ -70,8 +69,6 @@ import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.util.Screen
 import eu.kanade.presentation.util.relativeTimeSpanString
 import haruka.i18n.HR
-import haruka.motion.AnimationProfile
-import haruka.motion.LocalAnimationProfile
 import haruka.sync.SyncManager
 import haruka.sync.remote.SyncError
 import haruka.sync.store.RemovalOrigin
@@ -363,14 +360,7 @@ private fun SyncStatus(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
         )
-        if (state.running) {
-            // REDUCED uses a flat bar because the travelling wave is decorative motion.
-            if (LocalAnimationProfile.current == AnimationProfile.REDUCED) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            } else {
-                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-        }
+        if (state.running) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         // While signed out the account section is the call to action; a stale result would only repeat it.
         when (val result = state.lastResult.takeIf { canSync }) {
             is SyncLastResult.Synced -> if (result.conflicts > 0) {
