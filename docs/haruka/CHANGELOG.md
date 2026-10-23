@@ -3,6 +3,18 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
+## [0.1.0-beta.6]
+
+Unreleased.
+
+### From Mihon (main at d001e6f)
+- High quality renderer: pages still loading show the reader's usual progress ring instead of a growing grey circle; new image and tile filters (load your own shaders) and a "Disable double tap gestures" option; pages decode at the size they are shown, using less memory.
+- The download queue is rebuilt in Compose.
+- Covers no longer reload when you remove a series from the library.
+- Library updates start with the sources that have the most series.
+- The "Split tall images" download option is gone; the long strip reader already decodes tall pages in strips, and splitting made PNG and WebP pages lossy.
+- Settings › Advanced can redact sensitive headers in logcat.
+
 ## [0.1.0-beta.5]
 
 Library chapter counts that ignore duplicate copies, an Inflated counts shelf, Start reading at the preferred copy, sane missing-chapter counts, and a readability pass on the Hoshino library.
