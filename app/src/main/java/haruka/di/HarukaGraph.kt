@@ -5,6 +5,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import haruka.chapter.dedup.DedupSettings
 import haruka.chapter.dedup.OfficialCatalogLoader
+import haruka.library.FetchOnAdd
 import haruka.library.LibraryToggle
 import haruka.preference.HarukaPreferences
 import haruka.sync.SyncManager
@@ -19,6 +20,7 @@ import mihon.app.di.appGraph
 interface HarukaGraph {
     val harukaPreferences: HarukaPreferences
     val libraryToggle: LibraryToggle
+    val fetchOnAdd: FetchOnAdd
     val updateErrorStore: UpdateErrorStore
     val dedupSettings: DedupSettings
     val officialCatalogLoader: OfficialCatalogLoader

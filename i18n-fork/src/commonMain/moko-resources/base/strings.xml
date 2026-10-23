@@ -15,6 +15,9 @@
     <string name="pref_related_titles_summary">Show titles suggested by the source on the entry screen, when the extension supports it</string>
     <string name="pref_compact_titles">Hide alternative names in titles</string>
     <string name="pref_compact_titles_summary">Shorten titles that end with a list of alternative names, like \"Title (Alt 1/ Alt 2)\"</string>
+    <string name="pref_fetch_on_add">Load chapters when adding</string>
+    <string name="pref_fetch_on_add_summary">When you add a series without opening it, load its details and chapter list right away instead of at the next library update</string>
+    <string name="fetch_on_add_failed">Couldn\'t load chapters for %1$s</string>
     <string name="dedup_title">Duplicate chapters</string>
     <string name="dedup_summary">Group copies from different scanlators and pick one</string>
     <string name="dedup_group">Group duplicate chapters</string>

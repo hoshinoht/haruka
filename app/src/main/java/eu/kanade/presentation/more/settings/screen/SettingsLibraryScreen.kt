@@ -260,6 +260,7 @@ object SettingsLibraryScreen : SearchableSettings {
                 ),
                 // FORK -->
                 haruka.chapter.dedup.ui.dedupSettingsPreference(),
+                haruka.library.fetchOnAddPreference(),
                 // FORK <--
             ),
         )
