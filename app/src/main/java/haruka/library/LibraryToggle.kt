@@ -114,13 +114,8 @@ class LibraryToggle(
 
     fun remove(manga: Manga) {
         appScope.launch {
-            val coverLastModified = manga.removeCovers(coverCache).coverLastModified
-            updateManga.await(
-                MangaUpdate(manga.id) {
-                    favoriteAt = null
-                    if (coverLastModified != manga.coverLastModified) this.coverLastModified = coverLastModified
-                },
-            )
+            manga.removeCovers(coverCache)
+            updateManga.await(MangaUpdate(manga.id) { favoriteAt = null })
         }
     }
 
