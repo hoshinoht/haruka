@@ -9,6 +9,13 @@ Unreleased.
 
 ### Library
 - Series you add without opening them (long-press in Browse, global search or related titles) now load their details and chapter list right away, one at a time in the background, instead of sitting at 0 chapters until the next library update. Their chapters don't show up in Updates as new. Settings › Library › Load chapters when adding turns it off.
+- Your own shelves: under Library shelves › Your shelves, add a shelf from a library search (for example `unread>0 source:mangadex -genre:romance`); the editor shows how many series match as you type. "Group library by" adds one shelf per source, publication status, tracker or author with 2 or more series. "See all" works on these shelves too.
+
+### Reader
+- Detect long strips: a series still on the default reading mode opens in long strip when its tags say webtoon, long strip, manhwa or manhua; otherwise the first chapter's pages 2–4 are measured from their image headers (no extra download) and tall pages switch it to long strip once. A series with normal pages stays on the default, and a mode you pick yourself is never changed. Settings › Reader › Detect long strips turns it off.
+
+### Downloads
+- Settings › Data and storage › Downloads storage shows how much space your downloads use, by source and by series, without opening any files. It can remove downloads of series no longer in your library, and delete read chapters (keeping bookmarked chapters and excluded categories as your download settings say), optionally including copies of chapters you read in another version. Folders it can't match to a series are listed for you to check and are never deleted.
 
 ### Backup
 - Creating a backup, and picking a file to restore, no longer decodes every chapter and history entry just to check which trackers it uses. On a Galaxy S25+ with about 950 series, creating a backup takes 7–8 s instead of 28–32 s (debug build). The backup files are unchanged and still restore in Mihon.
