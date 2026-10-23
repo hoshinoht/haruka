@@ -30,6 +30,13 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
     /** Load details and chapters of a series added from a listing (browse, global search, related titles). */
     val fetchOnAdd: Preference<Boolean> = preferenceStore.getBoolean("haruka_fetch_on_add", true)
 
+    /** Open a series left on the Default reading mode as a long strip when its tags or page shapes say it is one. */
+    val autoReadingMode: Preference<Boolean> = preferenceStore.getBoolean("haruka_auto_reading_mode", true)
+
+    /** Ids of series the automatic reading mode has decided, so none is detected twice. Device-local, never synced. */
+    val autoReadingModeDecided: Preference<Set<String>> =
+        preferenceStore.getStringSet(Preference.appStateKey("haruka_auto_reading_mode_decided"), emptySet())
+
     /** The library as one scroll: a pinned Collection header and dividers that follow the sort. */
     val libraryShelves: Preference<Boolean> = preferenceStore.getBoolean("haruka_library_shelves", false)
 

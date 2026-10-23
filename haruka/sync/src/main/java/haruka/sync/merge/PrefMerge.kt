@@ -16,6 +16,7 @@ val SYNCED_PREF_KEYS: Set<String> = setOf(
     "haruka_compact_titles",
     "haruka_updates_momotalk",
     "haruka_fetch_on_add",
+    "haruka_auto_reading_mode",
     "haruka_library_shelves",
     "haruka_library_shelf_continue_reading",
     "haruka_library_shelf_new_chapters",
