@@ -131,6 +131,7 @@ class ReaderViewModel(
     // FORK -->
     private val harukaDedup: haruka.chapter.dedup.DedupSurfaces,
     private val harukaSyncTriggers: haruka.sync.SyncTriggers,
+    private val harukaAutoReadingMode: haruka.reader.AutoReadingMode,
     // FORK <--
 ) : ViewModel() {
 
@@ -352,7 +353,10 @@ class ReaderViewModel(
     private suspend fun init() {
         withContext(Dispatchers.IO) {
             try {
-                val manga = getManga.await(mangaId) ?: error("Requested manga of id $mangaId not found")
+                // FORK -->
+                val manga = (getManga.await(mangaId) ?: error("Requested manga of id $mangaId not found"))
+                    .let { harukaAutoReadingMode.onOpen(it) }
+                // FORK <--
                 val source = sourceManager.getOrStub(manga.source)
                 incognitoMode = getIncognitoState.await(manga.source)
                 mutableState.update { it.copy(manga = manga, source = source) }
@@ -371,6 +375,16 @@ class ReaderViewModel(
 
                 chapterList = loadChapterList()
                 loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
+                // FORK -->
+                state.value.viewerChapters?.let { chapters ->
+                    harukaAutoReadingMode.checkPageShape(
+                        viewModelScope,
+                        chapters.currChapter,
+                        { this@ReaderViewModel.manga },
+                        ::setMangaReadingMode,
+                    )
+                }
+                // FORK <--
             } catch (e: Throwable) {
                 if (e is CancellationException) {
                     throw e
