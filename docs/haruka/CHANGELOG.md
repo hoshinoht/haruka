@@ -13,6 +13,9 @@ Unreleased.
 ### Backup
 - Creating a backup, and picking a file to restore, no longer decodes every chapter and history entry just to check which trackers it uses. On a Galaxy S25+ with about 950 series, creating a backup takes 7–8 s instead of 28–32 s (debug build). The backup files are unchanged and still restore in Mihon.
 
+### Fixes
+- High quality renderer: online chapters show their first page in a few seconds again. The page you opened was put back in the download queue behind the rest of the chapter, so a long chapter could take 40 s to appear (a 109-page Kagane chapter on a Galaxy S25+: 40 s before, 4–5 s now).
+
 ### From Mihon (main at d001e6f)
 - High quality renderer: pages still loading show the reader's usual progress ring instead of a growing grey circle; new image and tile filters (load your own shaders) and a "Disable double tap gestures" option; pages decode at the size they are shown, using less memory.
 - The download queue is rebuilt in Compose.
