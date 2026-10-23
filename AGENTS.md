@@ -72,3 +72,13 @@ scripts/haruka/perf/trace.sh /tmp/scroll.pftrace                       # Perfett
 ```
 
 Compare against the previous run; reference on a Galaxy S25+ with ~950 series: cold start ~590 ms (floored by Mihon's 500 ms splash), jank under 1.5% on all three lists.
+
+## Cleanup at the end of a session
+
+Always clean up when finished for the session or day, after the work is merged and the release (if any) is installed:
+
+- `./gradlew clean` (and `--stop` for the daemons), plus the build output of any extra worktrees.
+- Remove worktrees made for lanes or comparisons (`git worktree remove`, then `git worktree prune`) and delete their merged lane branches.
+- Delete scratch files outside the repo: APKs copied to `/tmp`, screenshots, pulled databases and backups (they contain the owner's library), throwaway test files.
+- Delete test files written to the phone (test backups in Downloads, dummy folders) and put Haruka Dev settings changed for testing back to their defaults.
+- Keep `build/haruka-release/` only until its APKs are uploaded or installed; it is gitignored and rebuilt by `scripts/haruka/build-release.sh`.
