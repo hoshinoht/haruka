@@ -4,6 +4,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import eu.kanade.tachiyomi.BuildConfig
+import haruka.library.CustomShelf
+import haruka.library.CustomShelves
+import haruka.library.LibraryGroupBy
 import haruka.migration.SourcePreset
 import haruka.migration.SourcePresets
 import haruka.motion.AnimationProfile
@@ -44,6 +47,18 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
         preferenceStore.getBoolean("haruka_library_shelf_needs_new_source", true)
     val libraryShelfInflatedCounts: Preference<Boolean> =
         preferenceStore.getBoolean("haruka_library_shelf_inflated_counts", true)
+
+    /** Shelves defined by a library search query, below the built-in ones, in the user's order. */
+    val customShelves: Preference<List<CustomShelf>> = preferenceStore.getObjectFromString(
+        key = "haruka_custom_shelves",
+        defaultValue = emptyList(),
+        serializer = CustomShelves::encode,
+        deserializer = CustomShelves::decode,
+    )
+
+    /** One generated shelf per source, status, tracker or shared author, below the custom shelves. */
+    val libraryGroupBy: Preference<LibraryGroupBy> =
+        preferenceStore.getEnum("haruka_library_group_by", LibraryGroupBy.NONE)
 
     /** Motion across the app; pill swipe actions are part of [AnimationProfile.EXPRESSIVE]. */
     val animationProfile: Preference<AnimationProfile> =

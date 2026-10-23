@@ -60,4 +60,8 @@
         <item quantity="one">%d unread chapter</item>
         <item quantity="other">%d unread chapters</item>
     </plurals>
+    <plurals name="custom_shelf_matches">
+        <item quantity="one">%d series matches</item>
+        <item quantity="other">%d series match</item>
+    </plurals>
 </resources>

@@ -39,8 +39,8 @@ import eu.kanade.presentation.library.components.MangaListItem
 import eu.kanade.presentation.library.components.UnreadBadge
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import haruka.i18n.HR
+import haruka.library.SHELF_CAP
 import haruka.library.Section
-import haruka.library.Shelf
 import haruka.library.ShelfKind
 import haruka.library.SortSections
 import haruka.library.filterToShelf
@@ -133,23 +133,35 @@ fun ShelvesLibrary(
         val isSearching = !searchQuery.isNullOrEmpty()
 
         // "See all": the Collection shows one shelf's whole membership. In memory only, never a filter preference.
-        var shelfFilter by rememberSaveable { mutableStateOf<ShelfKind?>(null) }
+        var shelfFilter by rememberSaveable { mutableStateOf<String?>(null) }
         LaunchedEffect(isSearching) { if (isSearching) shelfFilter = null }
-        val filter = shelfFilter.takeUnless { isSearching }
+        val filterKey = shelfFilter.takeUnless { isSearching }
+        val filterKind = filterKey?.let { key -> ShelfKind.entries.firstOrNull { it.filterKey() == key } }
+        val filterShelf = filterKey.takeIf { filterKind == null }?.let { key ->
+            shelfData?.named?.firstOrNull { it.key == key }
+        }
+        // A custom shelf deleted or emptied, or a group gone, takes its filter with it
+        LaunchedEffect(filterKey, shelfData) {
+            if (filterKey != null && filterKind == null && shelfData != null && filterShelf == null) shelfFilter = null
+        }
+        val filterTitle = filterKind?.let { stringResource(it.title) } ?: filterShelf?.name
         val unavailableSources = shelfData?.unavailableSources.orEmpty()
         val inflated = shelfData?.inflated.orEmpty()
-        val shown = remember(items, filter, unavailableSources, inflated) {
-            if (filter == null) {
-                items
-            } else {
-                filterToShelf(items, filter, System.currentTimeMillis()) {
+        val shown = remember(items, filterKind, filterShelf, unavailableSources, inflated) {
+            when {
+                filterKind != null -> filterToShelf(items, filterKind, System.currentTimeMillis()) {
                     it.toShelfInput(unavailableSources, inflated)
                 }
+                filterShelf != null -> {
+                    val members = filterShelf.ids.toHashSet()
+                    items.filter { it.id in members }
+                }
+                else -> items
             }
         }
 
         // Only when there are chips to show: the toolbar already carries the count
-        val hasHeader = chipCategories != null || filter != null
+        val hasHeader = chipCategories != null || filterTitle != null
         val header: @Composable (Boolean, Dp) -> Unit = { isPinned, headerBleed ->
             CollectionHeader(
                 categories = chipCategories,
@@ -158,7 +170,7 @@ fun ShelvesLibrary(
                 onChangeCurrentPage = onChangeCurrentPage,
                 pinned = isPinned,
                 bleed = headerBleed,
-                filter = filter,
+                filterTitle = filterTitle,
                 onClearFilter = { shelfFilter = null },
             )
         }
@@ -183,11 +195,12 @@ fun ShelvesLibrary(
 
         val gridState = rememberSaveable(currentPage, saver = LazyGridState.Saver) { LazyGridState() }
         val shelves = shelfData?.shelves.takeUnless { isSearching }.orEmpty()
+        val named = shelfData?.named.takeUnless { isSearching }.orEmpty()
         val shelfItems = shelfData?.items.orEmpty()
         val continueReading = shelves.firstOrNull { it.kind == ShelfKind.ContinueReading }
             ?.ids.orEmpty().mapNotNull(shelfItems::get)
         // Index of the Collection header: after the global search row or the shelves above it
-        val headerIndex = if (isSearching) 1 else shelves.size
+        val headerIndex = if (isSearching) 1 else shelves.size + named.size
         val pinned by remember(headerIndex) {
             derivedStateOf {
                 gridState.firstVisibleItemIndex > headerIndex ||
@@ -198,8 +211,8 @@ fun ShelvesLibrary(
         val scrollTo: suspend (Int) -> Unit = { index ->
             if (reducedMotion) gridState.scrollToItem(index) else gridState.animateScrollToItem(index)
         }
-        val onSeeAll: (ShelfKind) -> Unit = { kind ->
-            shelfFilter = kind
+        val onSeeAll: (String) -> Unit = { key ->
+            shelfFilter = key
             scope.launch { scrollTo(headerIndex) }
         }
         // Re-tapping the Library tab: back to the top, or upstream's settings sheet when already there
@@ -228,7 +241,7 @@ fun ShelvesLibrary(
         }
         // A range runs over the category's full list, so under a shelf filter it would pick hidden series too
         val onLongClick: (LibraryManga) -> Unit = {
-            if (filter == null) onToggleRangeSelection(category, it) else onToggleSelection(category, it)
+            if (filterTitle == null) onToggleRangeSelection(category, it) else onToggleSelection(category, it)
         }
 
         // Only on the very first display: wait for the shelves so the grid doesn't open past where they appear
@@ -279,8 +292,26 @@ fun ShelvesLibrary(
                         }
                     }
                 } else {
-                    shelfRow(shelf, shelf.ids.mapNotNull(shelfItems::get), bleed, shelfActions) { onSeeAll(shelf.kind) }
+                    shelfRow(
+                        key = shelf.kind.name,
+                        title = { stringResource(shelf.kind.title) },
+                        items = shelf.ids.mapNotNull(shelfItems::get),
+                        total = shelf.total,
+                        bleed = bleed,
+                        actions = shelfActions,
+                        sourceUnavailable = shelf.kind == ShelfKind.NeedsNewSource,
+                    ) { onSeeAll(shelf.kind.filterKey()) }
                 }
+            }
+            for (shelf in named) {
+                shelfRow(
+                    key = shelf.key,
+                    title = { shelf.name },
+                    items = shelf.ids.subList(0, minOf(SHELF_CAP, shelf.ids.size)).mapNotNull(shelfItems::get),
+                    total = shelf.ids.size,
+                    bleed = bleed,
+                    actions = shelfActions,
+                ) { onSeeAll(shelf.key) }
             }
 
             if (hasHeader) {
@@ -312,25 +343,31 @@ fun ShelvesLibrary(
 // A shelf as one full-span grid item, so nothing scrolls vertically inside the grid. Always one item per shelf,
 // so the Collection header's index is the number of shelves.
 private fun LazyGridScope.shelfRow(
-    shelf: Shelf,
+    key: String,
+    title: @Composable () -> String,
     items: List<LibraryItem>,
+    total: Int,
     bleed: Dp,
     actions: ShelfActions,
+    sourceUnavailable: Boolean = false,
     onSeeAll: () -> Unit,
 ) {
-    item(key = "shelf-${shelf.kind.name}", span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_row") {
+    item(key = "shelf-$key", span = { GridItemSpan(maxLineSpan) }, contentType = "shelf_row") {
         Column(Modifier.horizontalBleed(bleed)) {
-            ShelfTitle(stringResource(shelf.kind.title), shelf.total, onSeeAll)
+            ShelfTitle(title(), total, onSeeAll)
             ShelfRow(
                 items = items,
-                total = shelf.total,
+                total = total,
                 actions = actions,
                 onSeeAll = onSeeAll,
-                sourceUnavailable = shelf.kind == ShelfKind.NeedsNewSource,
+                sourceUnavailable = sourceUnavailable,
             )
         }
     }
 }
+
+// "See all" filter keys: a built-in shelf by kind, a custom or generated one by its NamedShelf key
+private fun ShelfKind.filterKey() = "kind:$name"
 
 private fun LazyGridScope.divider(section: Section, content: @Composable () -> Unit) {
     item(

@@ -24,6 +24,8 @@ internal val SYNCED_PREF_STORAGE: Map<String, PrefStorage> = mapOf(
     "haruka_library_shelf_not_started" to PrefStorage.BOOLEAN,
     "haruka_library_shelf_needs_new_source" to PrefStorage.BOOLEAN,
     "haruka_library_shelf_inflated_counts" to PrefStorage.BOOLEAN,
+    "haruka_custom_shelves" to PrefStorage.STRING,
+    "haruka_library_group_by" to PrefStorage.STRING,
     "haruka_animation_profile" to PrefStorage.STRING,
     "haruka_dedup_group_chapters" to PrefStorage.BOOLEAN,
     "haruka_dedup_merge_split" to PrefStorage.BOOLEAN,

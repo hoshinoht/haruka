@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.category.visualName
 import haruka.i18n.HR
-import haruka.library.ShelfKind
 import haruka.motion.FilterChip
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Close
@@ -58,7 +57,7 @@ internal fun CollectionHeader(
     onChangeCurrentPage: (Int) -> Unit,
     pinned: Boolean,
     bleed: Dp,
-    filter: ShelfKind?,
+    filterTitle: String?,
     onClearFilter: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -74,7 +73,7 @@ internal fun CollectionHeader(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (filter != null) ShelfFilterChip(filter, onClearFilter)
+            if (filterTitle != null) ShelfFilterChip(filterTitle, onClearFilter)
             categories.orEmpty().forEachIndexed { index, category ->
                 val itemCount = getItemCountForCategory(category)
                 FilterChip(
@@ -96,10 +95,9 @@ internal fun CollectionHeader(
     }
 }
 
-/** The temporary "See all" filter: tapping it, or its ×, shows every series again. */
+/** The temporary "See all" filter, named [title]: tapping it, or its ×, shows every series again. */
 @Composable
-private fun ShelfFilterChip(filter: ShelfKind, onClear: () -> Unit) {
-    val title = stringResource(filter.title)
+private fun ShelfFilterChip(title: String, onClear: () -> Unit) {
     val description = stringResource(HR.strings.library_shelf_filter_clear, title)
     FilterChip(
         selected = true,

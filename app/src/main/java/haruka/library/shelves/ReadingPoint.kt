@@ -4,6 +4,7 @@ import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import eu.kanade.presentation.util.formatChapterNumber
+import eu.kanade.tachiyomi.data.track.TrackerManager
 import haruka.stale.StaleSources
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -11,8 +12,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import mihon.app.di.appGraph
 import tachiyomi.domain.chapter.interactor.GetChapter
 import tachiyomi.domain.history.interactor.GetHistory
+import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.source.model.StubSource
 import tachiyomi.domain.source.service.SourceManager
+import tachiyomi.domain.track.interactor.GetTracksPerManga
 import kotlin.time.Instant
 
 /** Where the reader stopped in a series: its last-read chapter, and the page when that chapter isn't finished. */
@@ -25,9 +28,12 @@ interface ShelvesGraph {
     val getChapter: GetChapter
     val staleSources: StaleSources
     val sourceManager: SourceManager
+    val getTracksPerManga: GetTracksPerManga
+    val trackerManager: TrackerManager
+    val getLibraryManga: GetLibraryManga
 }
 
-private val Context.shelvesGraph get() = appGraph as ShelvesGraph
+internal val Context.shelvesGraph get() = appGraph as ShelvesGraph
 
 /**
  * Reads the last-read chapter of [mangaId] from its history. Chapters keep the last page read but not the page
