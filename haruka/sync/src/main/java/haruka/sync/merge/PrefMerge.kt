@@ -23,6 +23,8 @@ val SYNCED_PREF_KEYS: Set<String> = setOf(
     "haruka_library_shelf_not_started",
     "haruka_library_shelf_needs_new_source",
     "haruka_library_shelf_inflated_counts",
+    "haruka_custom_shelves",
+    "haruka_library_group_by",
     "haruka_animation_profile",
     "haruka_dedup_group_chapters",
     "haruka_dedup_merge_split",

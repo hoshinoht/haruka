@@ -72,4 +72,8 @@
         <item quantity="one">Delete %1$d downloaded chapter? This frees %2$s.</item>
         <item quantity="other">Delete %1$d downloaded chapters? This frees %2$s.</item>
     </plurals>
+    <plurals name="custom_shelf_matches">
+        <item quantity="one">%d series matches</item>
+        <item quantity="other">%d series match</item>
+    </plurals>
 </resources>

@@ -7,8 +7,10 @@ import androidx.compose.ui.platform.LocalContext
 import eu.kanade.presentation.more.settings.Preference
 import haruka.di.harukaGraph
 import haruka.i18n.HR
+import haruka.library.LibraryGroupBy
 import haruka.library.ShelfKind
 import haruka.preference.HarukaPreferences
+import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.core.common.preference.Preference as PreferenceData
@@ -39,9 +41,11 @@ internal fun rememberEnabledShelves(): Set<ShelfKind> {
     }
 }
 
-/** The main toggle, then one per shelf, shown only while the main toggle is on. */
+/**
+ * The main toggle, then one per shelf, "Your shelves" and the grouping, shown only while the main toggle is on.
+ */
 @Composable
-fun libraryShelvesPreferences(): Array<Preference.PreferenceItem.SwitchPreference> {
+fun libraryShelvesPreferences(): Array<Preference.PreferenceItem<out Any, out Any>> {
     val preferences = LocalContext.current.harukaGraph.harukaPreferences
     val main = remember { preferences.libraryShelves }
     val enabled by main.collectAsState()
@@ -52,11 +56,33 @@ fun libraryShelvesPreferences(): Array<Preference.PreferenceItem.SwitchPreferenc
             visible = enabled,
         )
     }
+    val groupBy = Preference.PreferenceItem.ListPreference(
+        preference = remember { preferences.libraryGroupBy },
+        entries = mapOf(
+            LibraryGroupBy.NONE to stringResource(MR.strings.none),
+            LibraryGroupBy.SOURCE to stringResource(HR.strings.library_group_by_source),
+            LibraryGroupBy.STATUS to stringResource(MR.strings.status),
+            LibraryGroupBy.TRACKER to stringResource(HR.strings.library_group_by_tracker),
+            LibraryGroupBy.AUTHOR to stringResource(HR.strings.library_group_by_author),
+        ),
+        title = stringResource(HR.strings.pref_library_group_by),
+        visible = enabled,
+    )
+    // A custom preference has no visibility flag, so it is left out while shelves are off
+    val custom = if (enabled) {
+        val title = stringResource(HR.strings.pref_custom_shelves)
+        listOf(Preference.PreferenceItem.CustomPreference(title) { CustomShelvesSection() })
+    } else {
+        emptyList()
+    }
     return arrayOf(
         Preference.PreferenceItem.SwitchPreference(
             preference = main,
             title = stringResource(HR.strings.pref_library_shelves),
             subtitle = stringResource(HR.strings.pref_library_shelves_summary),
         ),
-    ) + shelves
+        *shelves.toTypedArray(),
+        *custom.toTypedArray(),
+        groupBy,
+    )
 }
