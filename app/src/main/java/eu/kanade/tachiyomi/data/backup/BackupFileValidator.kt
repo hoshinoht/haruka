@@ -21,9 +21,16 @@ class BackupFileValidator(
     suspend fun validate(uri: Uri): Results {
         val trackerIds = mutableSetOf<Int>()
         val backup = try {
-            backupDecoder.decodeEntries(uri).collect { manga ->
-                manga.tracking.mapTo(trackerIds) { it.syncId }
+            // FORK --> tracker ids from a wire scan instead of decoding every entry; upstream's decode when it can't
+            val harukaTrackerIds = haruka.backup.scanTrackerIds(uri)?.also(trackerIds::addAll)
+            if (harukaTrackerIds == null) {
+                // FORK <--
+                backupDecoder.decodeEntries(uri).collect { manga ->
+                    manga.tracking.mapTo(trackerIds) { it.syncId }
+                }
+                // FORK -->
             }
+            // FORK <--
             backupDecoder.decodeMetadata(uri).backup
         } catch (e: CancellationException) {
             throw e

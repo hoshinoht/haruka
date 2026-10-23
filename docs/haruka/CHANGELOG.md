@@ -18,6 +18,9 @@ Unreleased.
 - The "Split tall images" download option is gone; the long strip reader already decodes tall pages in strips, and splitting made PNG and WebP pages lossy.
 - Settings › Advanced can redact sensitive headers in logcat.
 
+### Backup
+- Creating a backup, and picking a file to restore, no longer decodes every chapter and history entry just to check which trackers it uses. On a Galaxy S25+ with about 950 series, creating a backup takes 7–8 s instead of 28–32 s (debug build). The backup files are unchanged and still restore in Mihon.
+
 ## [0.1.0-beta.5]
 
 Library chapter counts that ignore duplicate copies, an Inflated counts shelf, Start reading at the preferred copy, sane missing-chapter counts, and a readability pass on the Hoshino library.
