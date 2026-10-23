@@ -60,4 +60,16 @@
         <item quantity="one">%d unread chapter</item>
         <item quantity="other">%d unread chapters</item>
     </plurals>
+    <plurals name="storage_series_size">
+        <item quantity="one">%1$d series · %2$s</item>
+        <item quantity="other">%1$d series · %2$s</item>
+    </plurals>
+    <plurals name="storage_delete_series_confirm">
+        <item quantity="one">Delete the downloads of %1$d series not in your library? This frees %2$s.</item>
+        <item quantity="other">Delete the downloads of %1$d series not in your library? This frees %2$s.</item>
+    </plurals>
+    <plurals name="storage_delete_chapters_confirm">
+        <item quantity="one">Delete %1$d downloaded chapter? This frees %2$s.</item>
+        <item quantity="other">Delete %1$d downloaded chapters? This frees %2$s.</item>
+    </plurals>
 </resources>
