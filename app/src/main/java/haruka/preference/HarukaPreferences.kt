@@ -27,6 +27,9 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
 
     val momotalkUpdates: Preference<Boolean> = preferenceStore.getBoolean("haruka_updates_momotalk", false)
 
+    /** Load details and chapters of a series added from a listing (browse, global search, related titles). */
+    val fetchOnAdd: Preference<Boolean> = preferenceStore.getBoolean("haruka_fetch_on_add", true)
+
     /** The library as one scroll: a pinned Collection header and dividers that follow the sort. */
     val libraryShelves: Preference<Boolean> = preferenceStore.getBoolean("haruka_library_shelves", false)
 

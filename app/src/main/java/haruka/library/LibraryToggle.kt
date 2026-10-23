@@ -62,6 +62,7 @@ class LibraryToggle(
     private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags,
     private val updateManga: UpdateManga,
     private val addTracks: AddTracks,
+    private val fetchOnAdd: FetchOnAdd,
 ) {
 
     sealed interface Dialog {
@@ -109,6 +110,7 @@ class LibraryToggle(
             setMangaDefaultChapterFlags.await(manga)
             addTracks.bindEnhancedTrackers(manga, sourceManager.getOrStub(manga.source))
             updateManga.await(MangaUpdate(manga.id) { favoriteAt = Clock.System.now() })
+            fetchOnAdd.enqueue(manga)
         }
     }
 

@@ -248,6 +248,9 @@ class BrowseSourceViewModel(
             }
 
             updateManga.await(update)
+            // FORK -->
+            if (!manga.favorite) haruka.library.fetchOnAdd(manga)
+            // FORK <--
         }
     }
 
