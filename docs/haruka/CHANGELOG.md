@@ -5,11 +5,14 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 
 ## [0.1.0-beta.6]
 
-Unreleased.
+Your own shelves and shelves grouped by source, status, tracker or author; long strips detected on their own; a downloads storage manager; chapters loaded when you add a series; backups four times faster; and the high quality renderer shows long online chapters right away again.
+
+### Performance
+- Measured on a Galaxy S25+ with about 950 series (release build): cold start 581–594 ms, library jank 0.33%, Updates jank 0.88%, the same as beta.5.
 
 ### Library
 - Series you add without opening them (long-press in Browse, global search or related titles) now load their details and chapter list right away, one at a time in the background, instead of sitting at 0 chapters until the next library update. Their chapters don't show up in Updates as new. Settings › Library › Load chapters when adding turns it off.
-- Your own shelves: under Library shelves › Your shelves, add a shelf from a library search (for example `unread>0 source:mangadex -genre:romance`); the editor shows how many series match as you type. "Group library by" adds one shelf per source, publication status, tracker or author with 2 or more series. "See all" works on these shelves too.
+- Your own shelves: under Settings › Appearance › Library shelves › Your shelves, add a shelf from a library search (for example `unread>0 source:mangadex -genre:romance`); the editor shows how many series match as you type. "Group library by" adds one shelf per source, publication status, tracker or author with 2 or more series. "See all" works on these shelves too.
 
 ### Reader
 - Detect long strips: a series still on the default reading mode opens in long strip when its tags say webtoon, long strip, manhwa or manhua; otherwise the first chapter's pages 2–4 are measured from their image headers (no extra download) and tall pages switch it to long strip once. A series with normal pages stays on the default, and a mode you pick yourself is never changed. Settings › Reader › Detect long strips turns it off.
