@@ -10,6 +10,9 @@ Unreleased.
 ### Library
 - Series you add without opening them (long-press in Browse, global search or related titles) now load their details and chapter list right away, one at a time in the background, instead of sitting at 0 chapters until the next library update. Their chapters don't show up in Updates as new. Settings › Library › Load chapters when adding turns it off.
 
+### Backup
+- Creating a backup, and picking a file to restore, no longer decodes every chapter and history entry just to check which trackers it uses. On a Galaxy S25+ with about 950 series, creating a backup takes 7–8 s instead of 28–32 s (debug build). The backup files are unchanged and still restore in Mihon.
+
 ### From Mihon (main at d001e6f)
 - High quality renderer: pages still loading show the reader's usual progress ring instead of a growing grey circle; new image and tile filters (load your own shaders) and a "Disable double tap gestures" option; pages decode at the size they are shown, using less memory.
 - The download queue is rebuilt in Compose.
@@ -17,9 +20,6 @@ Unreleased.
 - Library updates start with the sources that have the most series.
 - The "Split tall images" download option is gone; the long strip reader already decodes tall pages in strips, and splitting made PNG and WebP pages lossy.
 - Settings › Advanced can redact sensitive headers in logcat.
-
-### Backup
-- Creating a backup, and picking a file to restore, no longer decodes every chapter and history entry just to check which trackers it uses. On a Galaxy S25+ with about 950 series, creating a backup takes 7–8 s instead of 28–32 s (debug build). The backup files are unchanged and still restore in Mihon.
 
 ## [0.1.0-beta.5]
 
