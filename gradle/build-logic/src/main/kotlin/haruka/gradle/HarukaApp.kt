@@ -1,6 +1,7 @@
 package haruka.gradle
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import mihon.gradle.extensions.libs
 import org.gradle.api.Project
 import java.util.Properties
 
@@ -61,6 +62,9 @@ fun configureHarukaApp(project: Project) {
     project.dependencies.add("implementation", project.project(":i18n-fork"))
     // Google Identity AuthorizationClient for Drive sync (haruka.sync.auth).
     project.dependencies.add("implementation", "com.google.android.gms:play-services-auth:$PLAY_SERVICES_AUTH")
+    // SqlDriver for fork reads Mihon has no query for (haruka.storage.NonLibraryMangaUrls); same version as :data.
+    val sqldelight = project.libs.versions.sqldelight.asProvider().get()
+    project.dependencies.add("implementation", "app.cash.sqldelight:runtime:$sqldelight")
 }
 
 // Latest stable on Google Maven (play-services-auth maven-metadata.xml, checked 2026-10-19).

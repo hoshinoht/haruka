@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
-import tachiyomi.domain.backup.repository.RestoreRepository
 import tachiyomi.domain.category.repository.CategoryRepository
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.repository.ChapterRepository
@@ -50,7 +49,7 @@ class StorageManagerViewModel(
     private val downloadPreferences: DownloadPreferences,
     private val getFavorites: GetFavorites,
     private val getMangaByUrlAndSourceId: GetMangaByUrlAndSourceId,
-    private val restoreRepository: RestoreRepository,
+    private val nonLibraryMangaUrls: NonLibraryMangaUrls,
     private val chapterRepository: ChapterRepository,
     private val categoryRepository: CategoryRepository,
     private val dedupSurfaces: DedupSurfaces,
@@ -99,7 +98,7 @@ class StorageManagerViewModel(
             .map { KnownSource(it.id, provider.getSourceDirName(it)) }
         val favorites = getFavorites.await()
         val favoritesMatcher = DownloadMatcher(sources, favorites.map { it.toKnown() })
-        val others = nonLibraryManga(sourcesToResolve(folders, favoritesMatcher), favorites)
+        val others = nonLibraryManga(sourcesToResolve(folders, favoritesMatcher))
         val all = favorites + others
         val series = classifyFolders(folders, DownloadMatcher(sources, all.map { it.toKnown() }))
 
@@ -109,19 +108,15 @@ class StorageManagerViewModel(
     }
 
     /**
-     * The non-library manga of [sourceIds]. The manga repository has no listing by source, so this takes every url of
-     * those sources from one query and loads each non-library one by its (source, url) index.
+     * The non-library manga of [sourceIds]. The manga repository has no listing by source, so this takes every
+     * non-library url from one query and loads each manga of those sources by its (source, url) index.
      */
-    private suspend fun nonLibraryManga(sourceIds: Set<Long>, favorites: List<Manga>): List<Manga> {
+    private suspend fun nonLibraryManga(sourceIds: Set<Long>): List<Manga> {
         if (sourceIds.isEmpty()) return emptyList()
-        val favoriteUrls = favorites.filter { it.source in sourceIds }.groupBy({ it.source }, { it.url })
-            .mapValues { it.value.toHashSet() }
-        val urlsBySource = restoreRepository.getMangaUrlsBySourceId()
+        val urlsBySource = nonLibraryMangaUrls.bySource()
         val result = ArrayList<Manga>()
         for (sourceId in sourceIds) {
-            val known = favoriteUrls[sourceId].orEmpty()
             for (url in urlsBySource[sourceId].orEmpty()) {
-                if (url in known) continue
                 getMangaByUrlAndSourceId.await(url, sourceId)?.takeUnless { it.favorite }?.let(result::add)
             }
         }

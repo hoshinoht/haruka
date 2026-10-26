@@ -3,6 +3,16 @@
 Haruka's own changes on top of Mihon. Upstream changes are in [CHANGELOG.md](../../CHANGELOG.md).
 Release notes for each GitHub release are taken from the matching `## [version]` section below.
 
+## [0.1.0-beta.7]
+
+Unreleased.
+
+### From Mihon (0.21.3, main at 007ec9a)
+- Backups are read faster before restoring, and each entry is decoded once while restoring. Checking which trackers a backup uses now decodes only the tracking field, so Haruka's own tracker scan from beta.6 is gone in favour of Mihon's.
+- An installed extension is kept when replacing it with a new version fails.
+- The Shizuku extension installer works with Sui.
+- Tab badges stay visible when the tab label is too long.
+
 ## [0.1.0-beta.6]
 
 Your own shelves and shelves grouped by source, status, tracker or author; long strips detected on their own; a downloads storage manager; chapters loaded when you add a series; backups four times faster; and the high quality renderer shows long online chapters right away again.

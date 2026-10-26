@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.net.Uri
 import dev.zacsweers.metro.Inject
+import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.track.TrackerManager
-import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 import tachiyomi.domain.source.service.SourceManager
 
 @Inject
@@ -21,19 +23,9 @@ class BackupFileValidator(
     suspend fun validate(uri: Uri): Results {
         val trackerIds = mutableSetOf<Int>()
         val backup = try {
-            // FORK --> tracker ids from a wire scan instead of decoding every entry; upstream's decode when it can't
-            val harukaTrackerIds = haruka.backup.scanTrackerIds(uri)?.also(trackerIds::addAll)
-            if (harukaTrackerIds == null) {
-                // FORK <--
-                backupDecoder.decodeEntries(uri).collect { manga ->
-                    manga.tracking.mapTo(trackerIds) { it.syncId }
-                }
-                // FORK -->
-            }
-            // FORK <--
-            backupDecoder.decodeMetadata(uri).backup
-        } catch (e: CancellationException) {
-            throw e
+            backupDecoder.decodeMetadata(uri, TrackedManga.serializer()) { manga ->
+                manga.tracking.mapTo(trackerIds) { it.syncId }
+            }.backup
         } catch (e: Exception) {
             throw IllegalStateException(e)
         }
@@ -64,5 +56,11 @@ class BackupFileValidator(
     data class Results(
         val missingSources: List<String>,
         val missingTrackers: List<String>,
+    )
+
+    // Only the field validation reads, so decoding skips the rest of each entry
+    @Serializable
+    private class TrackedManga(
+        @ProtoNumber(18) val tracking: List<BackupTracking> = emptyList(),
     )
 }
