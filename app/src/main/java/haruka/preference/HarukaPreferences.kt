@@ -40,6 +40,12 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
     val autoReadingModeDecided: Preference<Set<String>> =
         preferenceStore.getStringSet(Preference.appStateKey("haruka_auto_reading_mode_decided"), emptySet())
 
+    /** Pages of a chapter loaded in the background (the next chapter) that download together at first; 1 = upstream. */
+    val parallelPageDownloads: Preference<Int> = preferenceStore.getInt("haruka_parallel_page_downloads", 1)
+
+    /** Largest chunk of pages of the chapter being read that download together; 5 = upstream. */
+    val pagesDownloadedAtOnce: Preference<Int> = preferenceStore.getInt("haruka_pages_downloaded_at_once", 5)
+
     /** The library as one scroll: a pinned Collection header and dividers that follow the sort. */
     val libraryShelves: Preference<Boolean> = preferenceStore.getBoolean("haruka_library_shelves", false)
 

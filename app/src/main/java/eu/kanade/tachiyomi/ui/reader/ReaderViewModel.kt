@@ -481,6 +481,9 @@ class ReaderViewModel(
      * pages being read. Skipped when loading ahead isn't allowed on this network.
      */
     private fun preloadNextChapterAfter(chapters: ViewerChapters) {
+        // FORK(reader-loading) --> page loading settings for HttpPageLoader, which has no context
+        haruka.reader.loading.ReaderLoading.install(context)
+        // FORK <--
         val nextChapter = chapters.nextChapter ?: return
         nextChapterPreloadJob?.cancel()
         nextChapterPreloadJob = viewModelScope.launch(Dispatchers.IO) {
@@ -488,9 +491,10 @@ class ReaderViewModel(
             val current = chapters.currChapter
             // Only online pages load in the background; other loaders load a page once it's shown
             if (current.pageLoader is HttpPageLoader) {
-                current.pages.orEmpty().forEach { page ->
-                    page.statusFlow.first { it == Page.State.Ready || it is Page.State.Error }
-                }
+                // FORK(reader-loading) --> start once the pages just ahead are loaded or the end is near, not only once
+                // the whole chapter is
+                haruka.reader.loading.canPrefetchNextChapter(current, state.map { it.currentPage }).first { it }
+                // FORK <--
             }
             preload(nextChapter)
         }
