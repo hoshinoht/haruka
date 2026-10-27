@@ -328,6 +328,9 @@ object SettingsDataScreen : SearchableSettings {
                     preference = libraryPreferences.autoClearChapterCache,
                     title = stringResource(MR.strings.pref_auto_clear_chapter_cache),
                 ),
+                // FORK(cache-cap) -->
+                haruka.storage.chapterCacheLimitPreference(chapterCache) { cacheReadableSizeSema++ },
+                // FORK <--
                 // FORK -->
                 haruka.storage.downloadsStoragePreference(),
                 // FORK <--

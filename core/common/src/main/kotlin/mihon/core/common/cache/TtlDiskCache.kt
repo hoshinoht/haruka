@@ -164,6 +164,23 @@ class TtlDiskCache(
         count
     }
 
+    // FORK(cache-cap) -->
+
+    /**
+     * Removes the entries written longest ago until the rest take at most [maxBytes], returning how many it removed.
+     */
+    suspend fun trimToSize(maxBytes: Long): Int = locked {
+        var removed = 0
+        // Stable, so entries written at the same time go in the order they were written
+        for (entry in entries.values.sortedBy { it.writtenAt }) {
+            if (size <= maxBytes) break
+            remove(entry)
+            removed++
+        }
+        removed
+    }
+    // FORK <--
+
     /**
      * Runs [block] on the [dispatcher] holding the lock, once the entries are loaded.
      */

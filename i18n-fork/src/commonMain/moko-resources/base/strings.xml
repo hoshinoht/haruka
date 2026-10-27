@@ -238,4 +238,7 @@
     <string name="storage_delete_series">Delete downloads of %1$s</string>
     <string name="storage_size_line">%1$s · %2$s</string>
     <string name="reader_page_preview">Pages</string>
+    <string name="chapter_cache_limit">Chapter cache limit</string>
+    <string name="chapter_cache_limit_summary">Pages read online are kept for a day. Removes the oldest when the cache grows past this size</string>
+    <string name="chapter_cache_limit_none">No limit</string>
 </resources>
