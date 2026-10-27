@@ -53,6 +53,7 @@ fun ReaderChapterListAction(onClick: () -> Unit) {
 fun ReaderChapterSheet(
     viewModel: ReaderViewModel,
     onDismissRequest: () -> Unit,
+    onSelectChapter: (ReaderChapter) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val manga = state.manga
@@ -82,7 +83,7 @@ fun ReaderChapterSheet(
                         item = item,
                         manga = manga,
                         isCurrent = item == current,
-                        onClick = { viewModel.harukaOpenChapter(item) },
+                        onClick = { onSelectChapter(item) },
                     )
                 }
             }

@@ -321,7 +321,16 @@ class ReaderActivity : BaseActivity() {
                 }
                 // FORK(chapter-sheet) -->
                 is ReaderViewModel.Dialog.ChapterList -> {
-                    haruka.reader.ui.ReaderChapterSheet(viewModel = viewModel, onDismissRequest = onDismissRequest)
+                    haruka.reader.ui.ReaderChapterSheet(
+                        viewModel = viewModel,
+                        onDismissRequest = onDismissRequest,
+                        // Like the prev/next buttons: the guarded switch, then the first page
+                        onSelectChapter = { chapter ->
+                            lifecycleScope.launch {
+                                if (viewModel.harukaOpenChapter(chapter)) moveToPageIndex(0)
+                            }
+                        },
+                    )
                 }
                 // FORK <--
                 null -> {}
