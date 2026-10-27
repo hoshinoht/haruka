@@ -74,6 +74,9 @@ fun ReaderAppBars(
     cropEnabled: Boolean,
     onClickCropBorder: () -> Unit,
     onClickSettings: () -> Unit,
+    // FORK(chapter-sheet) -->
+    extraActions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+    // FORK <--
 ) {
     val backgroundColor = MaterialTheme.colorScheme
         .surfaceColorAtElevation(3.dp)
@@ -173,6 +176,9 @@ fun ReaderAppBars(
                     cropEnabled = cropEnabled,
                     onClickCropBorder = onClickCropBorder,
                     onClickSettings = onClickSettings,
+                    // FORK(chapter-sheet) -->
+                    extraActions = extraActions,
+                    // FORK <--
                 )
             }
         }

@@ -277,7 +277,6 @@ dependencies {
     implementation(libs.jsoup)
 
     // Disk
-    implementation(libs.diskLruCache)
     implementation(libs.unifile)
 
     // Preferences

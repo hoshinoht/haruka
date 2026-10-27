@@ -67,6 +67,9 @@ object SettingsReaderScreen : SearchableSettings {
                 title = stringResource(MR.strings.pref_load_ahead_only_over_wifi),
                 subtitle = stringResource(MR.strings.pref_load_ahead_only_over_wifi_summary),
             ),
+            // FORK(reader-loading) -->
+            haruka.reader.loading.readerLoadingPreferences(),
+            // FORK <--
             getDisplayGroup(readerPreferences = readerPref),
             getEInkGroup(readerPreferences = readerPref),
             getReadingGroup(readerPreferences = readerPref),

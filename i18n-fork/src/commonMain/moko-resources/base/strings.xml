@@ -22,6 +22,11 @@
     <string name="fetch_on_add_failed">Couldn\'t load chapters for %1$s</string>
     <string name="pref_auto_reading_mode">Detect long strips</string>
     <string name="pref_auto_reading_mode_summary">Open series on the default reading mode in long strip when their tags or page shapes show they\'re webtoons</string>
+    <string name="pref_category_haruka">Haruka</string>
+    <string name="pref_parallel_page_downloads">Parallel page downloads</string>
+    <string name="pref_parallel_page_downloads_summary">%1$s. First pages of the next chapter that download together while you read</string>
+    <string name="pref_pages_downloaded_at_once">Pages downloaded at once</string>
+    <string name="pref_pages_downloaded_at_once_summary">%1$s. Higher is faster on a good connection, but some sources limit it</string>
     <string name="dedup_title">Duplicate chapters</string>
     <string name="dedup_summary">Group copies from different scanlators and pick one</string>
     <string name="dedup_group">Group duplicate chapters</string>
@@ -233,4 +238,8 @@
     <string name="storage_nothing_to_delete">Nothing to delete</string>
     <string name="storage_delete_series">Delete downloads of %1$s</string>
     <string name="storage_size_line">%1$s · %2$s</string>
+    <string name="reader_page_preview">Pages</string>
+    <string name="chapter_cache_limit">Chapter cache limit</string>
+    <string name="chapter_cache_limit_summary">Pages read online are kept for a day. Removes the oldest when the cache grows past this size</string>
+    <string name="chapter_cache_limit_none">No limit</string>
 </resources>

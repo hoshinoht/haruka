@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.content.Context
 import android.net.Uri
-import androidx.annotation.IntRange
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -25,7 +24,6 @@ import eu.kanade.domain.manga.model.readingMode
 import eu.kanade.domain.source.interactor.GetIncognitoState
 import eu.kanade.domain.track.interactor.TrackChapter
 import eu.kanade.domain.track.service.TrackPreferences
-import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -47,7 +45,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
-import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.util.chapter.filterDownloaded
 import eu.kanade.tachiyomi.util.editCover
 import eu.kanade.tachiyomi.util.lang.byteSize
@@ -77,6 +74,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import mihon.core.metro.AppCoroutineScope
+import mihon.data.cache.ChapterCache
 import tachiyomi.core.common.preference.toggle
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
@@ -483,6 +481,9 @@ class ReaderViewModel(
      * pages being read. Skipped when loading ahead isn't allowed on this network.
      */
     private fun preloadNextChapterAfter(chapters: ViewerChapters) {
+        // FORK(reader-loading) --> page loading settings for HttpPageLoader, which has no context
+        haruka.reader.loading.ReaderLoading.install(context)
+        // FORK <--
         val nextChapter = chapters.nextChapter ?: return
         nextChapterPreloadJob?.cancel()
         nextChapterPreloadJob = viewModelScope.launch(Dispatchers.IO) {
@@ -490,9 +491,10 @@ class ReaderViewModel(
             val current = chapters.currChapter
             // Only online pages load in the background; other loaders load a page once it's shown
             if (current.pageLoader is HttpPageLoader) {
-                current.pages.orEmpty().forEach { page ->
-                    page.statusFlow.first { it == Page.State.Ready || it is Page.State.Error }
-                }
+                // FORK(reader-loading) --> start once the pages just ahead are loaded or the end is near, not only once
+                // the whole chapter is
+                haruka.reader.loading.canPrefetchNextChapter(current, state.map { it.currentPage }).first { it }
+                // FORK <--
             }
             preload(nextChapter)
         }
@@ -544,12 +546,6 @@ class ReaderViewModel(
             return
         }
         eventChannel.trySend(Event.ReloadViewerChapters)
-    }
-
-    fun onViewerLoaded(viewer: Viewer?) {
-        mutableState.update {
-            it.copy(viewer = viewer)
-        }
     }
 
     /**
@@ -949,10 +945,6 @@ class ReaderViewModel(
         mutableState.update { it.copy(menuVisible = visible) }
     }
 
-    fun showLoadingDialog() {
-        mutableState.update { it.copy(dialog = Dialog.Loading) }
-    }
-
     fun openReadingModeSelectDialog() {
         mutableState.update { it.copy(dialog = Dialog.ReadingModeSelect) }
     }
@@ -973,9 +965,31 @@ class ReaderViewModel(
         mutableState.update { it.copy(dialog = null) }
     }
 
-    fun setBrightnessOverlayValue(value: Int) {
-        mutableState.update { it.copy(brightnessOverlayValue = value) }
+    // FORK(chapter-sheet) -->
+    fun openChapterListDialog() {
+        mutableState.update { it.copy(dialog = Dialog.ChapterList) }
     }
+
+    /** The chapters the reader navigates, in reading order (ascending); empty before the reader has loaded. */
+    fun harukaChapters(): List<ReaderChapter> = if (::chapterList.isInitialized) chapterList else emptyList()
+
+    /**
+     * Opens [chapter] from the chapter sheet the way the toolbar's prev/next buttons do, so a late page event from
+     * the old chapter can't switch back. Returns false when it is already the current chapter.
+     */
+    suspend fun harukaOpenChapter(chapter: ReaderChapter): Boolean {
+        closeDialog()
+        if (chapter == state.value.viewerChapters?.currChapter) return false
+        loadAdjacent(chapter)
+        return true
+    }
+    // FORK <--
+
+    // FORK(page-preview) -->
+    fun openPagePreviewDialog() {
+        mutableState.update { it.copy(dialog = Dialog.PagePreview) }
+    }
+    // FORK <--
 
     /**
      * Saves the image of the selected page on the pictures directory and notifies the UI of the result.
@@ -1139,14 +1153,8 @@ class ReaderViewModel(
         val bookmarked: Boolean = false,
         val isLoadingAdjacentChapter: Boolean = false,
         val currentPage: Int = -1,
-
-        /**
-         * Viewer used to display the pages (pager, webtoon, ...).
-         */
-        val viewer: Viewer? = null,
         val dialog: Dialog? = null,
         val menuVisible: Boolean = false,
-        @IntRange(from = -100, to = 100) val brightnessOverlayValue: Int = 0,
     ) {
         val currentChapter: ReaderChapter?
             get() = viewerChapters?.currChapter
@@ -1156,11 +1164,18 @@ class ReaderViewModel(
     }
 
     sealed interface Dialog {
-        data object Loading : Dialog
         data object Settings : Dialog
         data object ReadingModeSelect : Dialog
         data object OrientationModeSelect : Dialog
         data class PageActions(val page: ReaderPage) : Dialog
+
+        // FORK(chapter-sheet) -->
+        data object ChapterList : Dialog
+        // FORK <--
+
+        // FORK(page-preview) -->
+        data object PagePreview : Dialog
+        // FORK <--
     }
 
     sealed interface Event {
