@@ -34,14 +34,14 @@ Each run opens the manga screen with MainActivity's `SHOW_MANGA` intent, taps th
 ## Limitations
 
 - **No first-page signal on the classic renderer.** ReaderActivity is not exported, so the shell cannot start it with ids. The classic renderer logs nothing per page at release log levels. A `uiautomator` dump takes about 2 s and only shows the "1 / N" page counter, which appears when the page list loads rather than the image. So on the default renderer, only "displayed" is reported, and that is not the page.
-- **First decoded page, not first visible page.** On the high-quality renderer, pages decode in parallel, and the first `Decoded` line can be another page. In the dev baseline's first run, page 2 finished at 3375 ms and page 1 at 3877 ms. In runs 2 and 3, page 1 was first. The number is a lower bound for the first visible page.
+- **First decoded page, not first visible page.** On the high-quality renderer, pages decode in parallel, and the first `Decoded` line can be another page. In one debug-build run, page 2 finished at 3375 ms and page 1 at 3877 ms. In the two runs after it, page 1 was first. The number is a lower bound for the first visible page.
 - **No jank numbers on the high-quality renderer.** It draws outside HWUI, so `gfxinfo` sees only a few menu frames. The script reports n/a when there are fewer than about 10 frames per fling. Use `trace.sh` for that renderer.
 - **No chapter transition timing.** The classic renderer logs nothing per page. The high-quality continuous viewer decodes adjacent chapters ahead. In the baseline it decoded the previous chapter's last page about 1 s after opening, and the next chapter's pages once the flings neared the end of the strip. Its log names pages by image URL, not by chapter and index, so no line marks the next chapter's first page being shown. A tap on "Next chapter" timed to the next decode caught decodes that happen anyway, 65 to 117 ms, so that approach was dropped.
 - **The phone must be free.** The script drives the UI with taps. Another agent or person using the phone at the same time breaks a run, or skews jank through extra input.
 
 ## Baseline
 
-Recorded on 2026-10-27, from 20:39 to 20:41 (+08), on a Galaxy S25+ (SM-S936B) at 1440x3120 over wireless adb. The phone was charging, and no other adb client sent input during the runs. The series is an 85-chapter Lua Scans long strip in the owner's library, and "Chapter 83" is an online, unread chapter of 9 pages. The release and dev builds give that series different ids.
+Recorded on 2026-10-27, from 20:39 to 20:40 (+08), on a Galaxy S25+ (SM-S936B) at 1440x3120 over wireless adb. The phone was charging, and no other adb client sent commands during the run. The series is an 85-chapter Lua Scans long strip in the owner's library, and "Chapter 83" is an online, unread chapter of 9 pages. The release and dev builds give that series different ids. In the dev build it is 521.
 
 ### Release: app.haruka 0.1.0-beta.6
 
@@ -64,21 +64,6 @@ next chapter:    not measured (see the header)
 
 Run 1 drew fewer frames than runs 2 and 3. It was the first open of the chapter in that session, so pages may still have been loading.
 
-### Dev: app.haruka.dev 0.1.0-beta.6-8344
+A rerun from 20:45 to 20:47 agreed: displayed median 29 ms, janky 0.20%, p90 17 ms, p95 17 ms and p99 17 ms. During it, another adb client ran read-only commands: UI dumps, a screencap, and `dumpsys display` and `dumpsys window`, but no input. The 20:39 run above had no foreign commands, so it is the baseline.
 
-This is a debug build, so it is slower than the release and not comparable with it. Its settings have the high-quality renderer on and long strip as the default mode. It is recorded to show the first-page signal working. Run 1 includes downloading the pages, and runs 2 and 3 read them from the chapter cache.
-
-```bash
-scripts/haruka/perf/reader.sh app.haruka.dev 521 "Chapter 83"
-```
-
-```text
-== reader app.haruka.dev 0.1.0-beta.6-8344 on SM-S936B, manga 521 "Chapter 83", 3 runs
-first page ms:   3375 366 316  median 366
-displayed ms:    42 40 34  median 40
-  run 1: only 6 HWUI frames
-  run 2: only 6 HWUI frames
-  run 3: only 6 HWUI frames
-scroll jank:     n/a (too few HWUI frames: the high-quality renderer draws outside HWUI, use trace.sh)
-next chapter:    not measured (see the header)
-```
+The high-quality renderer's first-page signal was checked on a debug build, which reported page 1 at 316 to 366 ms with warm caches. That build was replaced during the session, so its numbers are not part of this baseline.
