@@ -319,6 +319,11 @@ class ReaderActivity : BaseActivity() {
                         onSave = viewModel::saveImage,
                     )
                 }
+                // FORK(chapter-sheet) -->
+                is ReaderViewModel.Dialog.ChapterList -> {
+                    haruka.reader.ui.ReaderChapterSheet(viewModel = viewModel, onDismissRequest = onDismissRequest)
+                }
+                // FORK <--
                 null -> {}
             }
         }
@@ -610,6 +615,9 @@ class ReaderActivity : BaseActivity() {
                 menuToggleToast = toast(if (enabled) MR.strings.on else MR.strings.off)
             },
             onClickSettings = viewModel::openSettingsDialog,
+            // FORK(chapter-sheet) -->
+            extraActions = { haruka.reader.ui.ReaderChapterListAction(onClick = viewModel::openChapterListDialog) },
+            // FORK <--
         )
     }
 
