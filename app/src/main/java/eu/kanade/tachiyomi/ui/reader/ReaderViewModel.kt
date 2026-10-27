@@ -975,6 +975,12 @@ class ReaderViewModel(
     }
     // FORK <--
 
+    // FORK(page-preview) -->
+    fun openPagePreviewDialog() {
+        mutableState.update { it.copy(dialog = Dialog.PagePreview) }
+    }
+    // FORK <--
+
     /**
      * Saves the image of the selected page on the pictures directory and notifies the UI of the result.
      * There's also a notification to allow sharing the image somewhere else or deleting it.
@@ -1155,6 +1161,10 @@ class ReaderViewModel(
 
         // FORK(chapter-sheet) -->
         data object ChapterList : Dialog
+        // FORK <--
+
+        // FORK(page-preview) -->
+        data object PagePreview : Dialog
         // FORK <--
     }
 

@@ -232,4 +232,5 @@
     <string name="storage_nothing_to_delete">Nothing to delete</string>
     <string name="storage_delete_series">Delete downloads of %1$s</string>
     <string name="storage_size_line">%1$s · %2$s</string>
+    <string name="reader_page_preview">Pages</string>
 </resources>
