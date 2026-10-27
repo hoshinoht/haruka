@@ -35,6 +35,16 @@ internal class HttpPageLoader(
     private var chunkProcessJob: Job? = null
     private val downloadJobs = ConcurrentHashMap<Int, Job>()
 
+    // FORK(reader-loading) -->
+    // Whether the page list came from the source rather than the page list cache
+    @Volatile private var harukaListFromNetwork = false
+
+    // Page indices per chunk of the current loadPage plan, and whether it was planned with loading ahead allowed
+    @Volatile private var harukaPlan: List<List<Int>> = emptyList()
+
+    @Volatile private var harukaPlanAhead = false
+    // FORK <--
+
     override var isLocal: Boolean = false
 
     /**
@@ -42,8 +52,12 @@ internal class HttpPageLoader(
      * otherwise fallbacks to network.
      */
     override suspend fun getPages(): List<ReaderPage> {
-        val pages = chapterCache.getPageList(chapter.chapter)
-            ?: source.getPageList(chapter.chapter.toSChapter())
+        // FORK(reader-loading) -->
+        // Remembers where the list came from for recycle(), and starts the first pages per the fork setting
+        val cached = chapterCache.getPageList(chapter.chapter)
+        harukaListFromNetwork = cached == null
+        val pages = cached ?: source.getPageList(chapter.chapter.toSChapter())
+        val (chunkStartSize, chunkEndSize) = haruka.reader.loading.ReaderLoading.preloadChunks()
         return pages.mapIndexed { index, page ->
             // Don't trust sources and use our own indexing
             ReaderPage(index, page.url, page.imageUrl).also {
@@ -52,8 +66,9 @@ internal class HttpPageLoader(
             }
         }
             .also {
-                it.loadByRollingChunked(0, 1, 1)
+                it.loadByRollingChunked(0, chunkStartSize, chunkEndSize)
             }
+        // FORK <--
     }
 
     /**
@@ -78,11 +93,21 @@ internal class HttpPageLoader(
 
         val pages = page.chapter.pages.orEmpty()
         if (page.index !in pages.indices) return@withContext
-        pages.loadByRollingChunked(page.index, 3, 5) { chunks ->
+        // FORK(reader-loading) -->
+        // A page already near the front of the current plan is being fetched first, so keep that plan running. Only
+        // with loading ahead allowed: a limited plan ends a few pages ahead and has to follow the page being read.
+        val canLoadAhead = canLoadAhead()
+        if (canLoadAhead && harukaPlanAhead && haruka.reader.loading.isCoveredByPlan(harukaPlan, page.index)) {
+            return@withContext
+        }
+        pages.loadByRollingChunked(page.index, 3, haruka.reader.loading.ReaderLoading.pagesAtOnce()) { chunks ->
+            harukaPlan = chunks.map { chunk -> chunk.map { it.index } }
+            harukaPlanAhead = canLoadAhead
             val continueLoading = chunks.take(2).flatten().map { it.index }.toSet()
             downloadJobs.keys.filter { it !in continueLoading }
                 .forEach { downloadJobs.remove(it)?.cancel() }
         }
+        // FORK <--
     }
 
     /**
@@ -102,6 +127,11 @@ internal class HttpPageLoader(
         super.recycle()
         scope.cancel()
         downloadJobs.clear()
+
+        // FORK(reader-loading) -->
+        // A list read from the cache keeps its expiry: sources rotate image URLs, so rewriting it would extend them
+        if (!harukaListFromNetwork) return
+        // FORK <--
 
         // Cache current page list progress for online chapters to allow a faster reopen
         chapter.pages?.let { pages ->
