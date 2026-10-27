@@ -319,6 +319,25 @@ class ReaderActivity : BaseActivity() {
                         onSave = viewModel::saveImage,
                     )
                 }
+                // FORK(chapter-sheet) -->
+                is ReaderViewModel.Dialog.ChapterList -> {
+                    haruka.reader.ui.ReaderChapterSheet(viewModel = viewModel, onDismissRequest = onDismissRequest)
+                }
+                // FORK <--
+                // FORK(page-preview) -->
+                is ReaderViewModel.Dialog.PagePreview -> {
+                    haruka.reader.preview.ReaderPagePreviewSheet(
+                        viewModel = viewModel,
+                        onDismissRequest = onDismissRequest,
+                        // Like the slider: the jump keeps the menu open
+                        onSelectPage = { index ->
+                            isScrollingThroughPages = true
+                            moveToPageIndex(index)
+                            isScrollingThroughPages = false
+                        },
+                    )
+                }
+                // FORK <--
                 null -> {}
             }
         }
@@ -610,6 +629,12 @@ class ReaderActivity : BaseActivity() {
                 menuToggleToast = toast(if (enabled) MR.strings.on else MR.strings.off)
             },
             onClickSettings = viewModel::openSettingsDialog,
+            // FORK(chapter-sheet) -->
+            extraActions = {
+                haruka.reader.ui.ReaderChapterListAction(onClick = viewModel::openChapterListDialog)
+                haruka.reader.preview.ReaderPagePreviewAction(onClick = viewModel::openPagePreviewDialog)
+            },
+            // FORK <--
         )
     }
 

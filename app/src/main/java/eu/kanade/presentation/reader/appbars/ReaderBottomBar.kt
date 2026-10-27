@@ -28,6 +28,9 @@ fun ReaderBottomBar(
     onClickCropBorder: () -> Unit,
     onClickSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    // FORK(chapter-sheet) -->
+    extraActions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+    // FORK <--
 ) {
     Row(
         modifier = modifier
@@ -35,6 +38,9 @@ fun ReaderBottomBar(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // FORK(chapter-sheet) -->
+        extraActions()
+        // FORK <--
         IconButton(onClick = onClickReadingMode) {
             Icon(
                 imageVector = readingMode.icon,

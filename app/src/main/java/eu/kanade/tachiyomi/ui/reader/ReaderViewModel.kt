@@ -961,6 +961,26 @@ class ReaderViewModel(
         mutableState.update { it.copy(dialog = null) }
     }
 
+    // FORK(chapter-sheet) -->
+    fun openChapterListDialog() {
+        mutableState.update { it.copy(dialog = Dialog.ChapterList) }
+    }
+
+    /** The chapters the reader navigates, in reading order (ascending); empty before the reader has loaded. */
+    fun harukaChapters(): List<ReaderChapter> = if (::chapterList.isInitialized) chapterList else emptyList()
+
+    fun harukaOpenChapter(chapter: ReaderChapter) {
+        closeDialog()
+        if (chapter != state.value.viewerChapters?.currChapter) loadNewChapter(chapter)
+    }
+    // FORK <--
+
+    // FORK(page-preview) -->
+    fun openPagePreviewDialog() {
+        mutableState.update { it.copy(dialog = Dialog.PagePreview) }
+    }
+    // FORK <--
+
     /**
      * Saves the image of the selected page on the pictures directory and notifies the UI of the result.
      * There's also a notification to allow sharing the image somewhere else or deleting it.
@@ -1138,6 +1158,14 @@ class ReaderViewModel(
         data object ReadingModeSelect : Dialog
         data object OrientationModeSelect : Dialog
         data class PageActions(val page: ReaderPage) : Dialog
+
+        // FORK(chapter-sheet) -->
+        data object ChapterList : Dialog
+        // FORK <--
+
+        // FORK(page-preview) -->
+        data object PagePreview : Dialog
+        // FORK <--
     }
 
     sealed interface Event {
