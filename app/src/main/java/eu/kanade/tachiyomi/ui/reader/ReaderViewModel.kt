@@ -973,9 +973,15 @@ class ReaderViewModel(
     /** The chapters the reader navigates, in reading order (ascending); empty before the reader has loaded. */
     fun harukaChapters(): List<ReaderChapter> = if (::chapterList.isInitialized) chapterList else emptyList()
 
-    fun harukaOpenChapter(chapter: ReaderChapter) {
+    /**
+     * Opens [chapter] from the chapter sheet the way the toolbar's prev/next buttons do, so a late page event from
+     * the old chapter can't switch back. Returns false when it is already the current chapter.
+     */
+    suspend fun harukaOpenChapter(chapter: ReaderChapter): Boolean {
         closeDialog()
-        if (chapter != state.value.viewerChapters?.currChapter) loadNewChapter(chapter)
+        if (chapter == state.value.viewerChapters?.currChapter) return false
+        loadAdjacent(chapter)
+        return true
     }
     // FORK <--
 
