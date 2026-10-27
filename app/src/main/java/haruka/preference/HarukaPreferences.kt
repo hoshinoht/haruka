@@ -33,6 +33,9 @@ class HarukaPreferences(preferenceStore: PreferenceStore) {
     /** Load details and chapters of a series added from a listing (browse, global search, related titles). */
     val fetchOnAdd: Preference<Boolean> = preferenceStore.getBoolean("haruka_fetch_on_add", true)
 
+    /** Space the online page images may take in the chapter cache, in MB. 0 keeps Mihon's behaviour: no limit. */
+    val chapterCacheLimitMb: Preference<Int> = preferenceStore.getInt("haruka_chapter_cache_limit_mb", 0)
+
     /** Open a series left on the Default reading mode as a long strip when its tags or page shapes say it is one. */
     val autoReadingMode: Preference<Boolean> = preferenceStore.getBoolean("haruka_auto_reading_mode", true)
 

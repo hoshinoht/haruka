@@ -114,6 +114,9 @@ class ChapterCache(
                     }
                 }
             }
+                // FORK(cache-cap) -->
+                .also { haruka.storage.ChapterCacheCap.afterWrite(context, images) }
+            // FORK <--
         }
     }
 
@@ -121,6 +124,10 @@ class ChapterCache(
      * Removes everything, returning how many entries there were.
      */
     suspend fun clear(): Int = pageLists.clear() + images.clear()
+
+    // FORK(cache-cap) -->
+    suspend fun trimImages(maxBytes: Long): Int = images.trimToSize(maxBytes)
+    // FORK <--
 
     private val Chapter.key: String
         get() = "$mangaId$url"
