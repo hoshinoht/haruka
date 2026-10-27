@@ -100,7 +100,7 @@ fun MoreScreen(
                     onPreferenceClick = onClickDownloadQueue,
                 )
             }
-            // FORK -->
+            // FORK(update-errors) -->
             item { haruka.updateerrors.UpdateErrorsMoreItem() }
             // FORK <--
             item {

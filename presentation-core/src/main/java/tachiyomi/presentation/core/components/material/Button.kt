@@ -105,7 +105,7 @@ fun Button(
         onClick = onClick,
         modifier = modifier,
         onLongClick = onLongClick,
-        // FORK -->
+        // FORK(motion) -->
         shape = haruka.motion.pressMorphShape(shape, interactionSource),
         // FORK <--
         color = containerColor,

@@ -104,7 +104,7 @@ object SettingsDataScreen : SearchableSettings {
             Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.pref_storage_location_info)),
 
             getBackupAndRestoreGroup(backupPreferences = backupPreferences),
-            // FORK -->
+            // FORK(sync) -->
             haruka.sync.ui.syncSettingsPreference(),
             // FORK <--
             getDataGroup(),
@@ -329,7 +329,7 @@ object SettingsDataScreen : SearchableSettings {
                     preference = libraryPreferences.autoClearChapterCache,
                     title = stringResource(MR.strings.pref_auto_clear_chapter_cache),
                 ),
-                // FORK -->
+                // FORK(storage) -->
                 haruka.storage.downloadsStoragePreference(),
                 // FORK <--
             ),

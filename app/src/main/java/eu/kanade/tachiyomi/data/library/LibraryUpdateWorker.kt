@@ -103,7 +103,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
     @Inject private lateinit var updateMangaFromRemote: UpdateMangaFromRemote
 
     @Inject private lateinit var notifier: LibraryUpdateNotifier
-    // FORK -->
+    // FORK(dedup) -->
 
     @Inject private lateinit var harukaDedup: haruka.chapter.dedup.DedupSurfaces
 
@@ -263,7 +263,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
         val hasDownloads = AtomicBoolean(false)
         val timeZone = TimeZone.currentSystemDefault()
         val fetchWindow = fetchInterval.getWindow(Clock.System.now().toLocalDateTime(timeZone).date, timeZone)
-        // FORK -->
+        // FORK(update-errors) -->
         harukaUpdateErrors.replace(emptyList())
         // FORK <--
 
@@ -293,7 +293,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
 
                                         if (newChapters.isNotEmpty()) {
                                             val chaptersToDownload = filterChaptersForDownload.await(manga, newChapters)
-                                                // FORK -->
+                                                // FORK(dedup) -->
                                                 .let { harukaDedup.withoutDownloadedCopies(manga, it) }
                                             // FORK <--
 
@@ -340,7 +340,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
             }
         }
 
-        // FORK -->
+        // FORK(update-errors) -->
         harukaUpdateErrors.replace(
             failedUpdates.map { (manga, error) ->
                 haruka.updateerrors.UpdateError(manga.id, manga.title, manga.source, error)

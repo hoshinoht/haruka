@@ -58,7 +58,7 @@ fun AdaptiveSheet(
 ) {
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
-    // FORK -->
+    // FORK(motion) -->
     val sheetAnimationSpec = haruka.motion.sheetAnimationSpec(
         tachiyomi.presentation.core.components.sheetAnimationSpec,
         isTabletUi,
@@ -128,7 +128,7 @@ fun AdaptiveSheet(
         )
         val internalOnDismissRequest = {
             if (anchoredDraggableState.settledValue == 0) {
-                // FORK -->
+                // FORK(motion) -->
                 scope.launch { haruka.motion.animateSheetTo(anchoredDraggableState, 1, sheetDismissSpec) }
                 // FORK <--
             }
@@ -172,7 +172,7 @@ fun AdaptiveSheet(
                         },
                     )
                     .then(modifier)
-                    // FORK -->
+                    // FORK(motion) -->
                     .then(haruka.motion.sheetFadeModifier(visible = anchoredDraggableState.targetValue == 0))
                     // FORK <--
                     .offset {
@@ -204,7 +204,7 @@ fun AdaptiveSheet(
             )
 
             LaunchedEffect(anchoredDraggableState) {
-                // FORK -->
+                // FORK(motion) -->
                 scope.launch { haruka.motion.animateSheetTo(anchoredDraggableState, 0, sheetOpenSpec) }
                 // FORK <--
                 snapshotFlow { anchoredDraggableState.settledValue }

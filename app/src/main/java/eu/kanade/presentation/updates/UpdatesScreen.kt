@@ -131,7 +131,7 @@ fun UpdateScreen(
                             )
                         }
                     } else {
-                        // FORK -->
+                        // FORK(grouped-updates) -->
                         val grouping = haruka.updates.rememberUpdatesGroupingState()
                         // FORK <--
                         FastScrollLazyColumn(
@@ -139,7 +139,7 @@ fun UpdateScreen(
                         ) {
                             updatesLastUpdatedItem(lastUpdated)
 
-                            // FORK -->
+                            // FORK(grouped-updates) -->
                             if (grouping.enabled) {
                                 haruka.updates.groupedUpdatesUiItems(
                                     scope = this,

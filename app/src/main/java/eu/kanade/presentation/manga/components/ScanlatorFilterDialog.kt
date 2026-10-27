@@ -38,7 +38,7 @@ fun ScanlatorFilterDialog(
     excludedScanlators: Set<String>,
     onDismissRequest: () -> Unit,
     onConfirm: (Set<String>) -> Unit,
-    // FORK -->
+    // FORK(dedup) -->
     mangaId: Long? = null,
     // FORK <--
 ) {
@@ -104,7 +104,7 @@ fun ScanlatorFilterDialog(
         properties = DialogProperties(
             usePlatformDefaultWidth = true,
         ),
-        // FORK -->
+        // FORK(dedup) -->
         dismissButton = if (mangaId != null) {
             { haruka.chapter.dedup.ui.DedupOverrideButton(mangaId, availableScanlators) }
         } else {

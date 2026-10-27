@@ -125,7 +125,7 @@ private fun BoxScope.CoverTextOverlay(
     title: String,
     onClickContinueReading: (() -> Unit)? = null,
 ) {
-    // FORK -->
+    // FORK(hoshino) -->
     val continueReading: (@Composable () -> Unit)? = onClickContinueReading?.let { onClick ->
         {
             ContinueReadingButton(
@@ -266,7 +266,7 @@ private fun MangaGridCover(
                 modifier = Modifier
                     .padding(4.dp)
                     .align(Alignment.TopStart)
-                    // FORK --> Hoshino: one ringed pill for the downloaded and unread counts
+                    // FORK(hoshino) --> Hoshino: one ringed pill for the downloaded and unread counts
                     .then(haruka.library.hoshinoBadgeGroupRing()),
                 // FORK <--
                 content = badgesStart,
@@ -294,7 +294,7 @@ private fun GridItemTitle(
 ) {
     Text(
         modifier = modifier,
-        // FORK -->
+        // FORK(titles) -->
         text = haruka.title.rememberDisplayTitle(title),
         // FORK <--
         fontSize = 12.sp,
@@ -378,7 +378,7 @@ fun MangaListItem(
             data = coverData,
         )
         Text(
-            // FORK -->
+            // FORK(titles) -->
             text = haruka.title.rememberDisplayTitle(title),
             // FORK <--
             modifier = Modifier

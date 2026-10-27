@@ -41,7 +41,7 @@ private val themeResources: Map<AppTheme, Int> = mapOf(
     AppTheme.YINYANG to R.style.Theme_Tachiyomi_YinYang,
     AppTheme.YOTSUBA to R.style.Theme_Tachiyomi_Yotsuba,
     AppTheme.TIDAL_WAVE to R.style.Theme_Tachiyomi_TidalWave,
-    // FORK -->
+    // FORK(hoshino) -->
     AppTheme.HOSHINO to R.style.Theme_Tachiyomi_Hoshino,
     // FORK <--
 )

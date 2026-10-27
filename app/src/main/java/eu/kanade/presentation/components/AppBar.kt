@@ -91,7 +91,7 @@ fun AppBar(
     AppBar(
         modifier = modifier,
         backgroundColor = backgroundColor,
-        // FORK -->
+        // FORK(motion) -->
         titleContent = haruka.motion.appBarSwap(actionModeCounter, contentKey = { it > 0 }) { actionModeCounter ->
             if (actionModeCounter > 0) {
                 // FORK <--
@@ -102,7 +102,7 @@ fun AppBar(
         },
         navigateUp = navigateUp,
         navigationIcon = navigationIcon,
-        // FORK -->
+        // FORK(motion) -->
         actions = haruka.motion.appBarActionsSwap(actionModeCounter, contentKey = { it > 0 }) { actionModeCounter ->
             if (actionModeCounter > 0) {
                 // FORK <--
@@ -212,7 +212,7 @@ fun AppBarActions(
             state = rememberTooltipState(),
             focusable = false,
         ) {
-            // FORK -->
+            // FORK(motion) -->
             haruka.motion.IconButton(
                 // FORK <--
                 onClick = it.onClick,
@@ -239,7 +239,7 @@ fun AppBarActions(
             state = rememberTooltipState(),
             focusable = false,
         ) {
-            // FORK -->
+            // FORK(motion) -->
             haruka.motion.IconButton(
                 // FORK <--
                 onClick = { showMenu = !showMenu },
@@ -309,7 +309,7 @@ fun SearchToolbar(
 
     AppBar(
         modifier = modifier,
-        // FORK -->
+        // FORK(motion) -->
         titleContent = haruka.motion.appBarSwap(searchQuery, contentKey = { it != null }) { searchQuery ->
             if (searchQuery == null) return@appBarSwap titleContent()
             // FORK <--

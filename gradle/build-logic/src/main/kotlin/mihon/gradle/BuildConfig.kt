@@ -24,7 +24,7 @@ val Project.Config: BuildConfig get() = object : BuildConfig {
         }
         ?: Distribution.LOCAL
 
-    // FORK --> telemetry only when explicitly requested; never report into Mihon's Firebase project
+    // FORK(build) --> telemetry only when explicitly requested; never report into Mihon's Firebase project
     override val includeTelemetry: Boolean = project.flag("include-telemetry") ?: false
     // FORK <--
 

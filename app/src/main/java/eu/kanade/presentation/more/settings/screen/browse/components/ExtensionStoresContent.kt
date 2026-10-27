@@ -47,7 +47,7 @@ fun ExtensionStoresContent(
         repos.forEach {
             item {
                 ExtensionStoresListItem(
-                    // FORK -->
+                    // FORK(motion) -->
                     modifier = haruka.motion.listItemMotion(this),
                     // FORK <--
                     store = it,

@@ -38,7 +38,7 @@ include(":core:metro")
 include(":data")
 include(":domain")
 include(":i18n")
-// FORK -->
+// FORK(build) -->
 include(":haruka:core")
 include(":haruka:motion")
 include(":haruka:sync")

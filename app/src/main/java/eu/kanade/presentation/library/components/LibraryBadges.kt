@@ -23,7 +23,7 @@ internal fun DownloadsBadge(count: Int) {
 @Composable
 internal fun UnreadBadge(count: Long) {
     if (count > 0) {
-        // FORK --> Hoshino: round coral count
+        // FORK(hoshino) --> Hoshino: round coral count
         if (haruka.library.hoshinoUnreadDot(count)) return
         // FORK <--
         Badge(text = "$count")

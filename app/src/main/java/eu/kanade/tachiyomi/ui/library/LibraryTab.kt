@@ -77,7 +77,7 @@ data object LibraryTab : Tab {
         }
 
     override suspend fun onReselect(navigator: Navigator) {
-        // FORK -->
+        // FORK(shelves) -->
         if (haruka.library.shelves.LibraryReselect.consume()) return
         // FORK <--
         requestOpenSettingsSheet()
@@ -109,11 +109,11 @@ data object LibraryTab : Tab {
             started
         }
 
-        // FORK -->
+        // FORK(shelves) -->
         val shelvesEnabled = haruka.library.shelves.rememberLibraryShelvesEnabled()
         // FORK <--
         Scaffold(
-            // FORK -->
+            // FORK(shelves) -->
             topBarScrollBehavior = haruka.library.shelves.rememberLibraryTopBarScrollBehavior(
                 shelvesEnabled = shelvesEnabled,
                 keepVisible = state.selectionMode || state.searchQuery != null,
@@ -150,7 +150,7 @@ data object LibraryTab : Tab {
                     searchQuery = state.searchQuery,
                     onSearchQueryChange = viewModel::search,
                     // For scroll overlay when no tab
-                    // FORK --> shelves replace the tabs with chips, so always pass it
+                    // FORK(shelves) --> shelves replace the tabs with chips, so always pass it
                     scrollBehavior = scrollBehavior.takeIf { !state.showCategoryTabs || shelvesEnabled },
                     // FORK <--
                 )
@@ -204,7 +204,7 @@ data object LibraryTab : Tab {
                         onClickManga = { navigator.push(MangaScreen(it)) },
                         onContinueReadingClicked = { it: LibraryManga ->
                             scope.launch {
-                                // FORK --> with duplicates grouped: the next logical chapter, at its preferred copy
+                                // FORK(dedup) --> with duplicates grouped: the next logical chapter, at its preferred copy
                                 val chapter = haruka.chapter.dedup.nextUnreadForLibrary(context, it.manga) {
                                     viewModel.getNextUnreadChapter(it.manga)
                                 }

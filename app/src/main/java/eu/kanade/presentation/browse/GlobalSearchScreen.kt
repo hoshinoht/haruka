@@ -80,7 +80,7 @@ internal fun GlobalSearchContent(
                     } ?: source.name,
                     subtitle = LocaleHelper.getLocalizedDisplayName(source.lang),
                     onClick = { onClickSource(source) },
-                    // FORK -->
+                    // FORK(motion) -->
                     modifier = haruka.motion.listItemMotion(this),
                     // FORK <--
                 ) {

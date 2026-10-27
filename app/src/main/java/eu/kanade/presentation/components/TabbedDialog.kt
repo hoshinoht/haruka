@@ -50,7 +50,7 @@ fun TabbedDialog(
         onDismissRequest = onDismissRequest,
     ) {
         val scope = rememberCoroutineScope()
-        // FORK -->
+        // FORK(motion) -->
         val scrollToTab = haruka.motion.pagerTabScroll()
         // FORK <--
 
@@ -64,7 +64,7 @@ fun TabbedDialog(
                     tabTitles.fastForEachIndexed { index, tab ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            // FORK -->
+                            // FORK(motion) -->
                             onClick = { scope.launch { scrollToTab(pagerState, index) } },
                             // FORK <--
                             text = { TabText(text = tab) },

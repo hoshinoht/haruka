@@ -153,7 +153,7 @@ fun MigrationListScreenContent(
                     )
 
                     val result by item.searchResult.collectAsState()
-                    // FORK --> match confidence under the target
+                    // FORK(migration) --> match confidence under the target
                     haruka.migration.MigrationResultWithConfidence(
                         modifier = Modifier
                             .weight(1f)

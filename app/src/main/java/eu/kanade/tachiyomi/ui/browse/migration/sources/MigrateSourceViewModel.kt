@@ -33,7 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 class MigrateSourceViewModel(
     private val preferences: SourcePreferences,
     private val getSourcesWithFavoriteCount: GetSourcesWithFavoriteCount,
-    // FORK -->
+    // FORK(migration) -->
     private val staleSources: haruka.stale.StaleSources,
     // FORK <--
 ) : ViewModel() {
@@ -57,7 +57,7 @@ class MigrateSourceViewModel(
             sortingDirection = sortingDirection,
         )
     }
-        // FORK -->
+        // FORK(migration) -->
         .combine(staleSources.availability()) { current, availability ->
             haruka.stale.markUnavailable(current, availability)
         }
@@ -82,7 +82,7 @@ class MigrateSourceViewModel(
             }
         }
     }
-    // FORK -->
+    // FORK(migration) -->
 
     suspend fun unavailableFavoriteIds(): List<Long> {
         val state = state.value
@@ -96,7 +96,7 @@ class MigrateSourceViewModel(
         val items: List<Pair<Source, Long>> = listOf(),
         val sortingMode: SetMigrateSorting.Mode = SetMigrateSorting.Mode.ALPHABETICAL,
         val sortingDirection: SetMigrateSorting.Direction = SetMigrateSorting.Direction.ASCENDING,
-        // FORK -->
+        // FORK(migration) -->
         val unavailable: Map<Long, haruka.stale.UnavailableReason> = emptyMap(),
         // FORK <--
     ) {

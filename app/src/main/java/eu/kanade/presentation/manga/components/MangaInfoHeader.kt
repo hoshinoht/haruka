@@ -436,7 +436,7 @@ private fun ColumnScope.MangaContentInfo(
 ) {
     val context = LocalContext.current
     Text(
-        // FORK --> display only; copy and search below keep the full title
+        // FORK(titles) --> display only; copy and search below keep the full title
         text = haruka.title.rememberDisplayTitle(title).ifBlank { stringResource(MR.strings.unknown_title) },
         // FORK <--
         style = MaterialTheme.typography.titleLarge,
@@ -625,7 +625,7 @@ private fun MangaSummary(
     val loadImages = remember { preferences.imagesInDescription.get() }
     val animProgress by animateFloatAsState(
         targetValue = if (expanded) 1f else 0f,
-        // FORK -->
+        // FORK(motion) -->
         animationSpec = haruka.motion.listSpatialSpec(spring()),
         // FORK <--
         label = "summary",

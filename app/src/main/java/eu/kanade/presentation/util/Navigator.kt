@@ -43,7 +43,7 @@ fun DefaultNavigatorScreenTransition(
     val slideDistance = rememberSlideDistance()
     ScreenTransition(
         navigator = navigator,
-        // FORK -->
+        // FORK(motion) -->
         transition = haruka.motion.sharedAxisXTransition(
             slideDistance = slideDistance,
             forward = { navigator.lastEvent != StackEvent.Pop },

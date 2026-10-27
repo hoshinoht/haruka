@@ -10,6 +10,8 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 | `dev` | Haruka. Default branch. Upstream arrives through `sync/upstream-*` PRs (merge, never rebase). |
 | `feat/*`, `fix/*` | One change each, PR into `dev`. |
 
+The daily `haruka-upstream-check` workflow trial-merges upstream `main` into `dev`, compiles and tests it, runs `upstream-drift.sh`, and opens an "Upstream drift at <sha>" issue when anything breaks (it closes them once upstream merges cleanly). The weekly `haruka-upstream-sync` workflow skips while a sync PR is open and comments there when upstream has moved, so merge the open sync PR first.
+
 ## Where code goes
 
 - New code lives in fork modules under `haruka/` or the `haruka.*` package in the app; packages stay `haruka.*` either way:
@@ -19,8 +21,30 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
   - `app/src/main/java/haruka/**`: glue that needs app internals (screens, ViewModels, preferences, DI, adapters from domain models such as `Chapter.toDedupChapter()`).
   - New fork modules are included in the existing FORK block of `settings.gradle.kts`; the app depends on them through `configureHarukaApp`.
 - Edits to upstream files are thin hooks wrapped in markers:
-  - Kotlin/KTS/SQL: `// FORK -->` … `// FORK <--`
-  - XML: `<!-- FORK -->` … `<!-- /FORK -->`
+  - Kotlin/KTS/SQL: `// FORK(<tag>) -->` … `// FORK <--`
+  - XML: `<!-- FORK(<tag>) -->` … `<!-- /FORK -->`
+  - The tag names the feature the hook serves, not the helper it calls. Every tag has a row in `docs/haruka/FEATURES.md`:
+    - `motion`: Animations setting (Standard, Expressive, Reduced) and motion drop-ins.
+    - `hoshino`: Hoshino theme, colours and badges.
+    - `dedup`: chapter deduplication and preferred copies.
+    - `grouped-updates`: Updates grouped per entry and day, and conversations.
+    - `shelves`: library shelves and the sectioned library.
+    - `sync`: Google Drive library sync.
+    - `migration`: bulk migration, selection, match confidence, source presets, unavailable sources.
+    - `update-errors`: library update errors screen.
+    - `progress`: in-app progress banners.
+    - `titles`: shorter display titles.
+    - `related`: related titles on the entry screen.
+    - `storage`: downloads storage manager.
+    - `longstrip`: long strip detection.
+    - `library-add`: loading chapters when adding, long-press add in global search.
+    - `panorama`: wide covers shown in full.
+    - `build`: application id, version, updater, fork modules, rebrand.
+    - `fix`: fixes to Mihon bugs kept in the fork.
+    - `reader-loading`: next-chapter prefetch timing, download planning and page-list cache hygiene, plus the page loading settings.
+    - `chapter-sheet`: chapter list sheet in the reader and the bottom-bar extra-actions slot.
+    - `page-preview`: page thumbnail grid in the reader.
+    - `cache-cap`: size limit for the online image cache.
   - Imports are never wrapped: ktlint rejects comments in the import list. Never add imports to upstream files; use fully qualified calls (`haruka.foo.bar(...)`) inside the FORK block.
   - One exception, shadow imports: when every use of a symbol in an upstream file is already hooked, swap that file's import (e.g. `androidx.compose.material3.FilterChip`) for the same-named drop-in in `haruka.motion` and drop the per-call FORK blocks. The `import haruka.…` line is the marker; the drop-in keeps the upstream signature, and its STANDARD path must equal the upstream component. `scripts/haruka/patch-surface.sh` lists these as import hooks.
 - Motion hooks: the STANDARD animation profile must behave exactly like upstream; only EXPRESSIVE and REDUCED may differ.
@@ -31,14 +55,14 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
   - `res-release/`: release and foss (`app_name`, launcher icon). `res-debug/`: debug and nightly (`app_name`, debug launcher icon). Benchmark builds use `app/src/benchmark/res` instead of the release/debug overlays.
   - Fork assets ship from the fork module that reads them (e.g. `haruka/core/src/main/assets/`); library assets merge into the app at the same path.
 - Strings: new strings only in the fork i18n module (`i18n-fork`). Never add or edit strings in `i18n/`; the rebrand `app_name` lives in `app/src/haruka/res-release` and `res-debug`.
-- Fork-owned paths outside `haruka.*` packages: `haruka/`, `app/src/haruka/`, `app/src/benchmark/`, `gradle/build-logic/src/main/kotlin/haruka/`, `i18n-fork/`, `scripts/haruka/`, `docs/haruka/`, `.github/workflows/haruka-*`, `.github/assets/haruka-*`, `.github/README.md`, `NOTICE`, this file. `patch-surface.sh` keeps the same list.
+- Fork-owned paths outside `haruka.*` packages: `haruka/`, `app/src/haruka/`, `app/src/benchmark/`, `gradle/build-logic/src/main/kotlin/haruka/`, `i18n-fork/`, `scripts/haruka/`, `docs/haruka/`, `.github/workflows/haruka-*`, `.github/assets/haruka-*`, `.github/README.md`, `NOTICE`, this file. `patch-surface.sh` and `upstream-drift.sh` keep the same list.
 
 ## Hard rules
 
 1. `source-api/` and extension loading (`ExtensionLoader`, lib versions, trust) stay byte-identical to upstream. keiyoushi/extensions-source compatibility depends on it.
 2. No new `data/**/migrations/*.sqm` and no edits to upstream `.sq` files. Fork state lives in preferences or a fork-owned store.
 3. Backups must stay restorable by stock Mihon. Fork protobuf fields, if ever needed, use numbers ≥ 1000.
-4. When Mihon ships an equivalent of a fork feature, delete the fork version, migrate its preferences to Mihon's, and keep only still-wanted deltas on top of Mihon's design.
+4. When Mihon ships an equivalent of a fork feature, delete the fork version, migrate its preferences to Mihon's, and keep only still-wanted deltas on top of Mihon's design. `docs/haruka/FEATURES.md` is the ledger: every tag has a row; update it when adding a feature, when an upstream PR appears, and when decommissioning.
 5. Telemetry is off unless `-Pinclude-telemetry` is passed with Haruka's own Firebase config. The updater points at `hoshinoht/haruka`.
 6. Haruka's code stays in this repository. Never open pull requests, issues or patches against `mihonapp/mihon` (or other upstreams) with fork code, even for fixes that would shrink the hook surface.
 
@@ -49,6 +73,7 @@ Haruka is a personal fork of [Mihon](https://github.com/mihonapp/mihon). Everyth
 ./gradlew testDebugUnitTest
 ./gradlew assembleDebug
 scripts/haruka/patch-surface.sh   # upstream files touched outside fork-owned paths
+scripts/haruka/upstream-drift.sh  # strings, symbols and hook hosts the fork uses that upstream/main dropped
 ```
 
 Keep the patch surface trending down.

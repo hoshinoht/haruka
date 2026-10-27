@@ -21,7 +21,7 @@ import androidx.core.graphics.drawable.toBitmap
 @Composable
 fun rememberResourceBitmapPainter(@DrawableRes id: Int): BitmapPainter {
     val context = LocalContext.current
-    // FORK --> Rasterize once per resource and configuration, not once per list item: every cover in a list asked for
+    // FORK(fix) --> Rasterize once per resource and configuration, not once per list item: every cover in a list asked for
     // its own full-size copy of the error drawable, drawn in software on the main thread during composition.
     val configuration = context.resources.configuration
     val key = ResourceBitmapKey(id, configuration.uiMode, configuration.densityDpi)
@@ -35,7 +35,7 @@ fun rememberResourceBitmapPainter(@DrawableRes id: Int): BitmapPainter {
     }
     // FORK <--
 }
-// FORK -->
+// FORK(fix) -->
 
 // Only touched from composition, which runs on the main thread.
 private data class ResourceBitmapKey(val id: Int, val uiMode: Int, val densityDpi: Int)

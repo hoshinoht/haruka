@@ -26,7 +26,7 @@ fun Screen.migrateSourceTab(): TabContent {
 
     return TabContent(
         titleRes = MR.strings.label_migration,
-        // FORK --> listOfNotNull: the migrate-unavailable action is absent when every source works
+        // FORK(migration) --> listOfNotNull: the migrate-unavailable action is absent when every source works
         actions = listOfNotNull(
             haruka.stale.migrateUnavailableAction(
                 hasUnavailable = state.unavailable.isNotEmpty(),

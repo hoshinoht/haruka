@@ -65,7 +65,7 @@ fun HistoryItem(
         ) {
             val textStyle = MaterialTheme.typography.bodyMedium
             Text(
-                // FORK -->
+                // FORK(titles) -->
                 text = haruka.title.rememberDisplayTitle(history.title),
                 // FORK <--
                 fontWeight = FontWeight.SemiBold,

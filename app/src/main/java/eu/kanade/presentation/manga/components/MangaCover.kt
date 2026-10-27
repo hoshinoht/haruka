@@ -28,7 +28,7 @@ enum class MangaCover(val ratio: Float) {
         shape: Shape = MaterialTheme.shapes.extraSmall,
         onClick: (() -> Unit)? = null,
     ) {
-        // FORK -->
+        // FORK(panorama) -->
         if (haruka.cover.rememberPanoramaCoversEnabled()) {
             haruka.cover.PanoramaAwareCover(
                 data = data,

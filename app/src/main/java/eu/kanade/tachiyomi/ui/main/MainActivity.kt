@@ -215,7 +215,7 @@ class MainActivity : BaseActivity() {
             var incognito by remember { mutableStateOf(false) }
             val downloadOnly by preferences.downloadedOnly.collectAsState()
             val indexing by downloadCache.isInitializing.collectAsState()
-            // FORK -->
+            // FORK(progress) -->
             val backgroundTasks by remember { haruka.progress.BackgroundTaskProgress.visibleTasks(context) }
                 .collectAsState(emptyList())
             // FORK <--
@@ -225,7 +225,7 @@ class MainActivity : BaseActivity() {
                 indexing -> IndexingBannerBackgroundColor
                 downloadOnly -> DownloadedOnlyBannerBackgroundColor
                 incognito -> IncognitoModeBannerBackgroundColor
-                // FORK -->
+                // FORK(progress) -->
                 backgroundTasks.isNotEmpty() -> haruka.progress.TaskProgressBannerBackgroundColor
                 // FORK <--
                 else -> MaterialTheme.colorScheme.surface
@@ -264,7 +264,7 @@ class MainActivity : BaseActivity() {
                 val scaffoldInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)
                 Scaffold(
                     topBar = {
-                        // FORK -->
+                        // FORK(progress) -->
                         haruka.progress.HarukaAppStateBanners(
                             downloadedOnlyMode = downloadOnly,
                             incognitoMode = incognito,
@@ -649,7 +649,7 @@ class MainActivity : BaseActivity() {
                 }
                 null
             }
-            // FORK -->
+            // FORK(update-errors) -->
             haruka.updateerrors.UpdateErrorsScreen.ACTION_SHOW -> {
                 navigator.popUntilRoot()
                 navigator.push(haruka.updateerrors.UpdateErrorsScreen())

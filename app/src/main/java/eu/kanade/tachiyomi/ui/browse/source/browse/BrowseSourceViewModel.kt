@@ -248,7 +248,7 @@ class BrowseSourceViewModel(
             }
 
             updateManga.await(update)
-            // FORK -->
+            // FORK(library-add) -->
             if (!manga.favorite) haruka.library.fetchOnAdd(manga)
             // FORK <--
         }

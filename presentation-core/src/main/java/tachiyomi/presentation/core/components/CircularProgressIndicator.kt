@@ -41,7 +41,7 @@ fun CombinedCircularProgressIndicator(
     progress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
-    // FORK -->
+    // FORK(motion) -->
     if (haruka.motion.LocalAnimationProfile.current != haruka.motion.AnimationProfile.STANDARD) {
         haruka.motion.ProfileCombinedProgressIndicator(progress = progress, modifier = modifier)
         return

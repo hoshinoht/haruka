@@ -39,7 +39,7 @@ fun DropdownMenu(
     properties: PopupProperties = PopupProperties(focusable = true),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    // FORK -->
+    // FORK(motion) -->
     haruka.motion.MenuMotion(expanded) {
         // FORK <--
         ComposeDropdownMenu(
@@ -51,7 +51,7 @@ fun DropdownMenu(
             properties = properties,
             content = content,
         )
-        // FORK -->
+        // FORK(motion) -->
     }
     // FORK <--
 }

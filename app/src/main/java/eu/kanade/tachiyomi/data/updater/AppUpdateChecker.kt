@@ -11,7 +11,7 @@ import tachiyomi.domain.release.interactor.GetApplicationRelease
 @Inject
 class AppUpdateChecker(
     private val getApplicationRelease: GetApplicationRelease,
-    // FORK -->
+    // FORK(build) -->
     private val harukaReleaseChecker: haruka.release.HarukaReleaseChecker,
     // FORK <--
 ) {
@@ -23,7 +23,7 @@ class AppUpdateChecker(
         // }
 
         return withContext(Dispatchers.IO) {
-            // FORK --> SemVer tags and the beta channel; nightly keeps upstream's commit-count check below
+            // FORK(build) --> SemVer tags and the beta channel; nightly keeps upstream's commit-count check below
             if (!isNightlyBuildType) {
                 return@withContext harukaReleaseChecker.check(BuildConfig.VERSION_NAME, GITHUB_REPO, isFossBuildType)
             }
@@ -44,7 +44,7 @@ class AppUpdateChecker(
     }
 }
 
-// FORK --> Haruka has a single release repo; never offer Mihon builds as updates
+// FORK(build) --> Haruka has a single release repo; never offer Mihon builds as updates
 val GITHUB_REPO: String by lazy { "hoshinoht/haruka" }
 // FORK <--
 

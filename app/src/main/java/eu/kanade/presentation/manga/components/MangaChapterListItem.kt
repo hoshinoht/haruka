@@ -63,7 +63,7 @@ fun MangaChapterListItem(
     onDownloadClick: ((ChapterDownloadAction) -> Unit)?,
     onChapterSwipe: (LibraryPreferences.ChapterSwipeAction) -> Unit,
     modifier: Modifier = Modifier,
-    // FORK -->
+    // FORK(dedup) -->
     trailingContent: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
     /** Applied to the row's outermost layout, where lazy item animations must sit. */
     itemModifier: Modifier = Modifier,
@@ -86,7 +86,7 @@ fun MangaChapterListItem(
         onSwipe = { onChapterSwipe(chapterSwipeEndAction) },
     )
 
-    // FORK -->
+    // FORK(motion) -->
     haruka.ui.swipe.ChapterSwipeBox(
         startAction = chapterSwipeStartAction,
         endAction = chapterSwipeEndAction,
@@ -183,7 +183,7 @@ fun MangaChapterListItem(
                 }
             }
 
-            // FORK -->
+            // FORK(dedup) -->
             trailingContent()
             // FORK <--
 

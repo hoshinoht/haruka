@@ -192,7 +192,7 @@ fun VerticalFastScroller(
                     .offset { IntOffset(0, thumbOffsetY.roundToInt()) }
                     .then(
                         // Recompose opts
-                        // FORK --> Keep the thumb draggable mid-fling; the drag's scrollToItem cancels the fling.
+                        // FORK(fix) --> Keep the thumb draggable mid-fling; the drag's scrollToItem cancels the fling.
                         if (isThumbVisible) {
                             // FORK <--
                             Modifier.draggable(
@@ -212,7 +212,7 @@ fun VerticalFastScroller(
                     )
                     .then(
                         // Exclude thumb from gesture area only when needed
-                        // FORK -->
+                        // FORK(fix) -->
                         if (isThumbVisible && !isThumbDragged) {
                             // FORK <--
                             Modifier.systemGestureExclusion()
@@ -386,7 +386,7 @@ fun VerticalGridFastScroller(
                     .offset { IntOffset(0, thumbOffsetY.roundToInt()) }
                     .then(
                         // Recompose opts
-                        // FORK --> Keep the thumb draggable mid-fling; the drag's scrollToItem cancels the fling.
+                        // FORK(fix) --> Keep the thumb draggable mid-fling; the drag's scrollToItem cancels the fling.
                         if (isThumbVisible) {
                             // FORK <--
                             Modifier.draggable(
@@ -406,7 +406,7 @@ fun VerticalGridFastScroller(
                     )
                     .then(
                         // Exclude thumb from gesture area only when needed
-                        // FORK -->
+                        // FORK(fix) -->
                         if (isThumbVisible && !isThumbDragged) {
                             // FORK <--
                             Modifier.systemGestureExclusion()

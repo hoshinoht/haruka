@@ -20,7 +20,7 @@ enum class AppTheme(val titleRes: StringResource?) {
     TOKYONIGHT(MR.strings.theme_tokyonight),
     MONOCHROME(MR.strings.theme_monochrome),
 
-    // FORK -->
+    // FORK(hoshino) -->
     HOSHINO(haruka.i18n.HR.strings.theme_hoshino),
     // FORK <--
 

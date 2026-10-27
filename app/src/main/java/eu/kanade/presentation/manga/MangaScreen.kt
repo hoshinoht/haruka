@@ -413,7 +413,7 @@ private fun MangaScreenSmallImpl(
                         )
                     }
 
-                    // FORK -->
+                    // FORK(related) -->
                     item(key = "haruka_related", contentType = "haruka_related") {
                         haruka.related.RelatedMangaRow(manga = state.manga, source = state.source)
                     }
@@ -629,7 +629,7 @@ fun MangaScreenLargeImpl(
                             onCopyTagToClipboard = onCopyTagToClipboard,
                             onEditNotes = onEditNotesClicked,
                         )
-                        // FORK -->
+                        // FORK(related) -->
                         haruka.related.RelatedMangaRow(manga = state.manga, source = state.source)
                         // FORK <--
                     }
@@ -749,7 +749,7 @@ private fun LazyListScope.sharedChapterItems(
             is ChapterList.MissingCount -> {
                 MissingChapterCountListItem(
                     count = item.count,
-                    // FORK -->
+                    // FORK(motion) -->
                     modifier = haruka.motion.listItemMotion(this, animateInStandard = false),
                     // FORK <--
                 )
@@ -802,7 +802,7 @@ private fun LazyListScope.sharedChapterItems(
                     onChapterSwipe = {
                         onChapterSwipe(item, it)
                     },
-                    // FORK -->
+                    // FORK(dedup) -->
                     modifier = haruka.chapter.ui.chapterGroupIndent(item.harukaRow),
                     // Expanding a group inserts its rows as list items; this animates them in (not in STANDARD).
                     itemModifier = haruka.motion.listItemMotion(this, animateInStandard = false),

@@ -119,7 +119,7 @@ private fun ColumnScope.FilterSheet(
             onCheckedChange = { toggleScanlatorFilter() },
         )
     }
-    // FORK -->
+    // FORK(grouped-updates) -->
     haruka.updates.UpdatesGroupingSwitch()
     // FORK <--
 }

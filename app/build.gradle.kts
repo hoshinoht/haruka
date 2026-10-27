@@ -29,7 +29,7 @@ if (Config.includeTelemetry) {
     }
 }
 
-// FORK --> Haruka's id, version, overlays and fork modules (gradle/build-logic/src/main/kotlin/haruka/gradle)
+// FORK(build) --> Haruka's id, version, overlays and fork modules (gradle/build-logic/src/main/kotlin/haruka/gradle)
 haruka.gradle.configureHarukaApp(project)
 // FORK <--
 

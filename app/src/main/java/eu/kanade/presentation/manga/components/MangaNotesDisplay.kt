@@ -28,7 +28,7 @@ fun MangaNotesDisplay(
 
     val richTextState = rememberRichTextState()
     val primaryColor = MaterialTheme.colorScheme.primary
-    // FORK -->
+    // FORK(motion) -->
     val fadeSpec = haruka.motion.listEffectsSpec(FADE_TIME)
     // FORK <--
     LaunchedEffect(content) {
@@ -40,7 +40,7 @@ fun MangaNotesDisplay(
         }
 
         alpha.snapTo(targetValue = 0f)
-        // FORK -->
+        // FORK(motion) -->
         alpha.animateTo(targetValue = 1f, animationSpec = fadeSpec)
         // FORK <--
     }

@@ -43,7 +43,7 @@ object SettingsBrowseScreen : SearchableSettings {
                         preference = sourcePreferences.hideInLibraryItems,
                         title = stringResource(MR.strings.pref_hide_in_library_items),
                     ),
-                    // FORK -->
+                    // FORK(related) -->
                     haruka.related.relatedMangaPreference(),
                     // FORK <--
                     Preference.PreferenceItem.TextPreference(

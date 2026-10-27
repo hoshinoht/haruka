@@ -100,7 +100,7 @@ class LibraryUpdateNotifier(
      */
     @Synchronized
     fun showProgressNotification(manga: List<Manga>, current: Int, total: Int) {
-        // FORK -->
+        // FORK(progress) -->
         haruka.progress.BackgroundTaskProgress.onLibraryUpdateProgress(current, total)
         // FORK <--
         val now = SystemClock.elapsedRealtime()
@@ -174,11 +174,11 @@ class LibraryUpdateNotifier(
             setContentText(context.stringResource(MR.strings.action_show_errors))
             setSmallIcon(R.drawable.ic_mihon)
 
-            // FORK --> open the error list; the text log stays one action away
+            // FORK(update-errors) --> open the error list; the text log stays one action away
             setContentIntent(haruka.updateerrors.UpdateErrorsScreen.pendingActivity(context))
             addAction(
                 MaterialSymbolsR.drawable.rounded_filled_warning,
-                context.stringResource(MR.strings.action_open_log),
+                context.stringResource(haruka.i18n.HR.strings.action_open_log),
                 NotificationReceiver.openErrorLogPendingActivity(context, uri),
             )
             // FORK <--
@@ -309,7 +309,7 @@ class LibraryUpdateNotifier(
      * Cancels the progress notification.
      */
     fun cancelProgressNotification() {
-        // FORK -->
+        // FORK(progress) -->
         haruka.progress.BackgroundTaskProgress.onLibraryUpdateFinished()
         // FORK <--
         context.cancelNotification(Notifications.ID_LIBRARY_PROGRESS)

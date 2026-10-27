@@ -139,7 +139,7 @@ class MangaViewModel(
     private val sourceManager: SourceManager,
     private val refreshTracks: RefreshTracks,
     private val coverCache: CoverCache,
-    // FORK -->
+    // FORK(dedup) -->
     private val harukaChapterGroups: haruka.chapter.ui.MangaChapterGroups,
     // FORK <--
 ) : ViewModel() {
@@ -287,7 +287,7 @@ class MangaViewModel(
             hideMissingChapters = hideMissingChapters,
         )
     }
-        // FORK -->
+        // FORK(dedup) -->
         .let { harukaChapterGroups.attach(mangaId, it) }
         // FORK <--
         // Composition would otherwise build these on first read, on the main thread, for every new state
@@ -658,7 +658,7 @@ class MangaViewModel(
      */
     fun getNextUnreadChapter(): Chapter? {
         val successState = successState ?: return null
-        // FORK --> with duplicates grouped: the next logical chapter, at its preferred copy
+        // FORK(dedup) --> with duplicates grouped: the next logical chapter, at its preferred copy
         successState.harukaGroups?.let { return haruka.chapter.ui.nextUnreadGrouped(successState, it) }
         // FORK <--
         return successState.chapters.getNextUnread(successState.manga)
@@ -720,7 +720,7 @@ class MangaViewModel(
         items: List<ChapterList.Item>,
         action: ChapterDownloadAction,
     ) {
-        // FORK --> a group's head row downloads, cancels and deletes all of its winner's parts
+        // FORK(dedup) --> a group's head row downloads, cancels and deletes all of its winner's parts
         val harukaParts = harukaChapterGroups.withWinnerParts(successState, items)
         if (harukaParts.size > items.size) {
             when (action) {
@@ -797,7 +797,7 @@ class MangaViewModel(
             appScope.launch {
                 setReadStatus.await(
                     read = read,
-                    // FORK -->
+                    // FORK(dedup) -->
                     chapters = harukaChapterGroups.withCopies(successState, chapters, read).toTypedArray(),
                     // FORK <--
                 )
@@ -896,7 +896,7 @@ class MangaViewModel(
         appScope.launch {
             val manga = successState?.manga ?: return@launch
             val chaptersToDownload = filterChaptersForDownload.await(manga, chapters)
-                // FORK -->
+                // FORK(dedup) -->
                 .let { harukaChapterGroups.withoutDownloadedCopies(manga, it) }
             // FORK <--
 
@@ -1008,7 +1008,7 @@ class MangaViewModel(
         selected: Boolean,
         fromLongPress: Boolean = false,
     ) {
-        // FORK -->
+        // FORK(dedup) -->
         val chapters = successState?.harukaRows ?: return
         // FORK <--
         val selectedIndex = chapters.indexOfFirst { it.id == item.chapter.id }
@@ -1056,7 +1056,7 @@ class MangaViewModel(
                 }
             }
         }
-        // FORK -->
+        // FORK(dedup) -->
         successState?.harukaGroupedList?.let {
             haruka.chapter.ui.syncWinnerSelection(selectedChapterIds.value, selectedIds, it.groups)
         }
@@ -1144,14 +1144,14 @@ class MangaViewModel(
             val isRefreshingData: Boolean = false,
             val dialog: Dialog? = null,
             val hideMissingChapters: Boolean = false,
-            // FORK -->
+            // FORK(dedup) -->
             val harukaGroups: haruka.chapter.ui.ChapterGroupsInput? = null,
             // FORK <--
         ) : State {
             val processedChapters by lazy {
                 chapters.applyFilters(manga).toList()
             }
-            // FORK -->
+            // FORK(dedup) -->
 
             val harukaGroupedList by lazy { harukaGroups?.build(processedChapters) }
 
@@ -1164,7 +1164,7 @@ class MangaViewModel(
             }
 
             val selectedChapters by lazy {
-                // FORK -->
+                // FORK(dedup) -->
                 (harukaGroupedList?.selectable ?: processedChapters).fastFilter { it.selected }
                 // FORK <--
             }
@@ -1179,7 +1179,7 @@ class MangaViewModel(
 
             val missingChapterCount by lazy {
                 if (hideMissingChapters) return@lazy 0
-                // FORK --> numbers that look like ids or timestamps don't count as chapters
+                // FORK(dedup) --> numbers that look like ids or timestamps don't count as chapters
                 val harukaOutliers = haruka.chapter.chapterNumberOutlierThreshold(
                     processedChapters.fastMap { it.chapter.chapterNumber },
                 )
@@ -1191,12 +1191,12 @@ class MangaViewModel(
 
             val chapterListItems by lazy {
                 if (hideMissingChapters) {
-                    // FORK -->
+                    // FORK(dedup) -->
                     return@lazy harukaRows
                     // FORK <--
                 }
 
-                // FORK -->
+                // FORK(dedup) -->
                 val harukaOutliers = haruka.chapter.chapterNumberOutlierThreshold(
                     processedChapters.fastMap { it.chapter.chapterNumber },
                 )
@@ -1208,7 +1208,7 @@ class MangaViewModel(
                         before to after
                     }
                     if (higherChapter == null) return@insertSeparators null
-                    // FORK --> no gap counted up to an outlier number
+                    // FORK(dedup) --> no gap counted up to an outlier number
                     if (haruka.chapter.isChapterNumberOutlier(higherChapter.chapter.chapterNumber, harukaOutliers)) {
                         return@insertSeparators null
                     }
@@ -1271,7 +1271,7 @@ sealed class ChapterList {
         val chapter: Chapter,
         val downloadState: Download.State,
         val selected: Boolean = false,
-        // FORK -->
+        // FORK(dedup) -->
         val harukaRow: haruka.chapter.ui.ChapterGroupRow? = null,
         // FORK <--
     ) : ChapterList() {

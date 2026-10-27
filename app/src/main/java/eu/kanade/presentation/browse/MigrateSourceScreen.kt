@@ -71,7 +71,7 @@ fun MigrateSourceScreen(
                 onToggleSortingMode = onToggleSortingMode,
                 sortingDirection = state.sortingDirection,
                 onToggleSortingDirection = onToggleSortingDirection,
-                // FORK -->
+                // FORK(migration) -->
                 unavailable = state.unavailable,
                 // FORK <--
             )
@@ -88,7 +88,7 @@ private fun MigrateSourceList(
     onToggleSortingMode: () -> Unit,
     sortingDirection: SetMigrateSorting.Direction,
     onToggleSortingDirection: () -> Unit,
-    // FORK -->
+    // FORK(migration) -->
     unavailable: Map<Long, haruka.stale.UnavailableReason>,
     // FORK <--
 ) {
@@ -145,7 +145,7 @@ private fun MigrateSourceList(
                 count = count,
                 onClickItem = { onClickItem(source) },
                 onLongClickItem = { onLongClickItem(source) },
-                // FORK -->
+                // FORK(migration) -->
                 unavailableReason = unavailable[source.id],
                 // FORK <--
             )
@@ -159,7 +159,7 @@ private fun MigrateSourceItem(
     count: Long,
     onClickItem: () -> Unit,
     onLongClickItem: () -> Unit,
-    // FORK -->
+    // FORK(migration) -->
     unavailableReason: haruka.stale.UnavailableReason?,
     // FORK <--
     modifier: Modifier = Modifier,
@@ -201,7 +201,7 @@ private fun MigrateSourceItem(
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
-                    // FORK --> also names not-loaded and obsolete extensions, not only stubs
+                    // FORK(migration) --> also names not-loaded and obsolete extensions, not only stubs
                     haruka.stale.UnavailableSourceLabel(unavailableReason)
                     // FORK <--
                 }

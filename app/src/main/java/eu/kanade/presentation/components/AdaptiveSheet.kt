@@ -32,7 +32,7 @@ fun NavigatorAdaptiveSheet(
             ) {
                 ScreenTransition(
                     navigator = sheetNavigator,
-                    // FORK -->
+                    // FORK(motion) -->
                     transition = haruka.motion.sheetContentTransition {
                         // FORK <--
                         fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith

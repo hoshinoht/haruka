@@ -53,7 +53,7 @@ class GlobalSearchScreen(
                 }
             }
         } else {
-            // FORK -->
+            // FORK(library-add) -->
             val libraryToggle = haruka.library.rememberLibraryToggle(this)
             libraryToggle.Dialogs()
             // FORK <--
@@ -69,7 +69,7 @@ class GlobalSearchScreen(
                     navigator.push(BrowseSourceScreen(it.id, state.searchQuery))
                 },
                 onClickItem = { navigator.push(MangaScreen(it.id, true)) },
-                // FORK -->
+                // FORK(library-add) -->
                 onLongClickItem = libraryToggle.onLongClick,
                 // FORK <--
             )

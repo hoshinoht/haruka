@@ -166,7 +166,7 @@ object SettingsAppearanceScreen : SearchableSettings {
                     preference = uiPreferences.imagesInDescription,
                     title = stringResource(MR.strings.pref_display_images_description),
                 ),
-                // FORK -->
+                // FORK(panorama) -->
                 haruka.cover.panoramaCoversPreference(),
                 haruka.title.compactTitlesPreference(),
                 *haruka.library.shelves.libraryShelvesPreferences(),

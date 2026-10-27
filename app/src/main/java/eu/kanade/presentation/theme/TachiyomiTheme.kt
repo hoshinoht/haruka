@@ -55,7 +55,7 @@ private fun BaseTachiyomiTheme(
 ) {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
-    // FORK -->
+    // FORK(hoshino) -->
     haruka.theme.HarukaExpressiveTheme(
         appTheme = appTheme,
         // FORK <--
@@ -104,7 +104,7 @@ private val colorSchemes: Map<AppTheme, BaseColorScheme> = mapOf(
     AppTheme.TIDAL_WAVE to TidalWaveColorScheme,
     AppTheme.YINYANG to YinYangColorScheme,
     AppTheme.YOTSUBA to YotsubaColorScheme,
-    // FORK -->
+    // FORK(hoshino) -->
     AppTheme.HOSHINO to haruka.theme.HoshinoColorScheme,
     // FORK <--
 )

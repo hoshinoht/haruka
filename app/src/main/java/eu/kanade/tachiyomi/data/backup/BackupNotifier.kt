@@ -95,7 +95,7 @@ class BackupNotifier(
         maxAmount: Int = 100,
         sync: Boolean = false,
     ): NotificationCompat.Builder {
-        // FORK -->
+        // FORK(progress) -->
         haruka.progress.BackgroundTaskProgress.onRestoreProgress(progress, maxAmount, sync)
         // FORK <--
         val builder = with(progressNotificationBuilder) {
@@ -127,7 +127,7 @@ class BackupNotifier(
     }
 
     fun showRestoreError(error: String?) {
-        // FORK -->
+        // FORK(progress) -->
         haruka.progress.BackgroundTaskProgress.onRestoreFinished(context)
         // FORK <--
         context.cancelNotification(Notifications.ID_RESTORE_PROGRESS)
@@ -147,7 +147,7 @@ class BackupNotifier(
         file: String?,
         sync: Boolean,
     ) {
-        // FORK -->
+        // FORK(progress) -->
         haruka.progress.BackgroundTaskProgress.onRestoreFinished(context)
         // FORK <--
         val contentTitle = if (sync) {

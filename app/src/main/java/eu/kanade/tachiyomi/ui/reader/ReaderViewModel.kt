@@ -128,7 +128,7 @@ class ReaderViewModel(
     private val coverCache: CoverCache,
     private val chapterCache: ChapterCache,
     private val downloadCache: DownloadCache,
-    // FORK -->
+    // FORK(dedup) -->
     private val harukaDedup: haruka.chapter.dedup.DedupSurfaces,
     private val harukaSyncTriggers: haruka.sync.SyncTriggers,
     private val harukaAutoReadingMode: haruka.reader.AutoReadingMode,
@@ -285,7 +285,7 @@ class ReaderViewModel(
             .sortedWith(getChapterSort(manga, sortDescending = false))
             .run {
                 if (readerPreferences.skipDupe.get()) {
-                    // FORK -->
+                    // FORK(dedup) -->
                     harukaDedup.readerChapters(manga, this, selectedChapter)
                     // FORK <--
                 } else {
@@ -353,7 +353,7 @@ class ReaderViewModel(
     private suspend fun init() {
         withContext(Dispatchers.IO) {
             try {
-                // FORK -->
+                // FORK(longstrip) -->
                 val manga = (getManga.await(mangaId) ?: error("Requested manga of id $mangaId not found"))
                     .let { harukaAutoReadingMode.onOpen(it) }
                 // FORK <--
@@ -375,7 +375,7 @@ class ReaderViewModel(
 
                 chapterList = loadChapterList()
                 loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
-                // FORK -->
+                // FORK(longstrip) -->
                 state.value.viewerChapters?.let { chapters ->
                     harukaAutoReadingMode.checkPageShape(
                         viewModelScope,
@@ -602,14 +602,14 @@ class ReaderViewModel(
 
             val chaptersToDownload = getNextChapters.await(manga.id, nextChapter.id).run {
                 if (readerPreferences.skipDupe.get()) {
-                    // FORK -->
+                    // FORK(dedup) -->
                     harukaDedup.readerChapters(manga, this, nextChapter)
                     // FORK <--
                 } else {
                     this
                 }
             }
-                // FORK -->
+                // FORK(dedup) -->
                 .let { harukaDedup.withoutDownloadedCopies(manga, it) }
                 // FORK <--
                 .take(downloadAheadAmount)
@@ -734,7 +734,7 @@ class ReaderViewModel(
     private suspend fun updateChapterProgressOnComplete(readerChapter: ReaderChapter) {
         updateTrackChapterRead(readerChapter)
         deleteChapterIfNeeded(readerChapter)
-        // FORK -->
+        // FORK(dedup) -->
         manga?.let { harukaDedup.onChapterRead(it, readerChapter.chapter) }
         harukaSyncTriggers.onChapterCompleted()
         // FORK <--

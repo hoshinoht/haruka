@@ -1656,7 +1656,7 @@ open class WebGpuViewer(
         }
         resetQueues((prevPages + cachedPage + nextPages).mapTo(HashSet()) { pageKey(it) })
 
-        // FORK --> HttpPageLoader plans its download chain around the page asked for last and cancels
+        // FORK(fix) --> HttpPageLoader plans its download chain around the page asked for last and cancels
         // what's outside it, so the farthest pages go first and the current page last; in reading
         // order, the current page was cancelled and only loaded after the rest of the chapter.
         nextPages.asReversed().forEach { startDownload(it) }

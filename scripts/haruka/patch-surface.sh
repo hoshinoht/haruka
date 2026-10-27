@@ -13,8 +13,11 @@ modified="$(git diff --name-only --diff-filter=MD "$base" | grep -Ev "$fork_owne
 added_outside="$({ git diff --name-only --diff-filter=A "$base"; git ls-files --others --exclude-standard; } | grep -Ev "$fork_owned" | sort -u || true)"
 
 count() { if [ -z "$1" ]; then echo 0; else printf '%s\n' "$1" | wc -l | tr -d ' '; fi; }
-# FORK blocks open with `// FORK -->` (Kotlin/KTS/SQL) or `<!-- FORK -->` (XML).
-blocks_in() { grep -c -e '// FORK -->' -e '<!-- FORK -->' "$1" 2>/dev/null || true; }
+# FORK blocks open with `// FORK(tag) -->` (Kotlin/KTS/SQL) or `<!-- FORK(tag) -->` (XML); the tag names the feature.
+# The untagged forms `// FORK -->` and `<!-- FORK -->` are still counted, and listed below as untagged.
+open_re='(// |<!-- )FORK(\([a-z-]+\))? -->'
+untagged_re='(// |<!-- )FORK -->'
+blocks_in() { grep -c -E "$open_re" "$1" 2>/dev/null || true; }
 
 echo "Base: $(git rev-parse --short "$base") ($upstream_ref)"
 echo "Upstream files modified or deleted: $(count "$modified")  (FORK blocks per file)"
@@ -25,8 +28,18 @@ done
 echo "Files added outside fork-owned paths: $(count "$added_outside")"
 [ -n "$added_outside" ] && printf '  %s\n' $added_outside
 
-markers="$(git grep -c -e '// FORK -->' -e '<!-- FORK -->' -- . ':!AGENTS.md' ':!scripts/haruka' ':!docs/haruka' | awk -F: '{s+=$NF} END {print s+0}')"
+markers="$(git grep -c -E "$open_re" -- . ':!AGENTS.md' ':!scripts/haruka' ':!docs/haruka' | awk -F: '{s+=$NF} END {print s+0}')"
 echo "FORK hook blocks: $markers"
+# Blocks per feature tag, most first.
+{ git grep -h -E "$open_re" -- . ':!AGENTS.md' ':!scripts/haruka' ':!docs/haruka' || true; } \
+    | sed -n -E 's/.*FORK\(([a-z-]+)\) -->.*/\1/p' | sort | uniq -c | sort -k1,1nr -k2,2 \
+    | awk '{ printf "  %3d  %s\n", $1, $2 }'
+
+untagged="$({ git grep -n -E "$untagged_re" -- . ':!AGENTS.md' ':!scripts/haruka' ':!docs/haruka' || true; } | grep -Ev "$fork_owned" || true)"
+if [ -n "$untagged" ]; then
+    echo "Untagged FORK blocks: $(count "$untagged")"
+    printf '%s\n' "$untagged" | cut -d: -f1,2 | sed 's/^/  /'
+fi
 
 # Shadow imports: an upstream file swaps an import for a same-named haruka.* drop-in; the import line is the hook.
 import_files="$(git grep -l -E '^import haruka\.' -- . | grep -Ev "$fork_owned" || true)"
@@ -36,4 +49,6 @@ for file in $import_files; do
 done
 echo "Import hooks (import haruka.* in upstream files): $import_lines lines in $(count "$import_files") files"
 [ -n "$import_files" ] && printf '  %s\n' $import_files
+# Every opening marker in an upstream file names its feature.
+[ -z "$untagged" ] || exit 1
 exit 0

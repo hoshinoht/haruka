@@ -36,7 +36,7 @@ object SettingsReaderScreen : SearchableSettings {
                     .associate { it.flagValue to stringResource(it.stringRes) },
                 title = stringResource(MR.strings.pref_viewer_type),
             ),
-            // FORK -->
+            // FORK(longstrip) -->
             haruka.reader.autoReadingModePreference(),
             // FORK <--
             Preference.PreferenceItem.ListPreference(

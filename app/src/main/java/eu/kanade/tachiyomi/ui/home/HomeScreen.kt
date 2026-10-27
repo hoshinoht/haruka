@@ -112,7 +112,7 @@ object HomeScreen : Screen() {
                 ) {
                     AnimatedContent(
                         targetState = tabNavigator.current,
-                        // FORK -->
+                        // FORK(motion) -->
                         transitionSpec = haruka.motion.fadeThroughTransition {
                             // FORK <--
                             materialFadeThroughIn(
@@ -201,7 +201,7 @@ object HomeScreen : Screen() {
                 )
             },
             badge = tabBadge(tab),
-            // FORK --> Hoshino: solid pink selected tab
+            // FORK(hoshino) --> Hoshino: solid pink selected tab
             colors = haruka.theme.hoshinoNavigationItemColors(),
             // FORK <--
         )

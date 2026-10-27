@@ -67,14 +67,14 @@ data class MigrateMangaScreen(
                         }
                     },
                     scrollBehavior = scrollBehavior,
-                    // FORK -->
+                    // FORK(migration) -->
                     actions = {
                         haruka.selection.ListJumpActions(listState = lazyListState, itemCount = state.titles.size)
                     },
                     // FORK <--
                 )
             },
-            // FORK -->
+            // FORK(migration) -->
             // The selection toolbar takes over the Continue FAB's role.
             floatingActionButton = {
                 haruka.selection.SelectionToolbar(
@@ -105,7 +105,7 @@ data class MigrateMangaScreen(
                 contentPadding = contentPadding,
                 state = state,
                 onClickItem = viewModel::toggleSelection,
-                // FORK -->
+                // FORK(migration) -->
                 onLongClickItem = viewModel::selectRange,
                 // FORK <--
                 onClickCover = { navigator.push(MangaScreen(it.id)) },
@@ -130,7 +130,7 @@ data class MigrateMangaScreen(
         state: MigrateMangaViewModel.State,
         onClickItem: (Manga) -> Unit,
         onClickCover: (Manga) -> Unit,
-        // FORK -->
+        // FORK(migration) -->
         onLongClickItem: (Manga) -> Unit,
         // FORK <--
     ) {
@@ -144,7 +144,7 @@ data class MigrateMangaScreen(
                     isSelected = manga.id in state.selection,
                     onClickItem = onClickItem,
                     onClickCover = onClickCover,
-                    // FORK -->
+                    // FORK(migration) -->
                     onLongClickItem = onLongClickItem,
                     // FORK <--
                 )
@@ -158,7 +158,7 @@ data class MigrateMangaScreen(
         isSelected: Boolean,
         onClickItem: (Manga) -> Unit,
         onClickCover: (Manga) -> Unit,
-        // FORK -->
+        // FORK(migration) -->
         onLongClickItem: (Manga) -> Unit,
         // FORK <--
         modifier: Modifier = Modifier,
@@ -168,7 +168,7 @@ data class MigrateMangaScreen(
             manga = manga,
             onClickItem = { onClickItem(manga) },
             onClickCover = { onClickCover(manga) },
-            // FORK -->
+            // FORK(migration) -->
             onLongClickItem = { onLongClickItem(manga) },
             // FORK <--
         )

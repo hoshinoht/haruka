@@ -36,6 +36,20 @@ jobs:
         # Fast-forward only: fails loudly if someone committed to main.
         run: git push origin refs/remotes/upstream/main:refs/heads/main
 
+      - name: Check open sync PR
+        # A new sync branch starts from dev, so while a sync PR is open it would re-hit the conflicts that PR resolved.
+        id: open
+        run: |
+          short="$(git rev-parse --short upstream/main)"
+          pr="$(gh pr list --state open --json headRefName,number \
+            --jq '[.[] | select(.headRefName | startswith("sync/upstream-"))][0] // empty | "\(.number) \(.headRefName)"')"
+          echo "pr=${pr%% *}" >> "$GITHUB_OUTPUT"
+          [ -n "${pr}" ] && [ "${pr##* }" != "sync/upstream-${short}" ] || exit 0
+          if gh pr view "${pr%% *}" --json comments --jq '.comments[].body' | grep -qF "${short}"; then
+            echo "Already noted on #${pr%% *}"; exit 0
+          fi
+          gh pr comment "${pr%% *}" --body "Upstream moved to \`mihonapp/mihon@${short}\`. Merge this PR first; the next sync run merges the rest from \`dev\`."
+
       - name: Prepare merge branch
         id: prep
         run: |
@@ -45,9 +59,19 @@ jobs:
           echo "branch=${branch}" >> "$GITHUB_OUTPUT"
           if git merge-base --is-ancestor upstream/main HEAD; then
             echo "skip=up-to-date" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ steps.open.outputs.pr }}" ]; then
+            echo "skip=sync-pr-open" >> "$GITHUB_OUTPUT"
           elif git ls-remote --exit-code --heads origin "${branch}" > /dev/null; then
             echo "skip=branch-exists" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Check upstream drift
+        # Runs on dev, before the merge: strings, symbols and hook hosts the fork uses that upstream dropped.
+        if: steps.prep.outputs.skip == ''
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          scripts/haruka/upstream-drift.sh upstream/main 2>&1 | tee "$RUNNER_TEMP/drift.txt"
 
       - name: Merge upstream
         id: merge
@@ -76,7 +100,7 @@ jobs:
             echo
             sed 's/^/- `/; s/$/`/' "$RUNNER_TEMP/conflicts.txt"
             echo
-            echo "Resolve locally: \`git fetch upstream && git switch -c ${{ steps.prep.outputs.branch }} origin/dev && git merge upstream/main\`."
+            echo "Resolve locally: \`git fetch origin && git fetch upstream && git switch -c ${{ steps.prep.outputs.branch }} origin/dev && git merge ${{ steps.prep.outputs.short }}\`, then check \`scripts/haruka/upstream-drift.sh ${{ steps.prep.outputs.short }}\` and the build."
           } > "$RUNNER_TEMP/body.md"
           gh issue create --title "${title}" --body-file "$RUNNER_TEMP/body.md"
 
@@ -105,6 +129,10 @@ jobs:
             echo "Merges \`mihonapp/mihon@${{ steps.prep.outputs.short }}\` into \`dev\`."
             echo
             echo "Checks (\`spotlessCheck testDebugUnitTest assembleDebug\`): **${{ steps.verify.outcome }}**"
+            echo
+            echo '```'
+            cat "$RUNNER_TEMP/drift.txt"
+            echo '```'
             echo
             echo '```'
             scripts/haruka/patch-surface.sh upstream/main

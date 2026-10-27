@@ -26,13 +26,13 @@ fun BaseMangaListItem(
     cover: @Composable RowScope.() -> Unit = { defaultCover(manga, onClickCover) },
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable RowScope.() -> Unit = { defaultContent(manga) },
-    // FORK -->
+    // FORK(migration) -->
     onLongClickItem: (() -> Unit)? = null,
     // FORK <--
 ) {
     Row(
         modifier = modifier
-            // FORK -->
+            // FORK(migration) -->
             .then(haruka.selection.itemClickModifier(onClick = onClickItem, onLongClick = onLongClickItem))
             // FORK <--
             .height(56.dp)
@@ -58,7 +58,7 @@ private val defaultCover: @Composable RowScope.(Manga, () -> Unit) -> Unit = { m
 private val defaultContent: @Composable RowScope.(Manga) -> Unit = {
     Box(modifier = Modifier.weight(1f)) {
         Text(
-            // FORK -->
+            // FORK(titles) -->
             text = haruka.title.rememberDisplayTitle(it.title),
             // FORK <--
             modifier = Modifier

@@ -75,7 +75,7 @@ fun OnboardingScreen(
         ) {
             AnimatedContent(
                 targetState = currentStep,
-                // FORK -->
+                // FORK(motion) -->
                 transitionSpec = haruka.motion.sharedAxisXTransition(
                     slideDistance = slideDistance,
                     forward = { targetState > initialState },

@@ -109,7 +109,7 @@ object AboutScreen : Screen() {
                         },
                     )
                 }
-                // FORK -->
+                // FORK(build) -->
                 item { haruka.release.MihonBaseVersion() }
                 // FORK <--
 
@@ -150,7 +150,7 @@ object AboutScreen : Screen() {
                             },
                         )
                     }
-                    // FORK -->
+                    // FORK(build) -->
                     item { haruka.release.BetaUpdatesSwitch() }
                     // FORK <--
                 }
@@ -273,7 +273,7 @@ object AboutScreen : Screen() {
                 }
             }
             else -> {
-                // FORK --> prerelease version names (0.1.0-beta.1) are betas, not stable builds
+                // FORK(build) --> prerelease version names (0.1.0-beta.1) are betas, not stable builds
                 val channel = when {
                     isFossBuildType -> "FOSS"
                     '-' in BuildConfig.VERSION_NAME -> "Beta"

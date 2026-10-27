@@ -1,0 +1,52 @@
+# Haruka feature ledger
+
+One row per FORK tag. Hooks counts `FORK(<tag>)` blocks in upstream files (159 before the beta.7 reader lanes, 181 once they merge; from `scripts/haruka/patch-surface.sh`). The tag is the one used in `// FORK(<tag>) -->` hooks in upstream files, so `git grep -n 'FORK(<tag>)'` finds every hook a feature owns. Hard rule 4 in [AGENTS.md](../../AGENTS.md) applies to every row: when Mihon ships an equivalent, the fork version goes.
+
+Update this file when adding a feature (new row), when an upstream PR overlapping a feature appears or changes state, and when decommissioning (move the row to Decommissioned). Upstream status is one of `none known`, `PR #n (state, last updated)` or `shipped in <version>`; PRs are on `mihonapp/mihon`, checked 2026-10-27.
+
+## Features
+
+| Tag | Feature | Lives in | Hooks | Upstream status | Plan |
+|---|---|---|---|---|---|
+| `motion` | Animations setting: Standard keeps Mihon's motion, Expressive uses Material 3 Expressive springs, morphs and pill swipe actions, Reduced uses short fades. | `:haruka:motion`; app `haruka.motion`; `haruka.ui.swipe` (core and app) | 33 | none known | Keep. STANDARD must stay identical to upstream motion. |
+| `hoshino` | Hoshino theme in dark and light, the default theme, with coral unread badges and a solid pink selected tab. | app `haruka.theme`, `haruka.library` (Hoshino cover title, unread dot); `app/src/haruka/res` | 10 | none known | Keep. |
+| `dedup` | Official-first chapter deduplication: one preferred copy per chapter on the manga screen, reader, downloads, read marking and library counts, with other copies under a "versions" chip. | `:haruka:core` `haruka.chapter.dedup`, `haruka.chapter.ui`; app `haruka.chapter`, `haruka.library` (chapter counts) | 33 | PR #3764 "Allow excluding chapters without a scanlator" (draft, by maintainer AntsyLich, 2026-08-14) | Neither replaces dedup. If #3764 merges, use Mihon's exclusion and drop any fork option that does the same. |
+| `grouped-updates` | Updates can group chapters per entry and day, optionally as conversations, with the scanlator shown dimmer after the chapter name. | app `haruka.updates` | 4 | PR #3617 "Group chapters by entry in updates tab" (open, changes requested, 2026-10-06); PR #4162 "Show the scanlator of chapters in Updates" (open, 2026-10-21) | If #3617 merges, decommission the fork grouping and migrate its preference; keep the conversation view only if still wanted, on top of Mihon's grouping. If #4162 merges, use Mihon's scanlator line. |
+| `shelves` | Library shelves: a one-scroll library with Continue reading, New chapters, Not started, Needs a new source, Inflated counts and your own shelves, under a pinned "All series" header with sort dividers and category chips. | `:haruka:core` `haruka.library`; app `haruka.library.shelves`; [library-shelves](library-shelves) | 5 | PR #3284 "Pinned Categories" (draft, 2026-05-14); PR #4132 "Add manga selection and bulk category assignment" (open, 2026-10-18) | Neither replaces shelves. If #3284 merges, build the pinned header and category chips on Mihon's pinning. If #4132 merges, check shelf long-press selection against Mihon's. |
+| `sync` | Sync your library between devices through your own Google Drive, in a hidden app folder, with optional end-to-end encryption and confirmation before large removals. | `:haruka:sync`; app `haruka.sync`; [sync.md](sync.md) | 1 (the engine lives in `:haruka:sync` and app `haruka.sync`) | PR #4047 "Add Google Drive sync between devices" (open, not draft, no maintainer review, 2026-10-26): `drive.file` scope with browser OAuth, no Play Services, new tables and migration 18, per-entry `.tachibk` files | If it merges, decommission `:haruka:sync` and migrate its preferences to Mihon's. Keep only still-wanted deltas (appdata scope, encryption, removal safety) on top of Mihon's design. |
+| `migration` | Bulk migration with range selection, select all or none, match confidence (High, Check, Low) with a review step, source presets, and migrating all entries from unavailable sources at once. | `:haruka:core` `haruka.migration`; app `haruka.migration`, `haruka.selection`, `haruka.stale` | 25 | PR #3171 "Migrate Manga Screen Long Click Range Selection" (open, stale, 2026-04-11); PR #3474 "Add chapter count delta badge to migration search" (open, 2026-06-26) | If #3171 merges, drop the fork's range selection on that screen. If #3474 merges, compare its badge with match confidence; drop the chapter part of the confidence reason if it duplicates the badge. |
+| `update-errors` | A screen lists entries that failed the last library update; the error notification opens it. | app `haruka.updateerrors` | 5 | none known | Keep. |
+| `progress` | Library update and backup restore progress show as in-app banners. | app `haruka.progress` | 8 | none known | Keep. |
+| `titles` | Optional shorter titles that hide trailing lists of alternative names. | `:haruka:core` `haruka.title`; app `haruka.title` | 6 | none known | Keep. |
+| `related` | Entry screens can show related titles suggested by the extension. | app `haruka.related` | 3 | none known | Keep. |
+| `storage` | Settings › Data and storage › Downloads storage shows space used by source and series, and removes downloads of series no longer in the library or read chapters. | `:haruka:core` `haruka.storage`; app `haruka.storage` | 1 | none known | Keep. |
+| `longstrip` | Detect long strips: series on the default reading mode open in long strip when their tags or page shapes say webtoon. | `:haruka:core` `haruka.reader`; app `haruka.reader` | 3 | none known | Keep. |
+| `reader-loading` | Online chapters load sooner: the next chapter starts preloading once the pages just ahead are in or the end is near, a page already near the front of the download plan no longer restarts it, and a page list read from the cache keeps its expiry. Settings › Reader › Haruka adds "Parallel page downloads" and "Pages downloaded at once" (defaults equal Mihon). | `:haruka:core` `haruka.reader.loading`; app `haruka.reader.loading` | 7 | PR #3769 "Cancel obsolete image requests" (open, 2026-10-08); PR #2765 preload count (closed unmerged) | If Mihon reworks the loader's planning or prefetch (watch AntsyLich's reader PRs #4194/#4195), drop the matching block and keep only the settings if still wanted. |
+| `chapter-sheet` | A chapter list button in the reader's bottom bar opens the reader's chapters in a sheet, current chapter highlighted; tapping one opens it. | app `haruka.reader.ui` | 8 | PR #2974 "Chapter list on long press" (open, stale) | If Mihon ships a chapter list in the reader, drop the sheet and keep the bottom-bar slot only if another feature still uses it. |
+| `page-preview` | A pages button in the reader's bottom bar opens a grid of the chapter's page thumbnails (loaded pages only) to jump to a page. Shares the bottom-bar slot of `chapter-sheet`. | `:haruka:core` `haruka.reader.preview`; app `haruka.reader.preview` | 3 | Issue #2840 "Page preview" (open, 6 👍); PR #4018 precise page navigation (open) | If Mihon ships page previews, decommission; if only #4018 lands, keep the grid. |
+| `cache-cap` | Settings › Data and storage › Chapter cache limit caps the space online pages take (No limit, 250 MB to 2 GB); the oldest images go first. Default No limit = Mihon. | app `haruka.storage.ChapterCacheCap` | 4 | none known (Mihon's TTL cache has no size bound) | Drop if Mihon adds a size bound to its chapter cache. |
+| `library-add` | Series added without opening them load their details and chapters right away; long-press adds or removes an entry from global search results. | app `haruka.library` (fetch on add, library toggle) | 3 | none known | Keep. |
+| `panorama` | Wide covers can show in full instead of cropped. | app `haruka.cover` | 2 | none known | Keep. |
+| `build` | Haruka installs beside Mihon as `app.haruka`, follows Haruka releases in the updater and shows its Mihon base in Settings › About. | `gradle/build-logic` `haruka.gradle`; `app/src/haruka`; app `haruka.release`, `haruka.di`; `i18n-fork` | 10 | n/a (fork identity) | Permanent. |
+| `fix` | Fixes to Mihon kept in the fork: the fast scroller can be grabbed mid-fling, covers stop redrawing the failed-to-load placeholder per item, and the high quality renderer loads the open page first. | upstream files only | 7 | none known | Drop each block once upstream fixes the bug (check at every sync). Never send these upstream (hard rule 6). |
+
+## Decommissioned
+
+| Tag | Feature | Removed in | Replaced by |
+|---|---|---|---|
+| `backup` (before tags) | Backups four times faster to create and to pick for restore: `haruka.backup.scanTrackerIds` read only the tracker ids off the wire instead of decoding every chapter and history entry (added in 0.1.0-beta.6). | 0.1.0-beta.7 | Mihon 3ed83a8 "Decode only needed backup fields and restore entries in one pass", which decodes only the tracking field. |
+
+Worked example: when 3ed83a8 arrived with the 0.21.3 sync, Mihon's backup validator did the same job as the fork's scan. The two hook blocks in `BackupFileValidator.kt` and `app/src/main/java/haruka/backup` (with its test) were deleted, nothing needed migrating because the scan had no preferences, and the beta.7 CHANGELOG says so under "From Mihon (0.21.3, main at 007ec9a)".
+
+## How to decommission
+
+1. Find every hook: `git grep -n 'FORK(<tag>)'`, plus `import haruka.` lines in upstream files that point at the feature's packages.
+2. Remove those blocks so each upstream file matches upstream again, then delete the feature's fork files and its strings in `i18n-fork`.
+3. Migrate the feature's preferences to Mihon's equivalents (read the old key once, write Mihon's, delete the old key) so users keep their choice.
+4. Note it in `docs/haruka/CHANGELOG.md` under "From Mihon" in the release's section.
+5. Move the row to Decommissioned here.
+6. Run `scripts/haruka/patch-surface.sh` and confirm the tag's block count reaches zero and the surface drops.
+
+## Watch
+
+The daily `haruka-upstream-check` workflow and `scripts/haruka/upstream-drift.sh` catch API drift: strings, symbols and hook hosts the fork uses that upstream removed. Feature overlap is a human check. At each sync, review open `mihonapp/mihon` PRs touching these areas (Updates, chapter lists and scanlators, library and categories, migration, backup and sync) and update the Upstream status column.

@@ -141,7 +141,7 @@ internal fun LazyListScope.updatesUiItems(
 }
 
 @Composable
-// FORK --> internal so Haruka's grouped list can reuse the row
+// FORK(grouped-updates) --> internal so Haruka's grouped list can reuse the row
 internal fun UpdatesUiItem(
 // FORK <--
     update: UpdatesWithRelations,
@@ -187,7 +187,7 @@ internal fun UpdatesUiItem(
                 .weight(1f),
         ) {
             Text(
-                // FORK -->
+                // FORK(titles) -->
                 text = haruka.title.rememberDisplayTitle(update.mangaTitle),
                 // FORK <--
                 maxLines = 1,

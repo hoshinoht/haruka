@@ -53,7 +53,7 @@ fun LibraryContent(
             end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
         ),
     ) {
-        // FORK -->
+        // FORK(shelves) -->
         if (haruka.library.shelves.rememberLibraryShelvesEnabled()) {
             haruka.library.shelves.ShelvesLibrary(
                 categories = categories,

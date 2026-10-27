@@ -27,7 +27,7 @@ dependencies {
     api(projects.core.common)
     api(projects.i18n)
     implementation(projects.icons.materialSymbols)
-    // FORK --> haruka.motion, re-exported so upstream hooks here and in the app keep resolving it
+    // FORK(build) --> haruka.motion, re-exported so upstream hooks here and in the app keep resolving it
     api(projects.haruka.motion)
     // FORK <--
 
