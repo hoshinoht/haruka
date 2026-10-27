@@ -124,6 +124,54 @@ class LogicalChaptersTest {
     }
 
     @Test
+    fun `lone parts join a chapter another group merged as one partial copy each`() {
+        // Lady Lucetta's ... 11: two whole copies, one merged 11.1/11.2, and two groups with a single part each.
+        val result = group(
+            chapter(1, 11.2, "Swampert", name = "Ch. 11.2"),
+            chapter(2, 11.0, "Seadra"),
+            chapter(3, 11.0, "Empoleon", name = "Ch.11"),
+            chapter(4, 11.1, "Ursaring"),
+            chapter(5, 11.2, "Ursaring"),
+            chapter(6, 11.1, "Ho-oh", name = "Ch. 11.1 COMIKEY"),
+        )
+        result.shape() shouldBe listOf(
+            Triple(11.0, 0, listOf(listOf(1L), listOf(2L), listOf(3L), listOf(4L, 5L), listOf(6L))),
+        )
+        result.single().copies.map { it.partial } shouldBe listOf(true, false, false, false, true)
+    }
+
+    @Test
+    fun `parts split further than the merged run join from within it`() {
+        // Lady Lucetta's ... 1: Ursaring split it in two, Comikey (Ho-oh) in three and only 1.2 and 1.3 are listed.
+        val result = group(
+            chapter(1, 1.0, "Suicune"),
+            chapter(2, 1.1, "Ursaring"),
+            chapter(3, 1.2, "Ho-oh", name = "Ch. 1.2 COMIKEY"),
+            chapter(4, 1.2, "Ursaring"),
+            chapter(5, 1.3, "Ho-oh", name = "Ch. 1.3 COMIKEY"),
+        )
+        result.shape() shouldBe listOf(Triple(1.0, 0, listOf(listOf(1L), listOf(2L, 4L), listOf(3L, 5L))))
+        result.single().copies.map { it.partial } shouldBe listOf(false, false, true)
+    }
+
+    @Test
+    fun `parts that skip a part or start past the merged run stay their own chapters`() {
+        val result = group(
+            chapter(1, 1.1, "A"),
+            chapter(2, 1.2, "A"),
+            chapter(3, 1.1, "B"),
+            chapter(4, 1.3, "B"),
+            chapter(5, 1.5, "C"),
+        )
+        result.shape() shouldBe listOf(
+            Triple(1.0, 0, listOf(listOf(1L, 2L))),
+            Triple(1.0, 1, listOf(listOf(3L))),
+            Triple(1.0, 3, listOf(listOf(4L))),
+            Triple(1.0, 5, listOf(listOf(5L))),
+        )
+    }
+
+    @Test
     fun `a repeated part collapses into its newest upload and the parts still merge`() {
         val result = group(
             chapter(1, 12.1, "Empoleon", dateUpload = 1),

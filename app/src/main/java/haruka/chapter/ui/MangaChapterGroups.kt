@@ -40,7 +40,7 @@ data class ChapterGroupsInput(
         val downloaded = chapters.mapNotNullTo(HashSet()) { item -> item.id.takeIf { item.isDownloaded } }
         val groups = cache.groups(dedupChapters, options, downloaded) {
             buildChapterGroups(dedupChapters, deduper, options) { it.id in downloaded }
-        }
+        }.headedAtFirstUnread { items.getValue(it).chapter.read }
         val rows = groups.toRows(expanded, expansion) { id, row ->
             val item = items.getValue(id)
             if (row == null) item else item.copy(harukaRow = row)
@@ -49,7 +49,7 @@ data class ChapterGroupsInput(
         selectable += rows
         for (group in groups) {
             if (group.winner.size < 2 || group.key in expanded) continue
-            for (index in 1..<group.winner.size) selectable += items.getValue(group.winner[index])
+            group.forEachOtherPart { selectable += items.getValue(it) }
         }
         return GroupedChapterList(groups, rows, selectable)
     }
@@ -160,19 +160,6 @@ class MangaChapterGroups(
 
     suspend fun withoutDownloadedCopies(manga: Manga, chapters: List<Chapter>): List<Chapter> =
         surfaces.withoutDownloadedCopies(manga, chapters)
-}
-
-/**
- * The chapter to open for a tap on [chapter]. A head row standing for a chapter split into parts opens its first
- * unread part, so reading resumes where it stopped (parts 1 and 2 read: part 3); with every part read it opens part 1.
- * Any other row opens itself.
- */
-fun resumePart(state: MangaViewModel.State.Success, chapter: Chapter): Chapter {
-    val group = state.harukaGroupedList?.groupsByHead?.get(chapter.id) ?: return chapter
-    if (group.winner.size < 2) return chapter
-    val byId = state.chapters.associateBy({ it.id }, { it.chapter })
-    val parts = group.winner.mapNotNull(byId::get)
-    return parts.firstOrNull { !it.read } ?: parts.firstOrNull() ?: chapter
 }
 
 /**

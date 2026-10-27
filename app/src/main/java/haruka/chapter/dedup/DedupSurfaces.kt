@@ -128,7 +128,7 @@ class DedupSurfaces(
         }
         val read = chapters.mapNotNullTo(HashSet()) { chapter -> chapter.id.takeIf { chapter.read } }
         val logicalRead = deduped.count { chapter ->
-            chapter.logical.copies.any { copy -> copy.parts.all { it.id in read } }
+            chapter.logical.copies.any { copy -> copy.completes { it in read } }
         }
         SeriesCounts(deduped.size.toLong(), logicalRead.toLong(), grouped = true, inflated = inflated)
     }

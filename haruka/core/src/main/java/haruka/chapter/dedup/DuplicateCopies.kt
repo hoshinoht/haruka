@@ -3,7 +3,7 @@ package haruka.chapter.dedup
 /**
  * Unread parts of the other copies of every logical chapter that [newlyRead] finishes, plus every copy's repeated
  * part uploads ([ChapterCopy.duplicates]). A copy is finished once all of its parts are read, so reading only the
- * first part of a split chapter marks nothing yet.
+ * first part of a split chapter marks nothing yet; a [ChapterCopy.partial] copy never finishes its chapter.
  */
 fun duplicateCopiesToMarkRead(
     chapters: List<DedupChapter>,
@@ -16,7 +16,7 @@ fun duplicateCopiesToMarkRead(
     for (logical in groupLogicalChapters(chapters, mergeSplitChapters)) {
         if (!logical.hasDuplicates()) continue
         val finished = logical.copies.any { copy ->
-            copy.parts.any { it.id in newlyRead } && copy.parts.all { it.id in newlyRead || isRead(it.id) }
+            copy.parts.any { it.id in newlyRead } && copy.completes { it in newlyRead || isRead(it) }
         }
         if (!finished) continue
         for (copy in logical.copies) {
@@ -32,8 +32,9 @@ fun duplicateCopiesToMarkRead(
 }
 
 /**
- * The [candidates] whose logical chapter already has another copy with every part [downloaded]. A repeated part
- * upload ([ChapterCopy.duplicates]) is dropped once any copy, its own included, is downloaded.
+ * The [candidates] whose logical chapter already has another full copy (not [ChapterCopy.partial]) with every part
+ * [downloaded]. A repeated part upload ([ChapterCopy.duplicates]) is dropped once any copy, its own included, is
+ * downloaded.
  */
 fun chaptersWithDownloadedCopy(
     chapters: List<DedupChapter>,
@@ -45,7 +46,7 @@ fun chaptersWithDownloadedCopy(
     val result = HashSet<Long>()
     for (logical in groupLogicalChapters(chapters, mergeSplitChapters)) {
         if (!logical.hasDuplicates()) continue
-        val downloadedCopies = logical.copies.filter { copy -> copy.parts.all { it.id in downloaded } }
+        val downloadedCopies = logical.copies.filter { copy -> copy.completes { it in downloaded } }
         if (downloadedCopies.isEmpty()) continue
         for (copy in logical.copies) {
             for (part in copy.parts) {
@@ -81,12 +82,12 @@ fun readerChapterIds(deduped: List<DedupedChapter>, currentId: Long): Set<Long> 
 /**
  * The chapter id "continue reading" opens: the first logical chapter of [deduped] (in list order, or from the end when
  * [fromEnd]) not read yet, opened at its winner's first unread part. A logical chapter counts as read once any one of
- * its copies has every part read, so reading another scanlator's upload never sends you back to that chapter.
+ * its full copies has every part read, so reading another scanlator's upload never sends you back to that chapter.
  */
 fun nextUnreadChapterId(deduped: List<DedupedChapter>, fromEnd: Boolean, isRead: (Long) -> Boolean): Long? {
     val ordered = if (fromEnd) deduped.asReversed() else deduped
     for (chapter in ordered) {
-        if (chapter.logical.copies.any { copy -> copy.parts.all { isRead(it.id) } }) continue
+        if (chapter.logical.copies.any { copy -> copy.completes(isRead) }) continue
         val parts = chapter.winner.parts
         return (parts.firstOrNull { !isRead(it.id) } ?: parts.first()).id
     }

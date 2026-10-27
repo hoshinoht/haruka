@@ -36,6 +36,7 @@ import haruka.motion.listEffectsSpec
 import haruka.motion.listSpatialSpec
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.ContentCopy
+import mihon.icons.materialsymbols.rounded.Download
 import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
@@ -46,15 +47,20 @@ import tachiyomi.presentation.core.i18n.stringResource
  * It sits on most rows of multi-group series, so it stays low-key while collapsed (tonal, count only) and fills in
  * with a flipped chevron while expanded. The visible pill is 32dp tall to keep row height unchanged; Compose expands
  * its touch target to the 48dp minimum, as it does for the download indicator beside it.
+ *
+ * While collapsed, a download mark in the pill says a row it hides is downloaded (another copy, or a part of the
+ * winner the head doesn't show), so a downloaded chapter can be found without expanding every group.
  */
 @Composable
 fun ChapterGroupChip(row: ChapterGroupRow?, modifier: Modifier = Modifier) {
     if (row == null || !row.head) return
     val hasVersions = row.versions > 1
     val parts = if (row.parts > 1) pluralStringResource(HR.plurals.chapter_group_parts, row.parts, row.parts) else null
+    val hiddenDownloaded = row.hiddenDownloaded && !row.expanded
     val description = listOfNotNull(
         if (hasVersions) pluralStringResource(HR.plurals.chapter_group_versions, row.versions, row.versions) else null,
         parts,
+        if (hiddenDownloaded) stringResource(HR.strings.chapter_group_hidden_downloaded) else null,
     ).joinToString(", ")
     val toggleLabel = stringResource(
         if (row.expanded) HR.strings.chapter_group_collapse else HR.strings.chapter_group_expand,
@@ -88,6 +94,15 @@ fun ChapterGroupChip(row: ChapterGroupRow?, modifier: Modifier = Modifier) {
             .padding(start = 10.dp, end = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (hiddenDownloaded) {
+            Icon(
+                imageVector = MaterialSymbols.Rounded.Download,
+                contentDescription = null,
+                tint = colors.primary,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(4.dp))
+        }
         if (hasVersions) {
             Icon(
                 imageVector = MaterialSymbols.Rounded.ContentCopy,

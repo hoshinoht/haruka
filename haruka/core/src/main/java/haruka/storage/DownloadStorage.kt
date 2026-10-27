@@ -178,7 +178,7 @@ fun readChaptersToDelete(
     }
     if (cleanup.readInAnotherVersion) {
         for (logical in groupLogicalChapters(chapters, cleanup.mergeSplitChapters)) {
-            if (logical.copies.none { copy -> copy.parts.all { it.id in read } }) continue
+            if (logical.copies.none { copy -> copy.completes { it in read } }) continue
             for (copy in logical.copies) {
                 for (part in copy.parts) if (part.id in downloaded) result += part.id
                 for (part in copy.duplicates) if (part.id in downloaded) result += part.id

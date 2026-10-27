@@ -12,17 +12,27 @@ import kotlinx.coroutines.flow.update
 class ChapterGroup(
     /** Smallest chapter id of the logical chapter: unchanged when copies are re-ranked or newer ones arrive. */
     val key: Long,
-    /** The winner copy's parts, first part first; the first is the row that stands for the group. */
+    /** The winner copy's parts, first part first. */
     val winner: List<Long>,
     /** The winner's repeated part uploads, then every part and repeated upload of every other copy, best copy first. */
     val others: List<Long>,
     /** Number of copies, the winner included. */
     val versions: Int,
+    /** The winner part whose row stands for the group; see [headedAtFirstUnread]. */
+    val head: Long = winner[0],
+    /**
+     * Whether a row the head stands for is downloaded: another copy, or some but not all of the winner's parts. The
+     * head's own download indicator can't show it, so the group chip marks it.
+     */
+    val hiddenDownloaded: Boolean = false,
 ) {
-    val head: Long get() = winner[0]
-
     /** Whether the group needs more than its head row: other copies or more parts. */
     val isGrouped: Boolean get() = versions > 1 || winner.size > 1
+
+    /** The winner's parts other than [head], in part order. */
+    inline fun forEachOtherPart(action: (Long) -> Unit) {
+        for (id in winner) if (id != head) action(id)
+    }
 }
 
 /** How a chapter row takes part in a group. Plain single-copy chapters have none. */
@@ -34,6 +44,8 @@ data class ChapterGroupRow(
     val parts: Int,
     val expanded: Boolean,
     val expansion: ChapterGroupExpansion,
+    /** Head rows only: see [ChapterGroup.hiddenDownloaded]. */
+    val hiddenDownloaded: Boolean = false,
 )
 
 /** Keys of the expanded groups. Held by the screen's ViewModel, so they survive scrolling and config changes. */
@@ -57,10 +69,12 @@ fun buildChapterGroups(
     val winner = deduped.winner.parts.map { it.id }
     var key = winner.min()
     val others = ArrayList<Long>()
+    var hiddenDownloaded = false
     fun hide(parts: List<DedupChapter>) {
         for (part in parts) {
             others += part.id
             if (part.id < key) key = part.id
+            if (isDownloaded(part)) hiddenDownloaded = true
         }
     }
     hide(deduped.winner.duplicates)
@@ -68,7 +82,27 @@ fun buildChapterGroups(
         hide(copy.parts)
         hide(copy.duplicates)
     }
-    ChapterGroup(key, winner, others, deduped.logical.copies.size)
+    // A split winner with only some parts downloaded: the head may show the part that isn't
+    if (!hiddenDownloaded && winner.size > 1) {
+        val downloadedParts = deduped.winner.parts.count(isDownloaded)
+        hiddenDownloaded = downloadedParts in 1 until winner.size
+    }
+    ChapterGroup(key, winner, others, deduped.logical.copies.size, hiddenDownloaded = hiddenDownloaded)
+}
+
+/**
+ * Groups whose split winner is headed by its first unread part, so the row standing for the chapter is where reading
+ * resumes (parts 1 and 2 read: part 3); with every part read, part 1. Read state is applied after [buildChapterGroups]
+ * because marking a part read does not change the grouping.
+ */
+inline fun List<ChapterGroup>.headedAtFirstUnread(isRead: (Long) -> Boolean): List<ChapterGroup> = map { group ->
+    if (group.winner.size < 2) return@map group
+    val head = group.winner.firstOrNull { !isRead(it) } ?: group.winner[0]
+    if (head == group.head) {
+        group
+    } else {
+        ChapterGroup(group.key, group.winner, group.others, group.versions, head, group.hiddenDownloaded)
+    }
 }
 
 /**
@@ -87,11 +121,19 @@ inline fun <T> List<ChapterGroup>.toRows(
             continue
         }
         val isExpanded = group.key in expanded
-        val head = ChapterGroupRow(group.key, true, group.versions, group.winner.size, isExpanded, expansion)
+        val head = ChapterGroupRow(
+            group.key,
+            true,
+            group.versions,
+            group.winner.size,
+            isExpanded,
+            expansion,
+            group.hiddenDownloaded,
+        )
         rows += item(group.head, head)
         if (!isExpanded) continue
-        val child = head.copy(head = false)
-        for (index in 1..<group.winner.size) rows += item(group.winner[index], child)
+        val child = head.copy(head = false, hiddenDownloaded = false)
+        group.forEachOtherPart { rows += item(it, child) }
         for (id in group.others) rows += item(id, child)
     }
     return rows
@@ -103,9 +145,7 @@ fun syncWinnerSelection(before: Set<Long>, after: MutableSet<Long>, groups: List
         if (group.winner.size < 2) continue
         val selected = group.head in after
         if (selected == (group.head in before)) continue
-        for (index in 1..<group.winner.size) {
-            if (selected) after += group.winner[index] else after -= group.winner[index]
-        }
+        group.forEachOtherPart { if (selected) after += it else after -= it }
     }
 }
 

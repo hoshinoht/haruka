@@ -4,8 +4,9 @@ package haruka.chapter.dedup
  * One rule of the winner comparison; the first rule that tells two copies apart decides. The lowest chapter id is
  * always the final tie-break so the winner never depends on input order.
  *
- * Before the rules, a low-quality copy (see [ScanlatorNames.isLowQuality]) loses to every other copy; only a leading
- * [DOWNLOADED] rule is applied ahead of that demotion.
+ * Before the rules, a [ChapterCopy.partial] copy loses to every full copy, then a low-quality copy (see
+ * [ScanlatorNames.isLowQuality]) loses to every other copy; only a leading [DOWNLOADED] rule is applied ahead of that
+ * demotion.
  */
 enum class DedupRule {
     /** Every part of the copy is downloaded. */
@@ -134,6 +135,7 @@ private class Candidate(
     val sourceOrder = copy.parts.minOf { it.sourceOrder }
     val id = copy.parts.minOf { it.id }
     val split = copy.parts.size > 1
+    val partial = copy.partial
 }
 
 /** Orders better candidates first. Reads precomputed fields only. */
@@ -142,19 +144,22 @@ private class CandidateComparator(rules: List<DedupRule>) : Comparator<Candidate
     /**
      * The rules with the low-quality demotion (null) inserted first, or second behind a leading DOWNLOADED, and the
      * whole-over-split preference ([WHOLE_STEP]) right after the official rules: a whole upload of a chapter beats
-     * the same chapter split into parts, unless the parts are more official.
+     * the same chapter split into parts, unless the parts are more official. The partial demotion ([PARTIAL_STEP])
+     * goes ahead of all of them: a copy missing parts never stands for the chapter while a full one exists.
      */
-    private val steps: Array<Any?> = ArrayList<Any?>(rules.size + 2).apply {
+    private val steps: Array<Any?> = ArrayList<Any?>(rules.size + 3).apply {
         addAll(rules)
         val afterOfficial = maxOf(indexOf(DedupRule.OFFICIAL), indexOf(DedupRule.OFFICIAL_UNCERTAIN)) + 1
         add(afterOfficial, WHOLE_STEP)
         add(if (rules.firstOrNull() == DedupRule.DOWNLOADED) 1 else 0, null)
+        add(0, PARTIAL_STEP)
     }.toTypedArray()
 
     override fun compare(a: Candidate, b: Candidate): Int {
         for (step in steps) {
             val result = when (step) {
                 null -> a.lowQuality.compareTo(b.lowQuality)
+                PARTIAL_STEP -> a.partial.compareTo(b.partial)
                 WHOLE_STEP -> a.split.compareTo(b.split)
                 DedupRule.DOWNLOADED -> b.downloaded.compareTo(a.downloaded)
                 DedupRule.OFFICIAL -> b.official.compareTo(a.official)
@@ -171,3 +176,4 @@ private class CandidateComparator(rules: List<DedupRule>) : Comparator<Candidate
 }
 
 private val WHOLE_STEP = Any()
+private val PARTIAL_STEP = Any()

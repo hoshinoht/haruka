@@ -25,12 +25,19 @@ fun Double.withoutFloatNoise(): Double {
  *
  * [duplicates] are the same group's repeated uploads of a part already in [parts] (only the newest upload of each
  * part is kept in [parts]). They are not read as part of the copy but still belong to it, so no chapter is lost.
+ *
+ * A [partial] copy holds only some parts of a split chapter (a scanlator that uploaded 11.2 but not 11.1). It belongs
+ * to the chapter, but reading or downloading it does not finish the chapter, and it never wins over a full copy.
  */
 data class ChapterCopy(
     val parts: List<DedupChapter>,
     val duplicates: List<DedupChapter> = emptyList(),
+    val partial: Boolean = false,
 ) {
     val scanlator: String? get() = parts.first().scanlator
+
+    /** Whether [has] holds for the whole chapter: for every part of a copy that is not [partial]. */
+    inline fun completes(has: (Long) -> Boolean): Boolean = !partial && parts.all { has(it.id) }
 }
 
 /**
@@ -76,6 +83,10 @@ data class LogicalChapter(
  * uploaded more than once keeps its newest upload; the others become the copy's [ChapterCopy.duplicates]. When the
  * scanlator also has the whole chapter x, the merged parts are one more copy of x competing with it. Only the run
  * starting at .1 merges; a lone x.5 (usually an extra) stays its own chapter.
+ *
+ * Once some scanlator's parts merge into chapter x, another scanlator's parts of x that do not merge (a lone 11.2, or
+ * 1.2 and 1.3 next to a merged 1.1 and 1.2) join x as one [ChapterCopy.partial] copy, as long as they are consecutive
+ * and the first of them is within the longest merged run. A 1.5 next to a merged 1.1 and 1.2 stays its own chapter.
  */
 fun groupLogicalChapters(chapters: List<DedupChapter>, mergeSplitChapters: Boolean): List<LogicalChapter> {
     val kinds = Array(chapters.size) { chapterKind(chapters[it].name) }
@@ -125,7 +136,12 @@ private class MergedCopy(val number: Double, val copy: ChapterCopy)
 
 private data class SplitKey(val scanlator: String, val number: Long, val kind: ChapterKind)
 
-/** Maps each chapter id that belongs to a merged split chapter, as a part or a duplicate, to its shared copy. */
+private data class WholeKey(val number: Long, val kind: ChapterKind)
+
+/**
+ * Maps each chapter id that belongs to a merged split chapter, as a part or a duplicate, to its shared copy; the parts
+ * of a partial copy included.
+ */
 private fun findMergedCopies(
     chapters: List<DedupChapter>,
     parts: IntArray,
@@ -151,8 +167,10 @@ private fun findMergedCopies(
         }
     }
     val merged = HashMap<Long, MergedCopy>()
+    // Longest merged run of each split chapter, and the scanlators whose parts of it did not merge.
+    val mergedParts = HashMap<WholeKey, Int>()
+    val unmerged = ArrayList<Pair<SplitKey, List<Int>>>(0)
     for ((key, indices) in candidates) {
-        if (indices.size < 2) continue
         indices.sortWith(byPartThenNewest)
         val run = ArrayList<DedupChapter>(indices.size)
         val duplicates = ArrayList<DedupChapter>(0)
@@ -162,9 +180,36 @@ private fun findMergedCopies(
             run += chapters[indices[i++]]
             while (i < indices.size && parts[indices[i]] == part) duplicates += chapters[indices[i++]]
         }
-        if (run.size < 2) continue
+        if (run.size < 2) {
+            unmerged += key to indices
+            continue
+        }
         val copy = MergedCopy(key.number.toDouble(), ChapterCopy(run, duplicates))
         run.forEach { merged[it.id] = copy }
+        duplicates.forEach { merged[it.id] = copy }
+        mergedParts.merge(WholeKey(key.number, key.kind), run.size, ::maxOf)
+    }
+
+    for ((key, indices) in unmerged) {
+        val covered = mergedParts[WholeKey(key.number, key.kind)] ?: continue
+        // Sorted by part, so the first index holds the lowest one.
+        val first = parts[indices[0]]
+        if (first > covered) continue
+        val kept = ArrayList<DedupChapter>(indices.size)
+        val duplicates = ArrayList<DedupChapter>(0)
+        var consecutive = true
+        for ((n, index) in indices.withIndex()) {
+            val part = parts[index]
+            if (n > 0 && part == parts[indices[n - 1]]) {
+                duplicates += chapters[index]
+            } else {
+                consecutive = consecutive && part == first + kept.size
+                kept += chapters[index]
+            }
+        }
+        if (!consecutive) continue
+        val copy = MergedCopy(key.number.toDouble(), ChapterCopy(kept, duplicates, partial = true))
+        kept.forEach { merged[it.id] = copy }
         duplicates.forEach { merged[it.id] = copy }
     }
     return merged

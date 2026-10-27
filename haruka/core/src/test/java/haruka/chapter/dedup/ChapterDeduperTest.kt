@@ -57,6 +57,17 @@ class ChapterDeduperTest {
     }
 
     @Test
+    fun `a partial copy never wins over a full one`() {
+        winnerOf(
+            chapter(1, 7.1, "Group A"),
+            chapter(2, 7.2, "Group A"),
+            chapter(3, 7.1, "Official", dateUpload = 9),
+            options = DedupOptions(rankedScanlators = listOf("Official")),
+            downloaded = setOf(3),
+        ) shouldBe listOf(1L, 2L)
+    }
+
+    @Test
     fun `official beats doubtfully official`() {
         winnerOf(chapter(1, 1.0, "Official?"), chapter(2, 1.0, "Official")) shouldBe listOf(2L)
     }

@@ -7,7 +7,26 @@ Release notes for each GitHub release are taken from the matching `## [version]`
 
 Unreleased.
 
-### From Mihon (0.21.3, main at 007ec9a)
+### Chapters
+- A group's chip shows a download mark while collapsed when a copy or part it hides is downloaded, so downloaded chapters can be found without expanding every group.
+- A split chapter's row shows its first unread part (Ch. 34.2 once 34.1 is read) instead of always part 1; expanding it lists the other parts in order.
+- Parts from another group are grouped with their chapter once some group's parts of that chapter merge: a lone Ch. 11.2, "Ch. 11.1 COMIKEY", or Comikey's 1.2 and 1.3 beside another group's 1.1 and 1.2. Such a partial copy is never picked to stand for the chapter, and reading or downloading it does not count the chapter as read or downloaded. A 1.5 beside a merged 1.1 and 1.2 stays its own chapter.
+
+### Reader
+- Online chapters load sooner. The next chapter starts preloading once the pages just ahead of you are in or you are near the end, not only once the whole chapter has loaded; a page already near the front of the download queue no longer restarts the queue; and a page list read from the cache keeps its expiry, so rotated image links are not kept past it. Settings › Reader › Haruka adds "Parallel page downloads" and "Pages downloaded at once"; their defaults match Mihon.
+- The reader's bottom bar gains two buttons: Chapters opens the chapter list in a sheet, with the current chapter highlighted, and tapping a chapter opens it at its first page; Pages shows a grid of the chapter's page thumbnails to jump to a page.
+
+### Data and storage
+- Settings › Data and storage › Chapter cache limit caps the space pages read online may take (No limit, 250 MB, 500 MB, 1 GB or 2 GB). Mihon keeps those pages for a day with no size limit; with a limit set, the oldest go first. Default: No limit.
+
+### Tooling
+- `scripts/haruka/perf/reader.sh` measures the reader on a device (long-strip scroll jank, time to first page with the high quality renderer); the baseline is in `docs/haruka/perf-reader-baseline.md`.
+
+### From Mihon (0.21.3, main at e588e04)
+- The reader is drawn through Compose: its menus, page indicator and dialogs are Compose, reader settings live in a settings view model, and the viewer is created by the activity rather than the view model.
+- Pages read online are cached for a day instead of up to a size limit, and the page list for an hour, so a chapter reopened the same day shows at once.
+- Grayscale and inverted colours apply to pages only, not to the transition, loading and error pages.
+- Extension settings no longer show duplicate entries after the app returns from the background, and the extension source preferences screen is Compose.
 - Backups are read faster before restoring, and each entry is decoded once while restoring. Checking which trackers a backup uses now decodes only the tracking field, so Haruka's own tracker scan from beta.6 is gone in favour of Mihon's.
 - An installed extension is kept when replacing it with a new version fails.
 - The Shizuku extension installer works with Sui.

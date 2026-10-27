@@ -62,6 +62,16 @@ class DuplicateCopiesTest {
     }
 
     @Test
+    fun `a partial copy neither finishes nor stands in for its chapter`() {
+        // Group B has only part 2.2 of chapter 2, which VIZ has whole and Group A in two parts.
+        val withPart = chapters + chapter(7, 2.2, "Group B")
+        duplicateCopiesToMarkRead(withPart, true, setOf(7)) { false } shouldBe emptySet()
+        duplicateCopiesToMarkRead(withPart, true, setOf(5)) { false } shouldBe setOf(3L, 4L, 7L)
+        chaptersWithDownloadedCopy(withPart, true, candidates = setOf(5), downloaded = setOf(7)) shouldBe emptySet()
+        chaptersWithDownloadedCopy(withPart, true, candidates = setOf(7), downloaded = setOf(5)) shouldBe setOf(7L)
+    }
+
+    @Test
     fun `the reader keeps winners, and the copy being read`() {
         val deduped = ChapterDeduper(testCatalog).dedupe(chapters)
         readerChapterIds(deduped, currentId = 6) shouldBe setOf(2L, 5L, 6L)
