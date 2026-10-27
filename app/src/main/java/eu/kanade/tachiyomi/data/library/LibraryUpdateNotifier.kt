@@ -178,7 +178,7 @@ class LibraryUpdateNotifier(
             setContentIntent(haruka.updateerrors.UpdateErrorsScreen.pendingActivity(context))
             addAction(
                 MaterialSymbolsR.drawable.rounded_filled_warning,
-                context.stringResource(MR.strings.action_open_log),
+                context.stringResource(haruka.i18n.HR.strings.action_open_log),
                 NotificationReceiver.openErrorLogPendingActivity(context, uri),
             )
             // FORK <--
